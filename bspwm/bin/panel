@@ -13,7 +13,7 @@ mkfifo "$PANEL_FIFO"
 
 bspc config top_padding $PANEL_HEIGHT
 bspc subscribe > "$PANEL_FIFO" &
-xtitle -sf 'T%s' > "$PANEL_FIFO" &
+xtitle -sf 'T%.80s' > "$PANEL_FIFO" &
 while true 
 do 
     date +'S%a %d %b %H:%M:%S'
@@ -23,5 +23,5 @@ done > "$PANEL_FIFO" &
 
 cat "$PANEL_FIFO" | panel_bar |\
     lemonbar -g x$PANEL_HEIGHT -f "$PANEL_FONT_FAMILY"\
-    -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" |\
+        -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" |\
     while read line; do eval "$line"; done
