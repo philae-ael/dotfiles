@@ -56,8 +56,6 @@ in
     pavucontrol
     inkscape
 
-    direnv
-
     # various bash utilities
     xclip
     tree
@@ -112,7 +110,6 @@ in
   };
 
 
-  services.lorri.enable = true;
 
   services.dropbox = {
     enable = true;
@@ -279,6 +276,9 @@ in
     ];
     extraConfig = builtins.readFile ./config.vim;
   };
+
+  programs.direnv.enable = true;
+  programs.direnv.nix-direnv.enable = true;
 
   # A cat(1) clone with syntax highlighting and Git integration.
   programs.bat = {
