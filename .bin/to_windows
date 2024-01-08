@@ -1,2 +1,2 @@
-#!/bin/sh
-systemctl reboot --boot-loader-entry=windows.conf
+#!/bin/sh 
+sudo grub-reboot 2  && reboot
