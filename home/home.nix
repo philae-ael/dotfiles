@@ -1,8 +1,28 @@
 { config, pkgs, ... }:
 
-{
+with pkgs;
+let
+  my-python-packages = python-packages: with python-packages; [
+    pandas
+    requests
+    dbus-python
+    # other python packages you want
+  ]; 
+  python = python3.withPackages my-python-packages;
+
+  dark-chrome = pkgs.google-chrome.override {
+    commandLineArgs = "--enable-features=WebUIDarkMode --force-dark-mode";
+  };
+
+in
+  {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  imports = [
+    ./dconf.nix
+  ];
+
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -11,19 +31,77 @@
 
 
   home.packages = with pkgs; [
-    firefox google-chrome spotify anki evince
+    firefox spotify anki evince
 
     xclip tree htop zathura kitty
+
+
+    python
+    dark-chrome
+
+    feh
+    sxhkd
+    j4-dmenu-desktop
   ];
+
+  xdg = {
+    enable = true;
+    configFile = {
+      "bspwm/bspwmrc".source = "/home/tristan/.config/nixpkgs/bspwmrc";
+      "sxhkd/sxhkdrc".source = "/home/tristan/.config/nixpkgs/sxhkdrc";
+      "polybar/spotify_status.py".source = "/home/tristan/.config/nixpkgs/spotify_status.py";
+
+    };
+  };
+
+
+  xsession = {
+    pointerCursor = {
+      package = pkgs.vanilla-dmz;
+      name = "Vanilla-DMZ";
+      size = 16;
+      defaultCursor = "left_ptr";
+    };
+  };
+
+
+  services.polybar = {
+    enable = true;
+    config = "/home/tristan/.config/nixpkgs/polybar";
+    script = "PATH=${pkgs.python3}/bin:${pkgs.bspwm}/bin:$PATH polybar bar &";
+    package = pkgs.polybar.override {
+      pulseSupport = true;
+    }; 
+  };
+
+  services.picom = {
+    enable = true;
+    activeOpacity = "1.0";
+    inactiveOpacity = "1.0";
+    backend = "glx";
+    fade = true;
+    fadeDelta = 3;
+    shadow = true;
+    shadowOpacity = "0.75";
+    opacityRule = [ 
+      "100:class_g = 'kitty' && focused"
+      "95:class_g = 'kitty' && !focused"
+    ];
+  };
 
   programs.ssh = {
     enable = true;
   };
 
+  programs.vscode = {
+    enable = true;
+    package = pkgs.vscode;
+  };
+
   programs.kitty = {
     enable = true;
 
-    extraConfig =   ''
+    extraConfig = ''
       font_family      monospace
       bold_font        auto
       italic_font      auto
@@ -261,6 +339,12 @@
 
   };
 
+  programs.rofi = {
+    enable = true;
+    theme = "gruvbox-dark";
+
+    
+  };
 
 
   # This value determines the Home Manager release that your

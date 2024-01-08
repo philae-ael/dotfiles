@@ -3,7 +3,23 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
+let
+  bspwm-gnome = pkgs.writeShellScriptBin "bspwm-gnome" '' 
+#!/bin/sh
 
+# Register with gnome-session so that it does not kill the whole session thinking it is dead.
+test -n "$DESKTOP_AUTOSTART_ID" && {
+    dbus-send --print-reply --session --dest=org.gnome.SessionManager "/org/gnome/SessionManager" org.gnome.SessionManager.RegisterClient "string:bspwm-gnome" "string:$DESKTOP_AUTOSTART_ID"
+}
+
+bspwm
+
+# Logout process.
+test -n "$DESKTOP_AUTOSTART_ID" && {
+	dbus-send --print-reply --session --dest=org.gnome.SessionManager "/org/gnome/SessionManager" org.gnome.SessionManager.Logout "uint32:1"
+}
+  '';
+in
 {
     nixpkgs.config.allowUnfree = true;
     imports = [ 
@@ -22,26 +38,47 @@
 
     i18n.defaultLocale = "en_US.UTF-8";
 
+    nixpkgs.config.packageOverrides = pkgs: {
+      vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+    };
+
     hardware = {
-        opengl.extraPackages = with pkgs ;[
-            intel-media-driver
-            vaapiIntel
-        ];
-        pulseaudio.enable = true;
+      opengl.extraPackages = with pkgs ;[
+        intel-media-driver # LIBVA_DRIVER_NAME=iHD
+        vaapiIntel         # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+        vaapiVdpau
+        libvdpau-va-gl
+
+      ];
+      pulseaudio.enable = true;
     };
     sound.enable = true;
 
 
     services = {
-        xserver = {
+      xserver = {
+        enable = true;
+        videoDrivers = ["modesetting"];
+          # LightDM Display Manager
+          displayManager.defaultSession = "gnome-flashback-bspwm-gnome";
+          displayManager.gdm = {
             enable = true;
-            videoDrivers = ["modesetting"];
+          };
 
-            displayManager.gdm.enable = true;
-            displayManager.autoLogin.enable = true;
-            displayManager.autoLogin.user = "tristan";
-            desktopManager.gnome.enable = true;
-            desktopManager.xterm.enable = false;
+          desktopManager.gnome.flashback = {
+            customSessions = [
+              {
+                wmName = "bspwm-gnome";
+                wmLabel = "gnome + bspwm";
+                wmCommand = "${bspwm-gnome}/bin/bspwm-gnome";
+                enableGnomePanel = false;
+              }
+            ];
+          };
+
+          windowManager.bspwm = {
+            enable = true;
+          };
 
         };
         gnome.core-utilities.enable = false;
@@ -51,55 +88,55 @@
             # Remap what happens on power key press so it suspends rather than
             # shutting don immediately
             logind = {
-                extraConfig = ''
+              extraConfig = ''
                     HandlePowerKey=suspend
-                '';
+              '';
             };
-        };
+          };
 
     # Define a user account. Don't forget to set a password with ‘passwd’.
     users.users.tristan = {
-        isNormalUser = true;
-        extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
-        shell = pkgs.zsh;
+      isNormalUser = true;
+      extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+      shell = pkgs.zsh;
 
     };
 
     environment = {
-       variables.EDITOR = "vim";
-        systemPackages = with pkgs; [
-            vimHugeX 
-            gnome.nautilus
-        ];
+      variables.EDITOR = "vim";
+      systemPackages = with pkgs; [
+        vimHugeX 
+        gnome.nautilus
+      ];
     };
     programs.zsh.enable = true;
 
 
     fonts = {
-        fontDir.enable = true;
-        enableGhostscriptFonts = true;
+      fontDir.enable = true;
+      enableGhostscriptFonts = true;
 
-        fontconfig = {
-            enable = true;
-            antialias = true;
-            useEmbeddedBitmaps = true;
+      fontconfig = {
+        enable = true;
+        antialias = true;
+        useEmbeddedBitmaps = true;
 
-            defaultFonts = {
-                serif = [ "Source Serif Pro" "DejaVu Serif" ];
-                sansSerif = [ "Source Sans Pro" "DejaVu Sans" ];
-                monospace = [ "Hasklug Nerd Font" "FiraCode Nerd Font" ];
-            };
+        defaultFonts = {
+          serif = [ "Source Serif Pro" "DejaVu Serif" ];
+          sansSerif = [ "Source Sans Pro" "DejaVu Sans" ];
+          monospace = [ "Hasklug Nerd Font" "FiraCode Nerd Font" ];
         };
+      };
 
-        fonts = with pkgs; [
-            hasklig
-            source-code-pro
-            overpass
-            nerdfonts
-            fira
-            fira-code
-            fira-mono
-        ];
+      fonts = with pkgs; [
+        hasklig
+        source-code-pro
+        overpass
+        nerdfonts
+        fira
+        fira-code
+        fira-mono
+      ];
     };
 
     # settings for stateful data, like file locations and database versions
@@ -109,5 +146,5 @@
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
     system.stateVersion = "21.05"; # Did you read the comment?
 
-}
+  }
 
