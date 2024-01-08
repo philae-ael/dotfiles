@@ -4,6 +4,15 @@
 function echo() {
     /bin/echo -n $@
 }
+PULSEAUDIO_STATUS=$(pulseaudio-ctl full-status)
+VOL=$(echo $PULSEAUDIO_STATUS | sed 's/\([0-9]\+\).\+/\1/')
+MUTE=$(echo $PULSEAUDIO_STATUS | sed 's/[0-9]\+ \(yes\|no\).\+/\1/')
 
-echo "%{A4:pulseaudio-ctl up:}%{A5:pulseaudio-ctl down:}%{A:pulseaudio-ctl mute:}Volume : $(pulseaudio-ctl full-status| sed 's/\([0-9]\+\).\+/\1/') %{A}%{A}%{A}"
+VOL_STATE=$VOL
+
+if [[ "$MUTE" == "yes" ]];then
+    VOL_STATE="MUTE ($VOL)"
+fi
+
+echo "%{A4:pulseaudio-ctl up:}%{A5:pulseaudio-ctl down:}%{A:pulseaudio-ctl mute:}Volume : $VOL_STATE %{A}%{A}%{A}"
 

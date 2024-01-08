@@ -1,3 +1,4 @@
+#!/usr/bin/sh
 source ~/bin/panel_colors
 
 BAT=`echo $(acpi -b | awk '{gsub(/%,/,""); print $4}' | sed 's/%//g')`
