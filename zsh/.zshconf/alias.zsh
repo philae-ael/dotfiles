@@ -5,6 +5,7 @@ alias ealias="vim ~/.zshconf/alias.zsh"
 alias v=vim
 alias g=git
 alias groot='cd $(git rev-parse --show-toplevel)'
+alias less="less -FrX"
 
 function mkdirvenv(){
     mkvirtualenv $@ || return -1
