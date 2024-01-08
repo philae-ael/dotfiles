@@ -21,10 +21,12 @@ export EDITOR='vim'
 # Compilation flags
 export ARCHFLAGS="-arch x86_64 -j8"
 
+#Need to be before .zshconf because of fct redifining
+source /usr/share/doc/pkgfile/command-not-found.zsh
+source /usr/bin/virtualenvwrapper.sh
+
 for f in .zshconf/* 
 do
 	source $f
 done
 
-source /usr/share/doc/pkgfile/command-not-found.zsh
-source /usr/bin/virtualenvwrapper.sh
