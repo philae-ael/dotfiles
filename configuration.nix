@@ -3,21 +3,7 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-let
-  plasma-bspwm = pkgs.writeTextFile {
-    name = "plasma-bspwm-session";
-    destination = "/share/xsessions/plasma-bspwm.desktop";
-    text = ''
-      [Desktop Entry]
-      Exec=${pkgs.coreutils}/bin/env KDEWM=${pkgs.bspwm}/bin/bspwm ${pkgs.plasma-workspace}/bin/startplasma-x11
-      DesktopNames=KDE
-      Name=Plasma with bspwm
-      Comment=Plasma with bwpsm
-    '';
-  } // {
-    providedSessions = [ "plasma-bspwm" ];
-  };
-in {
+{
   nixpkgs.config.allowUnfree = true;
   imports = [ ./hardware-configuration.nix ];
 
@@ -28,7 +14,7 @@ in {
     supportedFilesystems = [ "ntfs" ];
   };
 
-  networking.hostName = "nixos-Tristan"; # Define your hostname.
+  networking.hostName = "nixos-Tristan"; # Define your hostname.;
 
   time.timeZone = "Europe/Paris";
 
@@ -67,33 +53,13 @@ in {
   services = {
     xserver = {
       enable = true;
+      displayManager.startx.enable = true;
       videoDrivers = [ "modesetting" ];
 
-      # Use 2560x1440p 144Hz  by default
-      monitorSection = ''
-        Modeline "2560x1440_144.0"  592.25  2560 2581 2613 2666  1440 1443 1448 1543 +hsync -vsync
-        Option "PreferredMode" "2560x1440_144.0"
-      '';
-
-      displayManager = {
-        defaultSession = "plasma-bspwm";
-        autoLogin = {
-          enable = true;
-          user = "tristan";
-        };
-        sddm = {
-          enable = true;
-          enableHidpi = true;
-        };
-
-        sessionPackages = [ plasma-bspwm ];
+      desktopManager.plasma5 = {
+        enable = true;
       };
-
-      desktopManager.plasma5 = { enable = true; };
       windowManager.bspwm = { enable = true; };
-
-      # displayManager.defaultSession = "gnome-flashback-bspwm-gnome";
-
     };
 
     # Remap what happens on power key press so it suspends rather than
@@ -109,7 +75,7 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.tristan = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ]; 
+    extraGroups = [ "wheel" "networkmanager" ];
     shell = pkgs.zsh;
 
   };

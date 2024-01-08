@@ -57,7 +57,11 @@ in
 
     # various bash utilities
     xclip tree htop file unzip p7zip
+
     clang clang-tools
+    nodePackages.vim-language-server
+    rust-analyzer
+    rnix-lsp
   ];
 
 
@@ -74,10 +78,12 @@ in
     };
   };
 
+  home.file.".xinitrc".source =  "${config.home.homeDirectory}/.config/nixpkgs/xinitrc";
   xdg = {
     enable = true;
     configFile = {
-      ".config/plasma-org.kde.plasma.desktop-appletsrc".source = "${config.home.homeDirectory}/.config/nixpkgs/plasma-org.kde.plasma.desktop-appletsrc";
+      "plasma-org.kde.plasma.desktop-appletsrc".source = "${config.home.homeDirectory}/.config/nixpkgs/plasma-org.kde.plasma.desktop-appletsrc";
+      "kactivitymanagerdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/kactivitymanagerdrc";
       "kxkbrc".source = "${config.home.homeDirectory}/.config/nixpkgs/kxkbrc";
       "kdeglobals".source = "${config.home.homeDirectory}/.config/nixpkgs/kdeglobals";
       "kded5rc".source = "${config.home.homeDirectory}/.config/nixpkgs/kded5rc";
@@ -251,6 +257,7 @@ in
       vim-vsnip-integ
 
       gruvbox
+      haskell-vim
 
       which-key-nvim
 
@@ -287,6 +294,14 @@ in
       theme = "apple";
     };
 
+    initExtra = ''
+      if [[ -z $DISPLAY ]] ; then 
+        case $(tty) in /dev/tty1)
+          exec startx
+        esac
+      fi
+
+    '';
   };
 
   programs.rofi = {

@@ -1,76 +1,46 @@
-
 set linebreak
 set showbreak=++
 set foldmethod=marker
 set showmatch
-set ruler
 set number
 
-set cursorline
-set cursorcolumn
-" Only on current windows
-au WinLeave * set nocursorline nocursorcolumn
-au WinEnter * set cursorline cursorcolumn
-
-set backspace=indent,eol,start
-set autoread
 set showcmd
 
-set completeopt+=menu,menuone,noselect
+set completeopt+=menu,menuone,preview
 
-" Selected characters/lines in visual mode
+" selected characters/lines in visual mode
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
 
-set wildmenu
 set wildmode=longest,list,full
 
 set modeline
-
 set mouse=a
 
-set hidden
-
 "" tabs
-set expandtab   " Use spaces instead of tabs
+set expandtab
 set autoindent
-set shiftwidth=4    " Number of auto-indent spaces
+set shiftwidth=4
 set smartindent
-set smarttab
 set softtabstop=4
 set tabstop=8
 set shiftround
 
-set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:×
+set listchars=tab:▸\ ,trail:·,multispace:\|\ \ \ ,extends:❯,precedes:❮,nbsp:×
 set list
 
-set laststatus=2
-set noshowmode
-
-"Other undo opts
-set undolevels=1000
-set undoreload=10000
-
-set incsearch
 set ignorecase
 set smartcase
 
 set timeoutlen=300
-set updatetime=100
+set updatetime=800
 
-"Toggle relative/absolute line numbers
-function! NumberToggle()
-    if(&relativenumber == 1)
-        set norelativenumber
-    else
-        set relativenumber
-    endif
-endfunction
-
+au WinLeave * set nocursorline nocursorcolumn
+au WinEnter * set cursorline cursorcolumn
 
 "" remove trailing spaces
 function! StripTrailingWhitespace()
-    " Preparation: save last search, and cursor position.
+    " preparation: save last search, and cursor position.
     let _s=@/
     let l = line(".")
     let c = col(".")
@@ -85,59 +55,33 @@ endfunction
 
 cmap w!! %!sudo tee > /dev/null %
 
-nnoremap <F4> :call NumberToggle()<cr>
-nnoremap <silent> <F5> :call StripTrailingWhitespace()<CR>
+nnoremap <silent> <f5> :call StripTrailingWhitespace()<cr>
 
-au VimEnter * RainbowParenthesesToggle
-au Syntax * RainbowParenthesesLoadRound
-au Syntax * RainbowParenthesesLoadSquare
-au Syntax * RainbowParenthesesLoadBraces
+au vimenter * RainbowParenthesesToggle
+au syntax   * RainbowParenthesesLoadRound
+au syntax   * RainbowParenthesesLoadSquare
+au syntax   * RainbowParenthesesLoadBraces
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
+vmap < <gv
+vmap > <gv
+
 let g:airline_powerline_fonts = 1
 
-let g:lsp_diagnostics_float_cursor = 1
-
-" Expand or jump
-imap <expr> <C-e>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
-smap <expr> <C-e>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
-
-" Select or cut text to use as $TM_SELECTED_TEXT in the next snippet.
-" See https://github.com/hrsh7th/vim-vsnip/pull/50
-nmap        s   <Plug>(vsnip-select-text)
-xmap        s   <Plug>(vsnip-select-text)
-nmap        S   <Plug>(vsnip-cut-text)
-xmap        S   <Plug>(vsnip-cut-text)
-
-set termguicolors
-set background=dark
-let g:gruvbox_italic=1
-let g:gruvbox_contrast_dark="medium"
-colorscheme gruvbox
-
-nnoremap <silent><leader>a :Lspsaga code_action<CR>
-vnoremap <silent><leader>a :<C-U>Lspsaga range_code_action<CR>
-
-nnoremap <silent><leader>l :Lspsaga show_line_diagnostics<CR>
-nnoremap <silent><leader>n :Lspsaga diagnostic_jump_next<CR>
-nnoremap <silent><leader>p :Lspsaga diagnostic_jump_prev<CR>
-
-
-nnoremap <silent><leader>f :Lspsaga lsp_finder<CR>
-
-nnoremap <silent><leader>d :Lspsaga hover_doc<CR>
-nnoremap <silent> <C-f> <cmd>lua require('lspsaga.action').smart_scroll_with_saga(1)<CR>
-nnoremap <silent> <C-b> <cmd>lua require('lspsaga.action').smart_scroll_with_saga(-1)<CR>
-
-nnoremap <silent><leader>s :Lspsaga signature_help<CR>
-nnoremap <silent><leader>r :Lspsaga rename<CR>
-nnoremap <silent><leader>p :Lspsaga preview_definition<CR>
-
-
-
 lua <<EOF
+function _G.put(...)
+  local objects = {}
+  for i = 1, select('#', ...) do
+    local v = select(i, ...)
+    table.insert(objects, vim.inspect(v))
+  end
+
+  print(table.concat(objects, '\n'))
+  return ...
+end
+
 local has_words_before = function()
     local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
@@ -147,23 +91,23 @@ local feedkey = function(key, mode)
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
 end
 
--- Setup nvim-cmp.
+-- setup nvim-cmp.
 local cmp = require'cmp'
 
 cmp.setup({
     snippet = {
-        -- REQUIRED - you must specify a snippet engine
+        -- required - you must specify a snippet engine
         expand = function(args) vim.fn["vsnip#anonymous"](args.body) end,
     },
     mapping = {
-        ['<C-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
-        ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
-        ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-        ['<C-y>'] = cmp.config.disable, 
-        ['<C-e>'] = cmp.mapping({
+        ['<c-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+        ['<c-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+        ['<c-space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+        ['<c-y>'] = cmp.config.disable,
+        ['<c-e>'] = cmp.mapping({
             i = cmp.mapping.abort(),
             c = cmp.mapping.close(),}),
-        ["<Tab>"] = cmp.mapping(
+        ["<tab>"] = cmp.mapping(
             function(fallback)
                 if cmp.visible() then
                     cmp.select_next_item()
@@ -172,10 +116,10 @@ cmp.setup({
                 elseif has_words_before() then
                     cmp.complete()
                 else
-                    fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
+                    fallback() -- the fallback function sends a already mapped key. in this case, it's probably `<tab>`.
                 end
             end, { "i", "s" }),
-        ["<S-Tab>"] = cmp.mapping(
+        ["<s-tab>"] = cmp.mapping(
             function()
                 if cmp.visible() then
                     cmp.select_prev_item()
@@ -184,26 +128,26 @@ cmp.setup({
                 end
             end, { "i", "s" }),
 
-        -- Accept currently selected item. If none selected, `select` first item.
-        -- Set `select` to `false` to only confirm explicitly selected items.
-        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        -- accept currently selected item. if none selected, `select` first item.
+        -- set `select` to `false` to only confirm explicitly selected items.
+        ['<cr>'] = cmp.mapping.confirm({ select = true }),
     },
     sources = cmp.config.sources({
         { name = 'nvim_lsp' },
-        { name = 'vsnip' }, -- For vsnip users.
+        { name = 'vsnip' }, -- for vsnip users.
     }, {
         { name = 'buffer' },
     })
 })
 
--- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
+-- use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline('/', {
     sources = {
         { name = 'buffer' }
         }
     })
 
--- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+-- use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
     { name = 'path' }
@@ -214,40 +158,21 @@ cmp.setup.cmdline(':', {
 
 local saga = require 'lspsaga'
 saga.setup { -- defaults ...
-    debug = false,
-    use_saga_diagnostic_sign = true,
-    -- diagnostic sign
-    error_sign = "",
-    warn_sign = "",
-    hint_sign = "",
-    infor_sign = "",
-    diagnostic_header_icon = "   ",
-    -- code action title icon
-    code_action_icon = " ",
-    code_action_prompt = {
-        enable = true,
-        sign = true,
-        sign_priority = 40,
-        virtual_text = true,
-    },
-  finder_definition_icon = "  ",
-  finder_reference_icon = "  ",
-  max_preview_lines = 10,
   finder_action_keys = {
-      open = {"<CR>", "o"},
+      open = {"<cr>", "o"},
       vsplit = "s",
       split = "i",
-      quit = "q",
-      scroll_down = "<C-f>",
-      scroll_up = "<C-b>",
+      quit = {"q", "<esc>", "<c-c>"},
+      scroll_down = "<c-f>",
+      scroll_up = "<c-b>",
       },
   code_action_keys = {
-      quit = "q",
-      exec = "<CR>",
+      quit = {"q", "<esc>", "<c-c>"},
+      exec = "<cr>",
       },
   rename_action_keys = {
-      quit = "<C-c>",
-      exec = "<CR>",
+      quit = {"q", "<esc>", "<c-c>"},
+      exec = "<cr>",
       },
   definition_preview_icon = "  ",
   border_style = "single",
@@ -256,34 +181,96 @@ saga.setup { -- defaults ...
   diagnostic_prefix_format = "%d. ",
   }
 
+local wk = require("which-key")
 
--- Setup lspconfig.
+-- setup lspconfig.
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
--- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md to add more servers 
-servers = { "hls" }
+-- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md to add more servers
 local nvim_lsp = require('lspconfig')
 
-for _, lsp in ipairs(servers) do
-    nvim_lsp[lsp].setup {}
+
+
+local function on_attach_generic(clent, bufnr)
+    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+    -- enable completion triggered by <c-x><c-o>
+    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+    -- mappings.
+    local opts = { noremap=true, silent=true }
+
+    -- see `:help vim.lsp.*` for documentation on any of the below functions
+    buf_set_keymap('n', '<leader><shift>n', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
+    buf_set_keymap('n', '<leader>n',        '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
+    buf_set_keymap('n', '<leader>s',        '<cmd>lspsage signature_help<cr>',         opts)
+    buf_set_keymap('n', '<leader>l',        '<cmd>lspsaga show_line_diagnostics<cr>',  opts)
+    buf_set_keymap('n', '<leader>r',        '<cmd>lspsaga rename<cr>',                 opts)
+    buf_set_keymap('n', '<leader>p',        '<cmd>lspsaga preview_definition<cr>',     opts)
+    buf_set_keymap('n', '<leader>d',        '<cmd>lspsaga hover_doc<cr>',              opts)
+    buf_set_keymap('n', 'k',                '<cmd>lspsaga hover_doc<cr>',              opts)
+    buf_set_keymap('n', '<leader>f',        '<cmd>lspsaga lsp_finder<cr>',             opts)
+    buf_set_keymap('n', '<leader>i',        '<cmd>lspsaga implement<cr>',              opts)
+    buf_set_keymap('n', '<leader>=',        '<cmd>lua vim.lsp.buf.formatting()<cr>',   opts)
+    buf_set_keymap('n', '<leader>a',        '<cmd>lspsaga code_action<cr>',            opts)
+    buf_set_keymap('v', '<leader>a',        '<cmd><c-u>lspsaga range_code_action<cr>', opts)
+
+
+    -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
+    -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<cr>', opts)
+    -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>', opts)
+
+
+
+    wk.register({
+        d = { "documentation" },
+        f = { "finder" },
+        r = { "rename" },
+        s = { "signature help" },
+        n = { "diagnotic next" },
+        p = { "preview definition" },
+        l = { "show line diagnostics" },
+        a = {"code action"},
+        i = {"implementation"},
+        ["="] = {"formatting"},
+    }, { prefix = "<leader>" })
+
+
 end
 
-local wk = require("which-key")
+
+local function on_attach_clang(client, bufnr)
+    on_attach_generic(client, bufnr)
+
+    vim.cmd("unmap k") -- to keep vim help
+end
+local function on_attach_clang(client, bufnr)
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>w", "<cmd>clangdswitchsourceheader<cr>",{ noremap=true, silent=true })
+    require("which-key").register({ w = { "switch between source & header" }}, { prefix = "<leader>" })
+
+    on_attach_generic(client, bufnr)
+end
+
+nvim_lsp.hls.setup           { on_attach = on_attach_generic }
+nvim_lsp.vimls.setup         { on_attach = on_attach_generic }
+nvim_lsp.clangd.setup        { on_attach = on_attach_clang   }
+nvim_lsp.rust_analyzer.setup { on_attach = on_attach_generic }
+nvim_lsp.rnix.setup          { on_attach = on_attach_generic }
+
 wk.register({
-d = { "Documentation" },
-f = { "Finder" },
-r = { "Rename" },
-s = { "Signature help" },
-n = { "Diagnotic next" },
-p = { "Preview definition" },
-l = { "Show line diagnostics" },
-a = {"Code action"},
 h = {
     name = "git",
-    s = { "Stage" },
-    p = { "Preview" },
-    u = { "Undo" },
+    s = { "stage" },
+    p = { "preview" },
+    u = { "undo" },
     }
 }, { prefix = "<leader>" })
-EOF
 
+EOF
+set termguicolors
+set background=dark
+let g:gruvbox_italic=1
+let g:gruvbox_contrast_dark="medium"
+colorscheme gruvbox
+hi normal ctermfg=223 ctermbg=none guifg=#ebdbb2 guibg=none
