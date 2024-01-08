@@ -17,6 +17,8 @@ zstyle ':prezto:load' pmodule \
   'history-substring-search' \
   'prompt' \
 
+zstyle ':prezto:module:git:alias' skip 'yes'
+
 # Set the key mapping style to 'emacs' or 'vi'.
 zstyle ':prezto:module:editor' key-bindings 'emacs'
 
