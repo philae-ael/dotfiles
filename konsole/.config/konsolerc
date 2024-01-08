@@ -1,5 +1,5 @@
 [Desktop Entry]
-DefaultProfile=
+DefaultProfile=Profile 1.profile
 
 [Favorite Profiles]
 Favorites=
@@ -8,13 +8,17 @@ Favorites=
 ShowMenuBarByDefault=false
 
 [MainWindow]
-Height 768=706
+Height 480=438
+Height 704=662
+Height 768=518
 MenuBar=Disabled
 State=AAAA/wAAAAD9AAAAAAAABToAAALCAAAABAAAAAQAAAAIAAAACPwAAAAA
 ToolBarsMovable=Disabled
-Width 1360=683
-Width 1366=1338
+Width 1360=679
+Width 1366=683
+Width 800=796
 Window-Maximized 768x1360=true
+Window-Maximized 768x1366=true
 
 [TabBar]
 TabBarVisibility=AlwaysHideTabBar

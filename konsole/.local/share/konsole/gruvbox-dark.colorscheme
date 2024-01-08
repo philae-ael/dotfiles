@@ -1,94 +1,64 @@
 [Background]
-Color=40,40,40
-
-[BackgroundFaint]
-Color=40,40,40
+Color=38,38,38
 
 [BackgroundIntense]
-Color=40,40,40
+Color=38,38,38
 
 [Color0]
-Color=40,40,40
-
-[Color0Faint]
-Color=40,40,40
+Color=38,38,38
 
 [Color0Intense]
-Color=146,131,116
+Color=38,38,38
 
 [Color1]
-Color=204,36,29
-
-[Color1Faint]
-Color=204,36,29
+Color=215,95,95
 
 [Color1Intense]
-Color=251,73,52
+Color=215,95,95
 
 [Color2]
-Color=152,151,26
-
-[Color2Faint]
-Color=152,151,26
+Color=175,175,0
 
 [Color2Intense]
-Color=184,187,38
+Color=175,175,0
 
 [Color3]
-Color=215,153,33
-
-[Color3Faint]
-Color=215,153,33
+Color=255,175,0
 
 [Color3Intense]
-Color=250,189,47
+Color=255,175,0
 
 [Color4]
-Color=69,133,136
-
-[Color4Faint]
-Color=69,133,136
+Color=131,173,173
 
 [Color4Intense]
-Color=131,165,152
+Color=131,173,173
 
 [Color5]
-Color=177,98,134
-
-[Color5Faint]
-Color=177,98,134
+Color=212,133,173
 
 [Color5Intense]
-Color=211,134,155
+Color=212,133,173
 
 [Color6]
-Color=104,157,106
-
-[Color6Faint]
-Color=104,157,106
+Color=133,173,133
 
 [Color6Intense]
-Color=142,192,124
+Color=133,173,133
 
 [Color7]
-Color=168,153,132
-
-[Color7Faint]
-Color=168,153,132
+Color=218,185,151
 
 [Color7Intense]
 Color=235,219,178
 
 [Foreground]
-Color=235,219,178
-
-[ForegroundFaint]
-Color=235,219,178
+Color=218,185,151
 
 [ForegroundIntense]
 Color=235,219,178
 
 [General]
-Description=Gruvbox
+Description=Base16 Gruvbox dark, pale
 Opacity=1
 Wallpaper=
