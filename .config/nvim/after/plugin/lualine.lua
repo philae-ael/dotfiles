@@ -9,7 +9,6 @@ local mocha = require("catppuccin.palettes").get_palette "mocha"
 
 local colors = vim.tbl_extend("keep", mocha, {
   fg = mocha.text,
-  bg = mocha.base,
   cyan = mocha.teal,
   orange = mocha.maroon,
   violet = mocha.mauve
@@ -125,8 +124,8 @@ ins_left {
     directory = '',
   },
   buffers_color = {
-    active = { bg = colors.bg, fg = colors.green },
-    inactive = { bg = colors.bg_dark, fg = colors.fg },
+    active = { fg = colors.green },
+    inactive = { fg = colors.fg },
   },
 }
 
@@ -187,7 +186,7 @@ ins_right {
 ins_right {
   'diff',
   -- Is it me or the symbol for modified us really weird
-  symbols = { added = ' ', modified = '柳 ', removed = ' ' },
+  symbols = { added = ' ', modified = ' ', removed = ' ' },
   diff_color = {
     added = { fg = colors.green },
     modified = { fg = colors.orange },

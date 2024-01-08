@@ -1,5 +1,6 @@
 vim.o.background = "dark"
 require("catppuccin").setup({
+  transparent_background = true,
   custom_highlights = function(colors)
     return {
       GitSignsAdd = { fg = colors.teal },
