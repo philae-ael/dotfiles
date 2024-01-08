@@ -1,0 +1,18 @@
+#!/bin/sh
+
+swaylock \
+  --screenshots \
+  --clock \
+  --indicator \
+  --indicator-radius 100 \
+  --indicator-thickness 7 \
+  --effect-blur 10x10 \
+  --effect-vignette 0.5:0.5 \
+  --ring-color f38ba8 \
+  --key-hl-color a6e3a1 \
+  --line-color 1e1e2e \
+  --inside-color 00000088 \
+  --separator-color 00000000 \
+  --grace 2 \
+  --fade-in 0.2 \
+  --text-color cdd6f4
