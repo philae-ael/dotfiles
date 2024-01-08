@@ -27,17 +27,15 @@ set showcmd                 " Show partial commands in status line and
 " Selected characters/lines in visual mode
 
 " Copy to X CLIPBOARD
-map <leader>cc :w !xsel -i -b<CR>
-map <leader>cp :w !xsel -i -p<CR>
-map <leader>cs :w !xsel -i -s<CR>
+map <leader>c "xy:call system("xsel -i -b", @x)<CR>
 " Paste from X CLIPBOARD
-map <leader>pp :r!xsel -p<CR>
-map <leader>ps :r!xsel -s<CR>
-map <leader>pb :r!xsel -b<CR>
+map <leader>p :r!xsel -b<CR>
 
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
 
+" allow the . to execute once for each line of a visual selection
+vnoremap . :normal .<CR>
 
 set wildmenu    " show a navigable menu for tab completion
 set wildmode=longest,list,full
@@ -101,6 +99,8 @@ Plugin 'dag/vim2hs'
 Plugin 'eagletmt/neco-ghc'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'ervandew/supertab'
+" Rust 
+Plugin 'rust-lang/rust.vim'
 call vundle#end()
 
 
@@ -156,11 +156,12 @@ let g:UltiSnipsExpandTrigger = "<C-e>"
 let g:UltiSnipsJumpForwardTrigger = "<C-f>"
 let g:UltiSnipsJumpBackwardTrigger = "<C-b>"
 
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+let g:ycm_key_list_select_completion = ['tab', '<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<S-tab>', '<C-p>', '<Up>']
 let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ycm_auto_trigger = 1
 let g:ycm_confirm_extra_conf = 0
+let g:ycm_rust_src_path = "/usr/src/rust/src/"
 
 "necoghc
 let g:necoghc_enable_detailed_browse = 1
