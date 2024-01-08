@@ -16,6 +16,18 @@
 ;; Line No
 (global-linum-mode 1)
 
+(setq backup-by-copying t)
+(setq backup-directory-alist `(("." . "~/.saves")))
+
+
+;; Tabs
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4) ; or any other preferred value
+(setq indent-line-function 'insert-tab)
+(global-set-key (kbd "DEL") 'backward-delete-char)
+
+(defvaralias 'c-basic-offset 'tab-width)
+(defvaralias 'cperl-indent-level 'tab-width)
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 

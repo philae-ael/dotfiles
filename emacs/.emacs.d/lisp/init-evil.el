@@ -26,4 +26,10 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (require-package 'evil-surround)
 (global-evil-surround-mode 1)
 
+
+; Use symbol as word i, eviL
+(with-eval-after-load 'evil
+    (defalias #'forward-evil-word #'forward-evil-symbol))
+
+
 (provide 'init-evil)

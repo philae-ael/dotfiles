@@ -1,5 +1,9 @@
 ;; package.el -- based on https://github.com/purcell/emacs.d/blob/master/lisp/init-elpa.el
 
+;;; Commentary:
+
+;;; Code:
+
 (require 'package)
 
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
@@ -51,3 +55,5 @@ locate PACKAGE."
 (package-initialize)
 
 (provide 'init-packages)
+
+;;; init-packages.el ends here

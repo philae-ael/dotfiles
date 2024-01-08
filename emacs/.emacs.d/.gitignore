@@ -1,3 +1,9 @@
 elpa
 *~
 url
+games/
+irony/
+eshell/
+ede-projects.el
+projectile-bookmarks.eld
+session.*
