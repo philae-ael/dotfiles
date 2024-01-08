@@ -83,6 +83,7 @@ nnoremap <silent> <F5> :call StripTrailingWhitespace()<CR>
 autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql autocmd BufWritePre <buffer> call StripTrailingWhitespace()
 
 au BufRead,BufNewFile make.config setfiletype make
+au BufRead,BufNewFile *.asm set filetype=nasm
 
 filetype on
 filetype off
@@ -116,8 +117,6 @@ Plugin 'dag/vim2hs'
 Plugin 'eagletmt/neco-ghc'
 " Rust
 Plugin 'rust-lang/rust.vim'
-" ASM
-Plugin 'shirk/vim-gas'
 call vundle#end()
 
 
