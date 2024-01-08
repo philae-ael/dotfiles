@@ -1,6 +1,9 @@
+local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+vim.filetype.add({ extension = { wgsl = "wgsl" } })
+
 require 'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "help", "c", "lua", "rust" },
+  ensure_installed = { "help", "c", "lua", "rust", "wgsl" },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -11,13 +14,12 @@ require 'nvim-treesitter.configs'.setup {
 
   highlight = {
     enable = true,
-
     additional_vim_regex_highlighting = false,
   },
   incremental_selection = {
     enable = true,
     keymaps = {
-      init_selection = "gnn", 
+      init_selection = "gnn",
       node_incremental = "grn",
       scope_incremental = "grc",
       node_decremental = "grm",
@@ -77,17 +79,6 @@ require 'nvim-treesitter.configs'.setup {
         ["<leader>dF"] = "@class.outer",
       },
     },
-
   },
 }
 
-local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-parser_config.wat = {
-  install_info = {
-    url = "~/projects/tree-sitter-wasm",
-    files = { "wat/src/parser.c" },
-    generate_requires_npm = false,
-    requires_generate_from_grammar = false,
-  },
-  filetype = "wat",
-}

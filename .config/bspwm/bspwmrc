@@ -20,4 +20,3 @@ bash ~/.config/polybar/launch.sh --forest &
 
 bspc rule -a obsidian state=floating
 bspc rule -a tev state=floating
-
