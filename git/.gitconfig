@@ -3,3 +3,5 @@
 [user]
 	email = gouge.tristan@gmail.com
 	name = naegi
+[push]
+	default = simple
