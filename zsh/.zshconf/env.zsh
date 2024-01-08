@@ -1,0 +1,4 @@
+PANEL_FIFO=/tmp/panel-fifo
+PANEL_HEIGHT=24
+PANEL_FONT_FAMILY="-*-fixed-*-*-*-*-12-*-*-*-*-*-*-*"
+export PANEL_FIFO PANEL_HEIGHT PANEL_FONT_FAMILY

@@ -1,0 +1,103 @@
+#
+# bspwm hotkeys
+#
+
+alt + a 
+	bspc window -c
+
+alt + t
+	bspc desktop -l next
+
+alt + b
+	bspc desktop -B
+
+alt + {s,f}
+	bspc window -t {floating,fullscreen}
+
+alt + Tab
+	bspc desktop -f last
+
+alt + {o,i}
+	bspc control --record-history off; \
+	bspc window {older,newer} -f; \
+	bspc control --record-history on
+
+alt + m
+	bspc window -s biggest
+
+alt + {_,shift + }{h,j,k,l}
+	bspc window -{f,s} {left,down,up,right}
+
+alt + {_,shift + }c
+	bspc window -f {next,prev}
+
+alt + {comma,period}
+	bspc desktop -C {backward,forward}
+
+alt + {Left,Right}
+	bspc desktop -f {prev,next}
+
+alt + super + {h,j,k,l}
+	bspc window -p {left,down,up,right}
+
+alt + ctrl + {h,j,k,l}
+	bspc window -e {left -10,up -10,up +10,left +10}
+
+alt + ctrl + shift + {h,j,k,l}
+	bspc window -e {right -10, down -10, down +10, right +10}
+
+alt + ctrl + {1-9}
+	bspc window -r 0.{1-9}
+
+alt + {_,shift + }{1-9,0}
+	bspc {desktop -f,window -d} ^{1-9,10}
+
+~button1
+	bspc pointer -g focus
+
+alt + button{1-3}
+	bspc pointer -g {move,resize_side,resize_corner}
+
+alt + !button{1-3}
+	bspc pointer -t %i %i
+
+alt + @button{1-3}
+	bspc pointer -u
+
+alt + {shift,_} + equal
+    bspc config -d focused window_gap $((`bspc config -d focused window_gap` {+,-} 2 ))
+
+# Sticky windows
+alt + e
+    bspc window -t sticky
+
+# Preventing closing 
+alt + r
+    bspc window -t locked
+
+# Private window -> using with sticky give you the possibility to have a window on all desktops, mantaining the tiling and the position
+alt + w 
+    bspc window -t private
+
+#
+# wm independent hotkeys
+#
+
+alt + Return
+	urxvtc
+
+alt + space
+	dmenu_run
+
+# make sxhkd reload its configuration files:
+alt + Escape
+	pkill -USR1 -x sxhkd
+
+XF86AudioMute
+	pulseaudio-ctl mute
+
+XF86AudioRaiseVolume
+	pulseaudio-ctl up   
+
+XF86AudioLowerVolume
+	pulseaudio-ctl down 
