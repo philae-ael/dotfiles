@@ -134,7 +134,7 @@ format-connected = <label-connected>
 format-connected-prefix = "📶 "
 format-connected-foreground = ${colors.color20}
 
-label-connected = %essid% 
+label-connected = %essid%
 
 label-disconnected = Wifi off
 label-disconnected-foreground = ${colors.foreground-alt}
@@ -219,8 +219,12 @@ menu-0-0 = reboot
 menu-0-0-exec = menu-open-1
 menu-0-1 = power off
 menu-0-1-exec = menu-open-2
-menu-0-2 = logout
+menu-0-2 = suspend
 menu-0-2-exec = menu-open-3
+menu-0-3 = hibernate
+menu-0-3-exec = menu-open-4
+menu-0-4 = logout
+menu-0-4-exec = menu-open-5
 
 menu-1-0 = reboot
 menu-1-0-exec = reboot
@@ -234,10 +238,21 @@ menu-2-0-exec = poweroff
 menu-2-1 = cancel
 menu-2-1-exec = menu-open-0
 
-menu-3-0 = logout
-menu-3-0-exec = i3-msg exit
+menu-3-0 = suspend
+menu-3-0-exec = systemctl hybrid-sleep
 menu-3-1 = cancel
 menu-3-1-exec = menu-open-0
+
+menu-4-0 = hibernate
+menu-4-0-exec = systemctl hibernate
+menu-4-1 = cancel
+menu-4-1-exec = menu-open-0
+
+
+menu-5-0 = logout
+menu-5-0-exec = i3-msg exit
+menu-5-1 = cancel
+menu-5-1-exec = menu-open-0
 
 [module/spotify-note]
 type=custom/text
@@ -251,7 +266,7 @@ format-foreground = ${colors.foreground-alt}
 
 [module/spotify-play-pause]
 type=custom/script
-click-left=playerctl play-pause
+click-left=playerctl play-pause || flatpak run com.spotify.Client 
 exec = python ~/scripts/spotify_status.py -f "{play_pause}" -p "⏵,⏸" -d "⏯"
 format-foreground = ${colors.foreground-alt}
 
@@ -265,6 +280,6 @@ format-foreground = ${colors.foreground-alt}
 [module/spotify]
 type = custom/script
 format = <label>
-exec = python ~/scripts/spotify_status.py -t 15 -f "{artist}: {song}" 
+exec = python ~/scripts/spotify_status.py -t 15 -f "{artist}: {song}"
 format-foreground = ${colors.foreground-alt}
 click-left=i3-msg workspace "10:S"

@@ -1,22 +1,37 @@
 #!/bin/sh 
 
-if [ ! -f "~/.wallpaper/wallpaper-blurred.jpg" ] ; then
-    convert ~/.wallpaper/wallpaper.jpg -resize $(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')^ -channel RGBA -blur 0x15 ~/.wallpaper/wallpaper-blurred.jpg
+THEME_DIR=~/.themes/
+source ~/.themes/theme
+
+WALLPAPER_FILE="$THEME_DIR$THEME/wallpaper.jpg"
+WALLPAPER_BLURRED_FILE="$THEME_DIR$THEME/wallpaper-blurred.jpg"
+
+if [ ! -f "$WALLPAPER_BLURRED_FILE" ] ; then
+    convert "$WALLPAPER_FILE" -resize $(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')^ -channel RGBA -blur 0x15 "$WALLPAPER_BLURRED_FILE"
 fi
 
 
+if [[ ${THEME_DARK:-1} == 1  ]]; then
+    COLOR_FRONT=ebdbb2 
+else
+    COLOR_FRONT=282828
+fi
+COLOR_ERROR=cc241d
+COLOR_OK=98971a
+
 
 xset s off dpms 0 10 0
-i3lock -i ~/.wallpaper/wallpaper-blurred.jpg \
+i3lock -i $WALLPAPER_BLURRED_FILE \
     --indicator --radius 20 --ring-width=5 \
-    --insidecolor=00000000 --ringcolor=ebdbb2 \
+    --insidecolor=00000000 --ringcolor=$COLOR_FRONT \
     --wrongtext="Mot de passe incorrect" \
     --noinputtext="" \
     --veriftext="Vérification...." \
     --indpos="x+2*r:y+2*r" --timestr="%H:%M:%S" --force-clock --timepos="ix+2*r:iy+15" --time-align=1 \
     --verifpos="x+w/2:y+h/2" --wrongpos="x+w/2:y+h/2" --greeterpos="x+w/2:y+h/2" \
-    --insidevercolor=00000000 --insidewrongcolor=00000000 --ringvercolor=98971a \
-    --ringwrongcolor=cc241d \
-    --bshlcolor=cc241d --keyhlcolor=98971a --separatorcolor=00000000 --line-uses-inside \
-    --modifpos="-5*r:-5*r" --datecolor=ebdbb2 --timecolor=ebdbb2 --wrongcolor=ebdbb2 --verifcolor=ebdbb2
+    --insidevercolor=00000000 --insidewrongcolor=00000000 --ringvercolor=$COLOR_OK \
+    --ringwrongcolor=$COLOR_ERROR \
+    --bshlcolor=$COLOR_ERROR --keyhlcolor=$COLOR_OK --separatorcolor=00000000 --line-uses-inside \
+    --modifpos="-5*r:-5*r" --datecolor=$COLOR_FRONT --timecolor=$COLOR_FRONT --wrongcolor=$COLOR_FRONT --verifcolor=$COLOR_FRONT \
+    --pass-screen-keys --pass-volume-keys
 xset s off -dpms

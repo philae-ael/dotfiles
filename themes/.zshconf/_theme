@@ -1,0 +1,12 @@
+
+function _theme(){
+
+    _arguments '-s[theme]:theme:->themes' '-a[apply current theme]' '-l[list themes]'
+    case "$state" in
+        themes)
+            _values 'Themes' $(theme -l)
+            ;;
+    esac
+}
+
+compdef _theme theme

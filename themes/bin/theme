@@ -1,0 +1,87 @@
+#!/bin/sh
+
+
+THEME_DIR=~/.themes/
+THEME_FILENAME=theme
+THEME_FILE=$THEME_DIR$THEME_FILENAME
+
+usage(){
+    cat << EOF
+Utilisation: theme [-s thme_name|-l|--show]
+
+ -l         --list             List themes
+ -a         --apply            Apply current theme
+ -s theme   --set theme        Set current theme to theme
+            --show             Show current theme (default)
+EOF
+}
+
+apply_theme(){
+    source $THEME_FILE
+    feh .themes/$THEME/wallpaper.jpg --bg-scale
+}
+
+
+show_theme(){
+    cat << EOF
+Current theme is: $THEME
+Dark mode is set to $THEME_DARK
+EOF
+}
+
+change_theme(){
+    rm $THEME_FILE
+    ln -s $1/theme $THEME_FILE
+}
+
+list_themes(){
+    ls -1 $THEME_DIR | grep -v "^$THEME_FILENAME$"
+}
+
+
+if [ "$1" == "" ]; then
+    showtheme=1
+fi
+while [ "$1" != "" ]; do
+    case $1 in
+        --show )
+            showtheme=1
+            ;;
+        -a | --apply)
+            applytheme=1
+            ;;
+        -s | --set )
+            settheme=1
+            applytheme=1
+            shift
+            newtheme=$1
+            ;;
+        -l)
+            listtheme=1
+            ;;
+        -h | --help )
+            usage
+            ;;
+        * )
+            usage
+            exit 1
+    esac
+    shift
+done
+
+if [[ ${settheme:-0} == 1 ]]; then
+    change_theme $newtheme
+fi
+
+if [[ ${showtheme:-0} == 1 ]]; then
+    show_theme
+fi
+
+
+if [[ ${listtheme:-0} == 1 ]]; then
+    list_themes
+fi
+
+if [[ ${applytheme:-0} == 1 ]]; then
+    apply_theme 
+fi

@@ -64,10 +64,10 @@ function prompt_honukai_async_git {
 function prompt_honukai_async_tasks {
     # Initialize async worker. This needs to be done here and not in
     # prompt_honukai_setup so the git formatting can be overridden by other prompts.
-    if (( !${prompt_prezto_honukai_async_init:-0} )); then
+    if (( !${prompt_prezto_async_init:-0} )); then
         async_start_worker prompt_honukai -n
         async_register_callback prompt_honukai prompt_honukai_async_callback
-        typeset -g prompt_prezto_honukai_async_init=1
+        typeset -g prompt_prezto_async_init=1
     fi
 
     # Kill the old process of slow commands if it is still running.

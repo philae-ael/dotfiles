@@ -111,7 +111,7 @@ def run_in_pipe(code, preprocess, converter, converter_options,
                 glob, loc, style, expand_list, remove_falses, last_only):
 
     loc["lc"] = 0
-    for line in sys.stdin.readlines():
+    for line in sys.stdin:
         line = line.rstrip('\n')
 
         if preprocess:

@@ -1,4 +1,4 @@
-call plug#begin(stdpath('data') . '/plugged')
+call plug#begin('~/.plugged')
 
 Plug 'junegunn/vim-plug'
 
@@ -19,7 +19,7 @@ Plug 'honza/vim-snippets'
 
 function! BuildYCM(info)
   if a:info.status == 'installed' || a:info.force
-    !./install.py --all
+    !./install.py --clangd-completer --cs-completer --go-completer --java-completer --ts-completer --rust-completer
   endif
 endfunction
 

@@ -17,10 +17,20 @@ set showcmd
 
 
 set completeopt+=menuone
+if has('nvim')
+else
+    set completeopt+=popup
+    set completepopup=height:20,width:90,highlight:Pmenu,border:off
+endif
 
 " Selected characters/lines in visual mode
 nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
 nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+
+let &t_SI = "\<esc>[5 q"
+let &t_SR = "\<esc>[5 q"
+let &t_EI = "\<esc>[2 q"
+
 
 set wildmenu
 set wildmode=longest,list,full

@@ -180,8 +180,8 @@ bindsym $mod + less exec playerctl previous || mpc prev
 
 bindsym Print exec scrot
 
-bindsym XF86MonBrightnessUp exec light -A 10
-bindsym XF86MonBrightnessDown exec light -U 10
+bindsym XF86MonBrightnessUp exec light -A 5
+bindsym XF86MonBrightnessDown exec light -U 5
 bindsym XF86AudioRaiseVolume exec pamixer -i 5
 bindsym XF86AudioLowerVolume exec pamixer -d 5
 bindsym XF86AudioMute exec pamixer -t
@@ -191,6 +191,7 @@ exec --no-startup-id polybar bar
 exec --no-startup-id dunst 
 exec --no-startup-id xss-lock /home/tristan/bin/lock
 exec_always --no-startup-id /home/tristan/bin/autostart
+exec_always --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 for_window [class="Spotify"] move --no-auto-back-and-forth to workspace $ws10
 for_window [class="Zathura"] floating enable

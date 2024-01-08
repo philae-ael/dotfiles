@@ -38,7 +38,6 @@ alias g=git
 alias groot='cd $(git rev-parse --show-toplevel)'
 
 alias py=ipython3
-alias vim=nvim
 
 export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 alias pmake='time make -j$NUMCPUS --load-average=$NUMCPUS'
