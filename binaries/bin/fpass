@@ -1,137 +1,327 @@
 #!/usr/bin/env python3
 
-import subprocess
-import os.path
+from contextlib import contextmanager
+import enum
 import re
-
+import os.path
+import subprocess
 import termios
 import select
 import sys
 
-import fuzzywuzzy.process
+try:
+    import fuzzywuzzy.process
+except ModuleNotFoundError:
+    print("Can't find fuzzywuzzy, you first need to install it via " +
+          "'pip install --user fuzzywuzzy' or other")
+    sys.exit(-1)
 
 PASS_DIR = os.path.expanduser("~/.password-store/")
+HIST_FILE = os.path.expanduser("~/.fpass-history")
+MAX_HISTORY_SIZE = 10
+WORD_CHAR_SEP = " /" # char need to be escaped for if has any effect in bracket context regex
+
+
 reg_pass_file =  re.compile("^" + PASS_DIR + "(.+)\.gpg$")
+reg_ctrl_bcksp = re.compile(f"(^|[{WORD_CHAR_SEP}])[^{WORD_CHAR_SEP}]+$")
 
 CURSOR_UP_ONE = '\x1b[1A'
 CURSOR_DOWN_ONE = '\x1b[1B'
 ERASE_LINE = '\x1b[2K'
 
-def get_pass_data():
-    """Get list of all stored passwords in pass"""
-    out = subprocess.check_output(["find", PASS_DIR, "-type", "f", "-name", "*.gpg"]).decode()
 
-    return [reg_pass_file.search(l).groups()[0] for l in out.splitlines() if l]
+# To use debug set this flag to true and use fpass like this
+# >> mkfifo /tmp/fifo-debug-fpass
+# >> fpass 2> /tmp/fifo-debug-fpass
+# in an other terminal
+# >> cat /tmp/fifo-debug-fpass
 
-def clean():
-    sys.stdout.write(ERASE_LINE + CURSOR_DOWN_ONE + ERASE_LINE + CURSOR_UP_ONE)
-    sys.stdout.flush()
+DEBUG = False
 
+if DEBUG:
+    def debug(*args, **kwargs):
+        print(*args, **kwargs, file=sys.stderr)
+        sys.stderr.flush()
+else:
+    def debug(*args, **kwargs):
+        pass
 
-def goto_cursor(row, column):
-    if row > 0:
-        sys.stdout.write(f'\x1b[{row}B')
-    if row < 0:
-        sys.stdout.write(f'\x1b[{-row}A')
+class History:
+    """Load and write into history file"""
+    def __init__(self):
+        debug("Initializing history")
+        self.entry = 0
+        self.history = []
+        self.err = False # when true, will not try to write history to file
 
-    sys.stdout.write(f'\x1b[G')
-    if column > 0:
-        sys.stdout.write(f'\x1b[{column}C')
+        try:
+            with open(HIST_FILE, 'r') as f:
+                self.history = f.read().splitlines()
+        except FileNotFoundError:
+            pass
+        except OSError:
+            self.err = True
+            debug("Can't open history file", HIST_FILE)
 
+        debug("Length history", len(self.history))
 
-def display(typed, out, cursor):
-    format_in = "input: "
-    sys.stdout.write(f"\x1b[G{format_in}{typed}\noutput: {out}")
-    goto_cursor(-1, len("input:") + cursor + 1)
-    sys.stdout.flush()
+    def write(self):
+        if self.err:
+            return
+        try:
+            with open(HIST_FILE, 'w') as f:
+                f.write('\n'.join(self.history[-MAX_HISTORY_SIZE - 1:]))
+        except OSError:
+            debug("Can't write history file")
 
+    def entry_up(self):
+        entry = max(self.entry - 1, -max(1, len(self.history)))
+        changed = entry != self.entry
+        self.entry = entry
+        return changed
 
-def get_non_bloking_input():
-    def isData():
-        return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
-    if isData():
-        return sys.stdin.read(1)
+    def entry_down(self):
+        entry = min(self.entry + 1, 0)
+        changed = entry != self.entry
+        self.entry = entry
+        return changed
 
-def get_one_char():
-    c = None
-    while c is None:
-        c = get_non_bloking_input()
+    def get_entry(self):
+        if self.entry == 0:
+            return ""
+        out = self.history[self.entry]
+        return out
 
-    return c
+    def add_entry(self, entry):
+        self.history.append(entry)
 
-def non_blocking_input():
-    """Don't use input while the generator is still existing"""
+class ConsoleStatus(enum.IntEnum):
+    NONE = 0
+    CHANGED = 1
+    HISTORY_UP = 2
+    HISTORY_DOWN = 3
+    REDISPLAY = 4
+    EXIT = 5
+    COMMIT = 6 # When enter is hit
 
-    old_settings = termios.tcgetattr(sys.stdin)
-    new_settings = termios.tcgetattr(sys.stdin)
-    new_settings[3] = new_settings[3] & ~(termios.ECHO | termios.ECHONL | termios.ICANON)
-    try:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_settings)
+class ConsoleDisplay:
+    def __init__(self):
+        self.cursor_column = 0
+        self.entry = ""
+        self.out = ""
+
+    def send(self, out):
+        self.out = out
+
+    def set_entry(self, entry):
+        self.entry = entry
+        self.cursor_column = len(entry)
+
+    def get_entry(self):
+        return self.entry
+
+    def update(self):
+        self.display()
+        try:
+            with self.non_blocking_input():
+                for c in self.wait_one_char():
+                    status = self.process_input(c)
+                    if status:
+                        yield status # self.out should be changed by fpass if needed
+
+                        self.clean()
+                        self.display()
+        except KeyboardInterrupt:
+            yield ConsoleStatus.EXIT
+            return
+
+    def move_cursor(self, row, column):
+        if row > 0:
+            self.write(f'\x1b[{row}B')
+        if row < 0:
+            self.write(f'\x1b[{-row}A')
+
+        self.write(f'\x1b[G')
+        if column > 0:
+            self.write(f'\x1b[{column}C')
+
+    def erase_line(self):
+        self.write(ERASE_LINE)
+
+    def flush(self):
+        sys.stdout.flush()
+
+    def display(self):
+        format_in = "input: "
+
+        self.write(f"\x1b[G{format_in}{self.entry}\noutput: {self.out}")
+
+        self.move_cursor(-1, len(format_in) + self.cursor_column)
+        sys.stdout.flush()
+
+    def write(self, s):
+        sys.stdout.write(s)
+
+    def clean(self):
+        self.erase_line()
+        self.move_cursor(1, 0)
+        self.erase_line()
+        self.move_cursor(-1, 0)
+
+        self.flush()
+
+    def get_non_blocking_input(self):
+        def isData():
+            return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
+
+        if isData():
+            return sys.stdin.read(1)
+
+    def wait_one_char(self):
         while True:
-            yield get_non_bloking_input()
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            c = None
+            while c is None:
+                c = self.get_non_blocking_input()
 
-def process_input(typed, cursor, c):
-    changed = True
+            yield c
 
-    if c is None:
-        changed = False
-    elif c == '\x7f':
-        typed = typed[:-1]
-        cursor = max(0, cursor - 1)
-    elif c == '\x15':
-        cursor = 0
-        typed = ''
-    elif c == '\x0b':
-        typed = typed[:cursor]
-    elif c == '\x1b':
-        c = sys.stdin.read(1)
-        if c == '[':
+    @contextmanager
+    def non_blocking_input(self):
+        """/!\ Don't use inputs while the generator is still existing"""
+
+        old_settings = termios.tcgetattr(sys.stdin)
+        new_settings = termios.tcgetattr(sys.stdin)
+        new_settings[3] = new_settings[3] & ~(termios.ECHO | termios.ECHONL | termios.ICANON)
+        try:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_settings)
+
+            yield
+
+        finally:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+    def end(self):
+        self.move_cursor(1, 0)
+        self.write('\n')
+
+    def process_input(self, c):
+        if c is None:
+            pass
+
+        debug(hex(ord(c)))
+
+        if c == '\n':
+            return ConsoleStatus.COMMIT
+        elif c == '\x08': # Ctrl + backspace = kill word backward
+            entry_front_tmp = self.entry[:self.cursor_column]
+            entry_back_tmp = self.entry[self.cursor_column:]
+
+            entry_front_tmp = reg_ctrl_bcksp.split(entry_front_tmp)[0]
+
+            self.cursor_column = len(entry_front_tmp)
+            self.entry = entry_front_tmp + entry_back_tmp
+
+            return ConsoleStatus.CHANGED
+        elif c == '\x01': # Ctrl + A
+            self.cursor_column = 0
+            return ConsoleStatus.REDISPLAY
+        elif c == '\x05':
+            self.cursor_column = len(self.entry)
+            return ConsoleStatus.REDISPLAY
+        elif c == '\x7f': # backspace
+            self.entry = self.entry[:-1]
+            self.cursor_column = max(0, self.cursor_column - 1)
+            return ConsoleStatus.CHANGED
+        elif c == '\x15': # ?
+            self.cursor_column = 0
+            self.entry = ''
+            return ConsoleStatus.CHANGED
+        elif c == '\x0b': #
+            self.entry = self.entry[:self.cursor_column]
+            return ConsoleStatus.CHANGED
+        elif c == '\x1b':
             c = sys.stdin.read(1)
-            if c == 'D':
-                cursor = max(0, cursor - 1)
-            if c == 'C':
-                cursor = min(len(typed), cursor + 1)
-    else:
-        typed += c
-        cursor += 1
+            if c == '[':
+                c = sys.stdin.read(1)
+                if c == 'A':
+                    return ConsoleStatus.HISTORY_UP
+                if c == 'B':
+                    return ConsoleStatus.HISTORY_DOWN
+                if c == 'C':
+                    self.cursor_column = min(len(self.entry), self.cursor_column + 1)
+                    return ConsoleStatus.REDISPLAY
+                if c == 'D':
+                    self.cursor_column = max(0, self.cursor_column - 1)
+                    return ConsoleStatus.REDISPLAY
+        else:
+            self.entry = self.entry[:self.cursor_column] + c + self.entry[self.cursor_column:]
+            self.cursor_column += 1
+            return ConsoleStatus.CHANGED
 
-    return changed, typed, cursor
+        return ConsoleStatus.NONE
 
-def pass_run(out):
-    subprocess.call(["pass", out, "-c"])
 
-def fuzzy_find(typed, pass_data):
-    typed = typed.strip()
-    if typed:
-        return fuzzywuzzy.process.extractOne(typed, pass_data)[0]
-    return ''
+class Fpass:
+    """Deals with datas and logic of fuzzy finding the correct pass"""
+    def __init__(self):
+        self.pass_data = self.get_pass_data()
+        self.history = History()
+        self.display = ConsoleDisplay()
 
-def main():
-    pass_data = get_pass_data()
-    try:
-        typed = ""
-        cursor = 0
+    def run(self):
         out = ""
-        display(typed, out, cursor)
-        for c in non_blocking_input():
-            if c == '\n':
-                goto_cursor(1, 0)
-                print()
-                sys.stdout.flush()
-                pass_run(out)
+        def update_out():
+            nonlocal out
+            out = self.fuzzy_find(self.display.get_entry(), self.pass_data)
+            self.display.send(out)
+
+        for status in self.display.update():
+            if status == ConsoleStatus.CHANGED:
+                update_out()
+
+            if status == ConsoleStatus.HISTORY_UP:
+                if self.history.entry_up():
+                    self.display.set_entry(self.history.get_entry())
+                    update_out()
+
+            if status == ConsoleStatus.HISTORY_DOWN:
+                if self.history.entry_down():
+                    self.display.set_entry(self.history.get_entry())
+                    update_out()
+
+            if status == ConsoleStatus.REDISPLAY:
+                pass
+
+            if status == ConsoleStatus.EXIT:
+                self.display.end()
+                return # No history write, no pass_call
+            if status == ConsoleStatus.COMMIT:
+                if out:
+                    self.history.add_entry(out)
+                    self.history.write()
+                self.display.end()
+
+                self.pass_run(out)
                 return
 
-            changed, typed, cursor = process_input(typed, cursor, c)
-            if not changed:
-                continue
+    def get_pass_data(self):
+        """Get list of all stored passwords in pass"""
+        out = subprocess.check_output(["find", PASS_DIR, "-type", "f", "-name", "*.gpg"]).decode()
 
-            out = fuzzy_find(typed, pass_data)
-            clean()
-            display(typed, out, cursor)
-    except KeyboardInterrupt:
-        return
+        return [reg_pass_file.search(l).groups()[0] for l in out.splitlines() if l]
+
+    def pass_run(self, out):
+        subprocess.call(["pass", out, "-c"])
+
+    def fuzzy_find(self, entry, pass_data):
+        entry = fuzzywuzzy.utils.full_process(entry)
+        if entry:
+            return fuzzywuzzy.process.extractOne(entry, pass_data)[0]
+        return ''
+
+def main():
+    fpass = Fpass()
+    fpass.run()
 
 if __name__ == "__main__":
     main()
