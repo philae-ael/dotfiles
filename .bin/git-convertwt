@@ -1,0 +1,5 @@
+#!/bin/bash
+
+git checkout $(git commit-tree $(git hash-object -t tree /dev/null) < /dev/null)
+git switch -c worktree
+git config branch.worktree.pushRemote no_push
