@@ -1,0 +1,1 @@
+maim --hidecursor ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png -g "$(slop)"
