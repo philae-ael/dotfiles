@@ -13,6 +13,7 @@ source ~/.config/nvim/plugins/syntastic.vim
 source ~/.config/nvim/plugins/vim-commentary.vim
 source ~/.config/nvim/plugins/ghc-mod.vim
 source ~/.config/nvim/plugins/tabularize.vim
+source ~/.config/nvim/plugins/ale.vim
 
 source ~/.config/nvim/maps.vim
 

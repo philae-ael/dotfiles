@@ -3,23 +3,24 @@
 DOTFILES_DIR="$HOME/dotfiles"
 
 echo "usage : - addDotfiles pkg_name file"
-echo "        - AddDotfiles -> back up package list"
-
-
-echo
-echo "backing up package list"
-
-pacman -Qqe > "$DOTFILES_DIR/pkg.list"
+echo "        - addDotfiles pkg_name -c file -> will only cp and don't stow"
 
 
 PKG=$1
 shift
 
+MOVE=mv
+
+if [[ $1 == '-c' ]]; then
+    MOVE=cp
+    shift
+fi
+
 while [ $# -gt 0 ]
 do
     echo archiving $1
     mkdir -p "$DOTFILES_DIR/$PKG/$(dirname $1)"
-    mv "$HOME/$1" "$DOTFILES_DIR/$PKG/$1"
+    $MOVE "$1" "$DOTFILES_DIR/$PKG/$1"
     [ ! $? ] && exit -1
 
     echo stowing "$DOTFILES_DIR/$PKG"

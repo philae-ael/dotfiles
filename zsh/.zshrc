@@ -20,7 +20,7 @@ export ARCHFLAGS="-arch x86_64 -j8"
 
 #Need to be before .zshconf because of fct redifining
 source $(which crossdev)
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
 setopt ksh_glob
 setopt no_bare_glob_qual
