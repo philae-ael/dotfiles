@@ -1,7 +1,7 @@
-vim.opt.signcolumn = 'yes'
+vim.opt.signcolumn = "yes"
 
-local lsp = require('lsp-zero')
-lsp.preset('recommended')
+local lsp = require("lsp-zero")
+lsp.preset("recommended")
 require("lsp-inlayhints").setup({
   inlay_hints = {
     highlight = "Comment",
@@ -9,35 +9,33 @@ require("lsp-inlayhints").setup({
 })
 
 lsp.ensure_installed({
-  'tsserver',
-  'eslint',
-  'lua_ls',
-  'texlab'
+  "tsserver",
+  "eslint",
+  "lua_ls",
+  "texlab",
 })
 
-
-
-lsp.configure('sumneko_lua', {
+lsp.configure("sumneko_lua", {
   settings = {
     Lua = {
       diagnostics = {
-        globals = { 'vim' }
-      }
-    }
-  }
+        globals = { "vim" },
+      },
+    },
+  },
 })
 
-lsp.configure('cssls', {
+lsp.configure("cssls", {
   settings = {
     scss = {
       lint = {
-        unknownAtRules = 'ignore'
-      }
-    }
-  }
+        unknownAtRules = "ignore",
+      },
+    },
+  },
 })
 
-lsp.configure('gopls', {
+lsp.configure("gopls", {
   settings = {
     gopls = {
       gofumpt = true,
@@ -54,7 +52,7 @@ lsp.configure('gopls', {
   },
 })
 
-lsp.configure('texlab', {
+lsp.configure("texlab", {
   settings = {
     texlab = {
       build = {
@@ -65,33 +63,35 @@ lsp.configure('texlab', {
           "-file-line-error",
           "-synctex=1",
           "-interaction=nonstopmode",
-          "%f"
+          "%f",
         },
         forwardSearchAfter = true,
         onSave = true,
       },
       chktex = { onOpenAndSave = true },
       forwardSearch = {
-        executable = 'sioyek',
+        executable = "sioyek",
         args = {
-          '--reuse-window',
-          '--inverse-search',
+          "--reuse-window",
+          "--inverse-search",
           [[nvim-texlabconfig -file %1 -line %2]],
-          '--forward-search-file', '%f',
-          '--forward-search-line', '%l', '%p'
+          "--forward-search-file",
+          "%f",
+          "--forward-search-line",
+          "%l",
+          "%p",
         },
       },
     },
   },
 })
 
-
-local cmp = require('cmp')
+local cmp = require("cmp")
 local cmp_select = { behavior = cmp.SelectBehavior.Select }
 local cmp_mappings = lsp.defaults.cmp_mappings({
-  ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-  ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-  ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+  ["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
+  ["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
+  ["<C-y>"] = cmp.mapping.confirm({ select = true }),
   ["<C-Space>"] = cmp.mapping.complete(),
 })
 
@@ -101,26 +101,27 @@ local cmp_mappings = lsp.defaults.cmp_mappings({
 
 lsp.setup_nvim_cmp({
   mapping = cmp_mappings,
---   formatting = {
---     format = function(_, vim_item)
---       local label = vim_item.abbr
---       local truncated_label = vim.fn.strcharpart(label, 0, MAX_LABEL_WIDTH)
---       if truncated_label ~= label then
---         vim_item.abbr = truncated_label .. ELLIPSIS_CHAR
---       elseif string.len(label) < MIN_LABEL_WIDTH then
---         local padding = string.rep(' ', MIN_LABEL_WIDTH - string.len(label))
---         vim_item.abbr = label .. padding
---       end
---       return vim_item
---     end,
---   },
+  --   formatting = {
+  --     format = function(_, vim_item)
+  --       local label = vim_item.abbr
+  --       local truncated_label = vim.fn.strcharpart(label, 0, MAX_LABEL_WIDTH)
+  --       if truncated_label ~= label then
+  --         vim_item.abbr = truncated_label .. ELLIPSIS_CHAR
+  --       elseif string.len(label) < MIN_LABEL_WIDTH then
+  --         local padding = string.rep(' ', MIN_LABEL_WIDTH - string.len(label))
+  --         vim_item.abbr = label .. padding
+  --       end
+  --       return vim_item
+  --     end,
+  --   },
 })
 
-
-local builtin = require('telescope.builtin')
+local builtin = require("telescope.builtin")
 
 lsp.on_attach(function(client, bufnr)
-  local opts = function(desc) return { desc = desc, buffer = bufnr, remap = false } end
+  local opts = function(desc)
+    return { desc = desc, buffer = bufnr, remap = false }
+  end
 
   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts("Go to definition"))
   vim.keymap.set("n", "gl", vim.diagnostic.open_float, opts("Show diagnostics in a floating window"))
@@ -130,23 +131,24 @@ lsp.on_attach(function(client, bufnr)
   vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, opts("View signature help"))
   vim.keymap.set("n", "<leader>.", vim.lsp.buf.code_action, opts("View code action"))
 
-  require("which-key").register { ["<leader>v"] = { name = "LSP bindings" } }
+  require("which-key").register({ ["<leader>v"] = { name = "LSP bindings" } })
   vim.keymap.set("n", "<leader>vs", builtin.lsp_workspace_symbols, opts("Workspace symbol"))
   vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, opts("Open diagnostic"))
   vim.keymap.set("n", "<leader>vr", builtin.lsp_references, opts("View references"))
   vim.keymap.set("n", "<leader>vi", builtin.lsp_implementations, opts("View implementations"))
   vim.keymap.set("n", "<leader>vn", vim.lsp.buf.rename, opts("Rename symbol"))
-  vim.keymap.set("n", "<leader>vf", function() vim.lsp.buf.format({ async = true }) end, opts("Format file"))
+  vim.keymap.set("n", "<leader>vf", function()
+    vim.lsp.buf.format({ async = true })
+  end, opts("Format file"))
   vim.keymap.set("n", "<leader>vl", builtin.loclist, opts("open loclist"))
 
   require("lsp-inlayhints").on_attach(client, bufnr)
-  vim.keymap.set("n", "<leader>vh", require('lsp-inlayhints').toggle, {desc="Toggle inlay hints"})
-
+  vim.keymap.set("n", "<leader>vh", require("lsp-inlayhints").toggle, { desc = "Toggle inlay hints" })
 end)
 
 lsp.nvim_workspace()
 
-lsp.skip_server_setup({ 'rust_analyser' })
+lsp.skip_server_setup({ "rust_analyser" })
 
 lsp.setup()
 
@@ -158,26 +160,23 @@ vim.diagnostic.config({
   severity_sort = true,
   float = {
     focusable = false,
-    style = 'minimal',
-    border = 'rounded',
-    source = 'always',
-    header = '',
-    prefix = '',
+    style = "minimal",
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
   },
 })
 
-local clangd_lsp = lsp.build_options('clangd',
-  {
-    cmd = { "clangd", "--background-index", "--completion-style=detailed" }
-  }
-)
+local clangd_lsp = lsp.build_options("clangd", {
+  cmd = { "clangd", "--background-index", "--completion-style=detailed" },
+})
 
 require("lspconfig").clangd.setup(clangd_lsp)
 
-
 local rust_tools = require("rust-tools")
 
-local rt_lsp = lsp.build_options('rust_analyser', {
+local rt_lsp = lsp.build_options("rust_analyser", {
   settings = {
     ["rust-analyzer"] = {
       check = {
@@ -192,7 +191,17 @@ rust_tools.setup({
   server = rt_lsp,
   tools = {
     inlay_hints = {
-      auto = false
-    }
-  }
+      auto = false,
+    },
+  },
+})
+
+local null_ls = require("null-ls")
+
+null_ls.setup({
+  sources = {
+    null_ls.builtins.formatting.stylua,
+    null_ls.builtins.diagnostics.eslint,
+    null_ls.builtins.formatting.jq,
+  },
 })

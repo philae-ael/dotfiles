@@ -2,7 +2,7 @@
 # VERSION: 3.0
 SETUVAR --export EDITOR:nvim
 SETUVAR --export GOPRIVATE:gitlab\x2ecom
-SETUVAR --export LESS:\x2dRiF\x20\x2d\x2dmouse\x20\x2d\x2dwheel\x2dlines\x3d3
+SETUVAR --export LESS:\x2dRiF\x20\x2d\x2dwheel\x2dlines\x3d3
 SETUVAR --export MANPAGER:nvim\x20\x2bMan\x21
 SETUVAR --export SSH_AUTH_SOCK:/run/user/1000/ssh\x2dagent\x2esocket
 SETUVAR __fish_initialized:3400
@@ -12,17 +12,85 @@ SETUVAR _fisher_jorgebucaran_2F_hydro_files:\x7e/\x2econfig/fish/functions/fish_
 SETUVAR _fisher_plugins:jorgebucaran/fisher\x1ejorgebucaran/hydro\x1ecatppuccin/fish
 SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR _hydro_git_1000:\x1d
+SETUVAR _hydro_git_1045:\x1d
+SETUVAR _hydro_git_108883:inte\x2dtgouge\x20
 SETUVAR _hydro_git_11297:vulkan\x20\u21911\x20
+SETUVAR _hydro_git_1132:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_11339:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_11472:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_11553:inte\x2dtgouge\x20
+SETUVAR _hydro_git_117246:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_120234:develop\u2022\x20
+SETUVAR _hydro_git_12493:master\x20
+SETUVAR _hydro_git_12693:master\x20
+SETUVAR _hydro_git_13539:integration\x20
+SETUVAR _hydro_git_140462:\x401a5f8bce74e\u2022\x20
+SETUVAR _hydro_git_15401:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_15607:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_15634:master\x20
 SETUVAR _hydro_git_159917:main\x20
+SETUVAR _hydro_git_16026:master\u2022\x20
+SETUVAR _hydro_git_16367:develop\u2022\x20
+SETUVAR _hydro_git_164207:main\u2022\x20
+SETUVAR _hydro_git_17791:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_18119:feat\x2dmail\x2dasync\x20
+SETUVAR _hydro_git_19730:master\u2022\x20
+SETUVAR _hydro_git_20142:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_209380:inte\x2dtgouge\x20
 SETUVAR _hydro_git_21017:master\u2022\x20
+SETUVAR _hydro_git_2204:\x1d
+SETUVAR _hydro_git_221617:master\u2022\x20
+SETUVAR _hydro_git_223524:inte\x2dtgouge\x20
+SETUVAR _hydro_git_22928:develop\u2022\x20
+SETUVAR _hydro_git_23074:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_23185:s3\x2dexport\u2022\x20
+SETUVAR _hydro_git_23938:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_2591:master\x20
+SETUVAR _hydro_git_26258:develop\u2022\x20
 SETUVAR _hydro_git_2641:\x1d
+SETUVAR _hydro_git_26745:\x1d
+SETUVAR _hydro_git_2773:feat\x2ddate\x2dbetter\x2dparsing\u2022\x20
+SETUVAR _hydro_git_28090:develop\u2022\x20
 SETUVAR _hydro_git_293597:\x1d
 SETUVAR _hydro_git_2982:vulkan\u2022\x20\u21912\x20
+SETUVAR _hydro_git_3074:master\x20
+SETUVAR _hydro_git_30891:master\u2022\x20
+SETUVAR _hydro_git_31560:inte\x2dtgouge\x20
 SETUVAR _hydro_git_33607:master\x20
+SETUVAR _hydro_git_34320:master\u2022\x20
 SETUVAR _hydro_git_34542:master\u2022\x20
+SETUVAR _hydro_git_385707:master\x20
+SETUVAR _hydro_git_39454:\x1d
+SETUVAR _hydro_git_4068:master\u2022\x20
+SETUVAR _hydro_git_4071:master\x20
+SETUVAR _hydro_git_40848:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_5056:master\x20
+SETUVAR _hydro_git_51845:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_53316:master\u2022\x20
+SETUVAR _hydro_git_54627:main\x20
+SETUVAR _hydro_git_55048:feat\x2ddate\x2dbetter\x2dparsing\u2022\x20
+SETUVAR _hydro_git_56772:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_57023:develop\u2022\x20
+SETUVAR _hydro_git_57332:feat\x2ddate\x2dbetter\x2dparsing\u2022\x20
 SETUVAR _hydro_git_5744:develop\u2022\x20
+SETUVAR _hydro_git_6112:master\x20
+SETUVAR _hydro_git_6297:master\u2022\x20
+SETUVAR _hydro_git_6507:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_6530:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_6596:master\u2022\x20
+SETUVAR _hydro_git_68134:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_71310:master\x20
+SETUVAR _hydro_git_72757:master\u2022\x20
+SETUVAR _hydro_git_72917:master\u2022\x20
 SETUVAR _hydro_git_78866:master\u2022\x20
 SETUVAR _hydro_git_8291:master\u2022\x20
+SETUVAR _hydro_git_8529:master\u2022\x20
+SETUVAR _hydro_git_8646:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_87143:master\u2022\x20
+SETUVAR _hydro_git_8976:master\u2022\x20
+SETUVAR _hydro_git_8989:master\x20
+SETUVAR _hydro_git_90734:inte\x2dtgouge\u2022\x20
+SETUVAR _hydro_git_91249:inte\x2dtgouge\u2022\x20
 SETUVAR _hydro_git_998:master\u2022\x20
 SETUVAR fish_color_autosuggestion:555\x1ebrblack
 SETUVAR fish_color_cancel:\x2dr
@@ -52,4 +120,4 @@ SETUVAR fish_pager_color_description:B3A06D\x1eyellow\x1e\x2di
 SETUVAR fish_pager_color_prefix:normal\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
 SETUVAR fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
 SETUVAR fish_pager_color_selected_background:\x2dr
-SETUVAR fish_user_paths:/home/tgouge/go/bin\x1e/home/tgouge/\x2ebin
+SETUVAR fish_user_paths:/home/tgouge/opt/zig\x2dlinux\x2dx86_64\x2d0\x2e12\x2e0\x2ddev\x2e21\x2bac95cfe44\x1e/home/tgouge/opt/depot_tools\x1e/usr/lib/emscripten\x1e/home/tgouge/opt\x2dalt/llvm70/bin\x1e/home/tgouge/go/bin\x1e/home/tgouge/\x2ebin

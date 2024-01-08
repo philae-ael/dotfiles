@@ -10,12 +10,17 @@ bspc config window_gap          12
 bspc config split_ratio          0.52
 bspc config borderless_monocle   true
 bspc config gapless_monocle      true
-bspc config top_padding          40
+bspc config top_padding          30
 
-xrandr --output HDMI-0 --mode 2560x1440 --rate 144
+xrandr --output DP-4 --mode 2560x1440 --rate 144
 xsetroot -cursor_name left_ptr &
-picom &
 setxkbmap -layout us -variant qwerty-fr -option compose:rwin &
 
-bspc rule -a obsidian state=floating
 bspc rule -a tev state=floating
+bspc rule -a org.kde.polkit-kde-authentication-agent-1 state=floating
+
+~/.wall/wall
+~/.config/bspwm/bspwmbar/bspwmbar & 
+picom & 
+/usr/lib/polkit-kde-authentication-agent-1 &
+dunst & 
