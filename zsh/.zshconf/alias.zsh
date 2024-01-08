@@ -31,6 +31,7 @@ alias rg=ranger
 alias v=vim
 alias y=yaourt
 alias ys='yaourt -S'
+alias ysd='yaourt -S --as-deps'
 alias yu='yaourt -Suya'
 alias g=git
 alias more=less
