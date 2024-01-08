@@ -70,7 +70,6 @@ lib32-mesa-libgl
 lib32-mpg123
 lib32-nvidia-utils
 lib32-openal
-lib32-primus
 lib32-virtualgl
 libnotify
 libreoffice-fresh-fr
@@ -109,7 +108,6 @@ perl
 pkg-config
 pkgfile
 playerctl
-primus
 procps-ng
 psmisc
 pulseaudio
