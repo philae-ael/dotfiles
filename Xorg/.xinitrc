@@ -15,5 +15,4 @@ do
 done
 
 sxhkd &
-panel &
 exec bspwm
