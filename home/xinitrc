@@ -1,3 +1,0 @@
-#!/bin/sh 
-export KDEWM=$(which bspwm)
-startplasma-x11 2> ~/.cache/plasma.log

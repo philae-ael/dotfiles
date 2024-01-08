@@ -1,0 +1,96 @@
+{
+  "wlr/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "",
+      "8": "",
+      "9": "",
+      "10": "",
+      "urgent": "",
+      "active": "",
+      "default": ""
+    },
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    "all-outputs": true
+  },
+  "clock": {
+    "interval": 60,
+    "align": 0,
+    "rotate": 0,
+    "format": "<span font='18' rise='-2000'></span>  {:%I:%M %p}",
+    "format-alt": " {:%a %b %d}",
+    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "disk": {
+    "interval": 30,
+    "format": " {free}"
+  },
+  "memory": {
+    "interval": 10,
+    "format": " {used:0.1f}G"
+  },
+  "hyprland/window": {
+    "format": ">_ {}",
+    "separate-outputs": true
+  },
+  "network": {
+    "interval": 5,
+    "format-wifi": " {essid}",
+    "format-ethernet": " {ipaddr}/{cidr}",
+    "format-linked": " {ifname} (No IP)",
+    "format-disconnected": "睊 Disconnected",
+    "format-disabled": "睊 Disabled",
+    "format-alt": " {bandwidthUpBits} |  {bandwidthDownBits}",
+    "tooltip-format": " {ifname} via {gwaddr}",
+  },
+  "pulseaudio": {
+    "format": "<span font='18' rise='-3000'>{icon}</span> {volume}",
+    "format-muted": " Muted",
+    "format-bluetooth": " {volume}% {format_source}",
+    "format-bluetooth-muted": " Muted",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾",
+      ]
+    },
+    "scroll-step": 5,
+    "on-click": "pamixer -t",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "pamixer -i 5",
+    "on-scroll-down": "pamixer -d 5",
+    "smooth-scrolling-threshold": 1
+  },
+  "tray": {
+    "icon-size": 18,
+    "spacing": 6
+  },
+  "bluetooth": {
+    "on-click-right": "blueberry"
+  },
+  "custom/media": {
+    "format": "<span line_height='0.5'>{icon}</span> <span font='Liberation 12'>{}</span>",
+    "return-type": "json",
+    "max-length": 40,
+    "format-icons": {
+      "spotify": "",
+      "default": "🎜"
+    },
+    "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null"
+  }
+}
