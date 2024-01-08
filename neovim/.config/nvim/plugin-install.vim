@@ -6,8 +6,6 @@ if dein#load_state('~/.cache/dein')
 
     call dein#add('Shougo/deoplete.nvim') " Completion framework
     call dein#add('zchee/deoplete-jedi') " Python deoplete provider
-    call dein#add('zchee/deoplete-clang')
-    call dein#add('Shougo/neoinclude.vim') " includes for deoplete
     call dein#add('Shougo/neco-vim')
 
     call dein#add('airblade/vim-gitgutter') " Print diff info in the gutter (1st left column)
@@ -24,7 +22,7 @@ if dein#load_state('~/.cache/dein')
     call dein#add('vim-airline/vim-airline') " Status bar
     call dein#add('vim-airline/vim-airline-themes')
 
-    call dein#add('w0rp/ale') " Lint engine
+    call dein#add('dense-analysis/ale') " Lint engine
 
     call dein#add('ctrlpvim/ctrlp.vim') " Fast Fast
 
@@ -38,8 +36,6 @@ if dein#load_state('~/.cache/dein')
 
     call dein#add('justinmk/vim-sneak')
     call dein#add('kshenoy/vim-signature')
-
-
     call dein#end()
     call dein#save_state()
 end

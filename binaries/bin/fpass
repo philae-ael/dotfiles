@@ -41,47 +41,51 @@ class History:
     """Load and write into history file"""
     def __init__(self):
         debug("Initializing history", level=1)
-        self.entry = 0
+        self.entry = -1
         self.history = []
-        self.err = False # when true, will not try to write history to file
 
-        try:
-            with open(HIST_FILE, 'r') as f:
-                self.history = f.read().splitlines()
-                debug("History:", '-'*15, *enumerate(self.history), '-'*15, sep='\n', level=2)
-        except FileNotFoundError:
-            pass
-        except OSError:
-            self.err = True
-            debug("Can't open history file", HIST_FILE)
+        if HIST_FILE:
+            try:
+                with open(HIST_FILE, 'r') as f:
+                    self.history = f.read().splitlines()
+                    debug("History:", '-'*15, *enumerate(self.history), '-'*15, sep='\n', level=2)
+            except FileNotFoundError:
+                debug("File not found, will create it")
+            except OSError:
+                debug("Can't open history file", HIST_FILE)
 
         debug("Length history", len(self.history), level=1)
 
     def write(self):
-        if self.err:
-            return
-        try:
-            with open(HIST_FILE, 'w') as f:
-                f.write('\n'.join(self.history[:MAX_HISTORY_SIZE]))
-        except OSError:
-            debug("Can't write history file")
+        if HIST_FILE:
+            try:
+                with open(HIST_FILE, 'w') as f:
+                    f.write('\n'.join(self.history[:MAX_HISTORY_SIZE]))
+            except OSError:
+                debug("Can't write history file")
 
     def entry_up(self):
         entry = min(self.entry + 1, len(self.history) - 1)
         changed = (entry != self.entry)
         self.entry = entry
+        if changed: debug(f"History entry set to {self.entry}")
         return changed
 
     def entry_down(self):
         entry = max(self.entry - 1, -1)
         changed = (entry != self.entry)
         self.entry = entry
+        if changed: debug(f"History entry set to {self.entry}")
         return changed
 
     def get_entry(self):
         if self.entry == -1:
             return ""
-        out = self.history[self.entry]
+        try:
+            out = self.history[self.entry]
+        except IndexError:
+            debug(f"History entry index ({self.entry}) out of range !")
+            out = ""
         return out
 
     def add_entry(self, entry):
@@ -90,7 +94,8 @@ class History:
         for indice in sorted(indices, reverse=True):
             del self.history[indice]
 
-        self.history.insert(0, entry)
+        self.history.insert(0, str(entry))
+
 
 class ConsoleStatus(enum.IntEnum):
     NONE           = 0

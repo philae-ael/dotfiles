@@ -42,7 +42,7 @@ alias vim=nvim
 export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
 alias pmake='time make -j$NUMCPUS --load-average=$NUMCPUS'
 
-alias gdb-kern='gdb kernel/apropos.kernel  -iex "target remote localhost:1234"'
+alias gdb-kern='gdb kernel/kernel.kernel  -iex "target remote localhost:1234"'
 alias msfconsole="msfconsole --quiet -x \"db_connect ${USER}@msf\""
 
 alias bws='export BW_SESSION=$(cat ~/.bitwarden_session)'

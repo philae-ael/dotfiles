@@ -10,4 +10,4 @@ R=$(echo $COLOR | awk -F, '{print $1}')
 G=$(echo $COLOR | awk -F, '{print $2}')
 B=$(echo $COLOR | awk -F, '{print $3}')
 
-exec mouse_color $R $G $B
+exec sudo mouse_color $R $G $B

@@ -1,0 +1,2 @@
+#!/bin/bash
+systemctl start restart_to_windows.service

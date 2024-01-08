@@ -11,7 +11,6 @@ source ~/.config/nvim/plugins/ultisnips.vim
 source ~/.config/nvim/plugins/rainbow-parenthese.vim
 source ~/.config/nvim/plugins/syntastic.vim
 source ~/.config/nvim/plugins/vim-commentary.vim
-source ~/.config/nvim/plugins/ghc-mod.vim
 source ~/.config/nvim/plugins/tabularize.vim
 source ~/.config/nvim/plugins/ale.vim
 source ~/.config/nvim/plugins/vimtex.vim

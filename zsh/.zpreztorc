@@ -11,7 +11,6 @@ zstyle ':prezto:load' pmodule \
   'spectrum' \
   'utility' \
   'git' \
-  'python' \
   'syntax-highlighting' \
   'autosuggestions' \
   'completion' \
@@ -45,7 +44,7 @@ zstyle ':prezto:module:history-substring-search:color' found 'bg=magenta'
 #
 
 # Set the Pacman frontend.
-zstyle ':prezto:module:pacman' frontend 'yaourt'
+zstyle ':prezto:module:pacman' frontend 'yay'
 
 #
 # Prompt
