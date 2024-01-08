@@ -1,140 +1,152 @@
 #!/bin/bash
 
-[[ ! -z "$CROSSDEV" ]] && PATH=$(echo $PATH | sed "s/[^:]*$CROSSDEV[^:]*://")
-
-TARGET=$1
-PREFIX="$HOME/opt/$1"
-OLDPWD=`pwd`
-
-_shell_start()
+function _crossdev_clean_path
 {
-    export CROSSDEV=$TARGET
-    cd $OLDPWD
-    $SHELL
-    exit
+    [[ -z "$CROSSDEV" ]] && return
+    
+    PREFIX="$HOME/opt/$CROSSDEV/bin"
+    PATH=$(echo $PATH | sed "s_$PREFIX:__")
+
 }
 
+function crossdev_deactivate
+{
+    _crossdev_clean_path
+    unset CROSSDEV
+}
 
-export PATH="$PREFIX/bin:$PATH"
+function crossdev
+{
+    _crossdev_clean_path
+    TARGET=$1
+    PREFIX="$HOME/opt/$1"
 
-if [[ -d $PREFIX ]];
-then
-    _shell_start
-fi
+    export PATH="$PREFIX/bin:$PATH"
+    export CROSSDEV=$TARGET
 
-PROCNUM=$(nproc)
+    if [[ -d $PREFIX ]];
+    then
+        return
+    fi
+    _create_crossdev
+}
 
+function _create_crossdev
+{
+    OLDPWD=`pwd`
+    PROCNUM=$(nproc)
 
-read -p "Do you want do compile the target $1 ? [Yn]" -n 1 -r
-echo
-if [[ $REPLY =~ "(n|N)" ]]
-then
-    exit 1
-fi
+    read -p "Do you want do compile the target $1 ? [Yn]" -n 1 -r
+    echo
+    if [[ $REPLY =~ "(n|N)" ]]
+    then
+        exit 1
+    fi
 
-mkdir -p $HOME/opt/src
+    mkdir -p $HOME/opt/src
 
-read -p "What's the version of binutils needed ? (e.g 2.26)" binutilsver
-read -p "What's the version of gcc needed ? (e.g 6.1.0)" gccver
-read -p "What's the version of ClooG needed ? (e.g 0.18.4)" cloogver
-
-
-cd $HOME/opt/src 
-
-echo
-echo "###"
-echo "#   Downloading sources"
-echo "###"
-
-echo "Downloading binutils"
-[[ -e binutils-$binutilsver.tar.gz ]] || wget ftp://ftp.gnu.org/gnu/binutils/binutils-$binutilsver.tar.gz
-echo "Downloading gcc"
-[[ -e gcc-$gccver.tar.bz2 ]] || wget ftp://gcc.gnu.org/pub/gcc/releases/gcc-$gccver/gcc-$gccver.tar.bz2
-echo "Downloading  ClooG"
-[[ -e cloog-$cloogver.tar.gz ]] || wget http://www.bastoul.net/cloog/pages/download/cloog-$cloogver.tar.gz
-
-
-
-echo
-echo "###"
-echo "#   Untaring src"
-echo "###"
-
-for f in $(find . -type f -name '*.tar*')
-do
-    tar xf $f
-    echo "Untared $f"
-done
-
-cd gcc-$gccver
-
-echo "Downloading  gcc prerequisites"
-./contrib/download_prerequisites
+    read -p "What's the version of binutils needed ? (e.g 2.26)" binutilsver
+    read -p "What's the version of gcc needed ? (e.g 6.1.0)" gccver
+    read -p "What's the version of ClooG needed ? (e.g 0.18.4)" cloogver
 
 
-echo
-echo "###"
-echo "#  Linking directories"
-echo "###"
+    cd $HOME/opt/src
+
+    echo
+    echo "###"
+    echo "#   Downloading sources"
+    echo "###"
+
+    echo "Downloading binutils"
+    [[ -e binutils-$binutilsver.tar.gz ]] || wget ftp://ftp.gnu.org/gnu/binutils/binutils-$binutilsver.tar.gz
+    echo "Downloading gcc"
+    [[ -e gcc-$gccver.tar.bz2 ]] || wget ftp://gcc.gnu.org/pub/gcc/releases/gcc-$gccver/gcc-$gccver.tar.bz2
+    echo "Downloading  ClooG"
+    [[ -e cloog-$cloogver.tar.gz ]] || wget http://www.bastoul.net/cloog/pages/download/cloog-$cloogver.tar.gz
 
 
-#ignore Fail
-ln -s ../isl-$islver isl || true
-ln -s ../cloog-$cloogver cloog || true 
 
-cd ..
+    echo
+    echo "###"
+    echo "#   Untaring src"
+    echo "###"
 
-echo
-echo "###"
-echo "#   Building binutils"
-echo "###"
+    for f in $(find . -type f -name '*.tar*')
+    do
+        tar xf $f
+        echo "Untared $f"
+    done
 
-mkdir build-binutils
-cd build-binutils
+    cd gcc-$gccver
 
-../binutils-$binutilsver/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
-
-make -j$PROCNUM
-make install
-
-cd ..
-
-echo
-echo "###"
-echo "#   Building gcc"
-echo "###"
+    echo "Downloading  gcc prerequisites"
+    ./contrib/download_prerequisites
 
 
-mkdir build-gcc
-cd build-gcc
-../gcc-$gccver/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
-make all-gcc -j$PROCNUM
-make all-target-libgcc -j$PROCNUM
-make install-gcc -j$PROCNUM
-make install-target-libgcc -j$PROCNUM
-
-cd ..
-
-echo
-echo "###"
-echo "#   Cleaning"
-echo "###"
-
-for f in $(find . -type d |  grep -v '^\.*$')
-do
-    rm -rf $f
-done
+    echo
+    echo "###"
+    echo "#  Linking directories"
+    echo "###"
 
 
-echo
-echo "###"
-echo "#   Striping file"
-echo "###"
+    #ignore Fail
+    ln -s ../isl-$islver isl || true
+    ln -s ../cloog-$cloogver cloog || true
 
-cd $PREFIX
-for f in $(find . -type f -executable)
-do
-    strip $f
-done
+    cd ..
 
-_shell_start
+    echo
+    echo "###"
+    echo "#   Building binutils"
+    echo "###"
+
+    mkdir build-binutils
+    cd build-binutils
+
+    ../binutils-$binutilsver/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror
+
+    make -j$PROCNUM
+    make install
+
+    cd ..
+
+    echo
+    echo "###"
+    echo "#   Building gcc"
+    echo "###"
+
+
+    mkdir build-gcc
+    cd build-gcc
+    ../gcc-$gccver/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
+    make all-gcc -j$PROCNUM
+    make all-target-libgcc -j$PROCNUM
+    make install-gcc -j$PROCNUM
+    make install-target-libgcc -j$PROCNUM
+
+    cd ..
+
+    echo
+    echo "###"
+    echo "#   Cleaning"
+    echo "###"
+
+    for f in $(find . -type d |  grep -v '^\.*$')
+    do
+        rm -rf $f
+    done
+
+
+    echo
+    echo "###"
+    echo "#   Striping file"
+    echo "###"
+
+    cd $PREFIX
+    for f in $(find . -type f -executable)
+    do
+        strip $f
+    done
+
+    cd $OLDPWD
+}
