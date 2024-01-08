@@ -14,5 +14,5 @@ do
 	./$f
 done
 
-sxhkd &
+sxhkd -m 1 & # azerty keyboard
 exec bspwm
