@@ -132,11 +132,7 @@ echo "#   Striping file"
 echo "###"
 
 cd $PREFIX
-for f in $(find bin -type f)
-do
-    strip $f
-done
-for f in $(find $TARGET/bin -type f)
+for f in $(find . -type f -executable)
 do
     strip $f
 done

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+DEST=/home/tristan/sites/$1
+
+mkdir -p $DEST
+
+ln -s $(realpath $3) $DEST/$2
