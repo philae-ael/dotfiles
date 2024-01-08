@@ -27,6 +27,8 @@ function ask_yes_or_no() {
 }
 alias ealias="vim ~/.zshconf/alias.zsh"
 
+alias wttr='curl http://wttr.in/Plouzané'
+alias moon='curl http://wttr.in/Moon'
 alias rg=ranger
 alias v=vim
 alias y=yaourt
@@ -34,9 +36,7 @@ alias ys='yaourt -S'
 alias ysd='yaourt -S --as-deps'
 alias yu='yaourt -Suya'
 alias g=git
-alias more=less
 alias groot='cd $(git rev-parse --show-toplevel)'
-alias less="less -FrX"
 
 # startx alias
 alias kx='ask_yes_or_no "Kill X ?" && pkill X'
