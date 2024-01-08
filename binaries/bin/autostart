@@ -1,5 +1,0 @@
-#!/bin/sh
-for s in ~/.autostart/*
-do
-    $s
-done
