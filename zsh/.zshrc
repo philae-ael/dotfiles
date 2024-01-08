@@ -9,8 +9,7 @@ COMPLETION_WAITING_DOTS="true"
 plugins=(sudo git common-aliases web-search virtualenvwrapper )
 
 
-export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
-
+export PATH="$HOME/bin:$PATH"
 source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
@@ -29,5 +28,3 @@ for f in .zshconf/*
 do
 	source $f
 done
-
-screenfetch

@@ -3,6 +3,9 @@
 #
 
 alt + q
+	bspc node -c
+
+alt + shift + q
 	bspc node -k
 
 alt + t
@@ -12,7 +15,7 @@ alt + b
 	bspc desktop -B
 
 alt + {s,f,d,g}
-	bspc node -t {floating,fullscreen,pseudo_tiled,tiled}
+	bspc node -t '~{floating,fullscreen,pseudo_tiled,tiled}'
 
 alt + Tab
 	bspc desktop -f last
