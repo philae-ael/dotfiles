@@ -111,9 +111,11 @@ class ConsoleDisplay:
         self.cursor_column = 0
         self.entry = ""
         self.out = ""
+        self.index = 0
 
-    def send(self, out):
+    def send(self, out, index):
         self.out = out
+        self.index = index
 
     def set_entry(self, entry):
         self.entry = entry
@@ -156,7 +158,7 @@ class ConsoleDisplay:
     def display(self):
         format_in = "input: "
 
-        self.write(f"\x1b[G{format_in}{self.entry}\noutput: {self.out}")
+        self.write(f"\x1b[G{format_in}{self.entry}\noutput ({self.index}): {self.out}")
 
         self.move_cursor(-1, len(format_in) + self.cursor_column)
         sys.stdout.flush()
@@ -283,7 +285,7 @@ class Fpass:
         def update_out():
             nonlocal out
             out = self.fuzzy_find(self.display.get_entry(), self.pass_data)
-            self.display.send(out)
+            self.display.send(out, self.index)
 
         for status in self.display.update():
             if status == ConsoleStatus.CHANGED:
@@ -337,10 +339,13 @@ class Fpass:
     def fuzzy_find(self, entry, pass_data):
         entry = fuzzywuzzy.utils.full_process(entry)
         if entry:
-            debug("Index of search: ", self.index)
-            outputs, _ = zip(*fuzzywuzzy.process.extract(entry, pass_data))
-            self.index = min(self.index, len(outputs) - 1)
-            return outputs[self.index]
+            outputs, _ = zip(*fuzzywuzzy.process.extract(entry, pass_data, limit=None))
+        else:
+            outputs = [""]
+
+        debug("Index of search: ", self.index)
+        self.index = min(self.index, len(outputs) - 1)
+        return outputs[self.index]
         return ''
 
 def main():
