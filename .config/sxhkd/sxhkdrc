@@ -1,6 +1,9 @@
-#
+
 # wm independent hotkeys
 #
+
+Print 
+    screenshot
 
 # terminal emulator
 super + Return
