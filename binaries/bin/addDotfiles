@@ -2,14 +2,17 @@
 
 DOTFILES_DIR="$HOME/dotfiles"
 
-if [ $# -lt 1 ]
-then
-    echo usage : AddDotfiles pkg_name file
-    exit -1
-fi
+echo "usage : - addDotfiles pkg_name file"
+echo "        - AddDotfiles -> back up package list"
+
+
+echo
+echo "backing up package list"
+
+pacman -Qqe > "$DOTFILES_DIR/pkg.list"
+
 
 PKG=$1
-echo $1
 shift
 
 while [ $# -gt 0 ]
@@ -25,8 +28,5 @@ do
     shift;
 done
 
-echo backing up package list
-
-pacman -Qqe > "$DOTFILES_DIR/pkg.list"
-
+echo
 echo "Don't forget to commit"
