@@ -24,6 +24,7 @@ let
     };
   };
   polybar_config = import ./polybar.nix pkgs;
+  ankama-launcher = import ./ankama.nix;
 in
 {
 
@@ -58,7 +59,6 @@ in
 
     # various bash utilities
     xclip
-    tree
     htop
     file
     unzip
@@ -66,9 +66,12 @@ in
     ripgrep
 
     nodePackages.vim-language-server
+    nodePackages.pyright
     rust-analyzer
     rnix-lsp
     zsh-completions
+    ankama-launcher
+    wine
   ];
 
 
@@ -298,6 +301,7 @@ in
     enable = true;
     shellAliases = {
       "cat" = "bat";
+      "tree" = "lsd --tree";
       "toWindows" = "systemctl reboot --boot-loader-entry=auto-windows";
     };
     history = {

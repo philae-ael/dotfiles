@@ -283,8 +283,9 @@ nvim_lsp.vimls.setup         { capabilities = capabilities, on_attach = on_attac
 nvim_lsp.cmake.setup         { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.rust_analyzer.setup { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.rnix.setup          { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.pyright.setup       { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.clangd.setup        { capabilities = capabilities, on_attach = on_attach_clangd,
-                               cmd = { 'clangd', '--background-index', "--clang-tidy", "--header-insertion=iwyu"}}
+                               cmd = { 'clangd', '--background-index', "--clang-tidy", "--header-insertion=iwyu", "--completion-style=detailed"}}
 
 wk.register({
 h = {
