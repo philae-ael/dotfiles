@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+
+import subprocess
+import os.path
+import re
+
+import termios
+import select
+import sys
+
+import fuzzywuzzy.process
+
+PASS_DIR = os.path.expanduser("~/.password-store/")
+reg_pass_file =  re.compile("^" + PASS_DIR + "(.+)\.gpg$")
+
+CURSOR_UP_ONE = '\x1b[1A'
+CURSOR_DOWN_ONE = '\x1b[1B'
+ERASE_LINE = '\x1b[2K'
+
+def get_pass_data():
+    """Get list of all stored passwords in pass"""
+    out = subprocess.check_output(["find", PASS_DIR, "-type", "f", "-name", "*.gpg"]).decode()
+
+    return [reg_pass_file.search(l).groups()[0] for l in out.splitlines() if l]
+
+def clean():
+    sys.stdout.write(ERASE_LINE + CURSOR_DOWN_ONE + ERASE_LINE + CURSOR_UP_ONE)
+    sys.stdout.flush()
+
+
+def goto_cursor(row, column):
+    if row > 0:
+        sys.stdout.write(f'\x1b[{row}B')
+    if row < 0:
+        sys.stdout.write(f'\x1b[{-row}A')
+
+    sys.stdout.write(f'\x1b[G')
+    if column > 0:
+        sys.stdout.write(f'\x1b[{column}C')
+
+
+def display(typed, out, cursor):
+    format_in = "input: "
+    sys.stdout.write(f"\x1b[G{format_in}{typed}\noutput: {out}")
+    goto_cursor(-1, len("input:") + cursor + 1)
+    sys.stdout.flush()
+
+
+def get_non_bloking_input():
+    def isData():
+        return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
+    if isData():
+        return sys.stdin.read(1)
+
+def get_one_char():
+    c = None
+    while c is None:
+        c = get_non_bloking_input()
+
+    return c
+
+def non_blocking_input():
+    """Don't use input while the generator is still existing"""
+
+    old_settings = termios.tcgetattr(sys.stdin)
+    new_settings = termios.tcgetattr(sys.stdin)
+    new_settings[3] = new_settings[3] & ~(termios.ECHO | termios.ECHONL | termios.ICANON)
+    try:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, new_settings)
+        while True:
+            yield get_non_bloking_input()
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+def process_input(typed, cursor, c):
+    changed = True
+
+    if c is None:
+        changed = False
+    elif c == '\x7f':
+        typed = typed[:-1]
+        cursor = max(0, cursor - 1)
+    elif c == '\x15':
+        cursor = 0
+        typed = ''
+    elif c == '\x0b':
+        typed = typed[:cursor]
+    elif c == '\x1b':
+        c = sys.stdin.read(1)
+        if c == '[':
+            c = sys.stdin.read(1)
+            if c == 'D':
+                cursor = max(0, cursor - 1)
+            if c == 'C':
+                cursor = min(len(typed), cursor + 1)
+    else:
+        typed += c
+        cursor += 1
+
+    return changed, typed, cursor
+
+def pass_run(out):
+    subprocess.call(["pass", out, "-c"])
+
+def fuzzy_find(typed, pass_data):
+    typed = typed.strip()
+    if typed:
+        return fuzzywuzzy.process.extractOne(typed, pass_data)[0]
+    return ''
+
+def main():
+    pass_data = get_pass_data()
+    try:
+        typed = ""
+        cursor = 0
+        out = ""
+        display(typed, out, cursor)
+        for c in non_blocking_input():
+            if c == '\n':
+                goto_cursor(1, 0)
+                print()
+                sys.stdout.flush()
+                pass_run(out)
+                return
+
+            changed, typed, cursor = process_input(typed, cursor, c)
+            if not changed:
+                continue
+
+            out = fuzzy_find(typed, pass_data)
+            clean()
+            display(typed, out, cursor)
+    except KeyboardInterrupt:
+        return
+
+if __name__ == "__main__":
+    main()
