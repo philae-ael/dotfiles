@@ -26,6 +26,8 @@ export ARCHFLAGS="-arch x86_64 -j8"
 
 #Need to be before .zshconf because of fct redifining
 source /usr/share/doc/pkgfile/command-not-found.zsh
+source $(which crossdev)
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 setopt ksh_glob
 setopt no_bare_glob_qual
@@ -39,9 +41,3 @@ done
 [[ -n "$AUTO_RANGER" && -z "$RANGER_LEVEL" ]] && { 
     /usr/bin/ranger && exit  # don't exit on fails
 }
-
-PATH="/home/tristan/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/tristan/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/tristan/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/tristan/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/tristan/perl5"; export PERL_MM_OPT;

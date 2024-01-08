@@ -1,6 +1,6 @@
 fancy-ctrl-z () {
   if [[ $#BUFFER -eq 0 ]]; then
-    fg
+    fg &&
     zle redisplay
   else
     zle push-input
