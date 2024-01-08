@@ -13,6 +13,7 @@ zstyle ':prezto:load' pmodule \
   'git' \
   'python' \
   'syntax-highlighting' \
+  'autosuggestions' \
   'completion' \
   'history-substring-search' \
   'prompt' \
@@ -133,3 +134,7 @@ zstyle ':prezto:module:terminal' auto-title 'yes'
 # before deleting or overwriting files. Set to 'no' to disable this safer
 # behavior.
 zstyle ':prezto:module:utility' safe-ops 'yes'
+
+export fpath=($fpath $HOME/.zsh_async)
+
+autoload -Uz async && async
