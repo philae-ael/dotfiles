@@ -3,9 +3,9 @@ export ZSH=/home/tristan/.oh-my-zsh
 ZSH_THEME="honukai"
 HYPHEN_INSENSITIVE="true"
 
-plugins=(sudo git common-aliases virtualenvwrapper systemd pip)
+plugins=(sudo git common-aliases virtualenvwrapper systemd pip docker)
 
-PATH="$HOME/bin:$PATH"
+PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 source $ZSH/oh-my-zsh.sh
 
@@ -19,9 +19,8 @@ export PROJECT_HOME="$HOME/programmation/"
 export ARCHFLAGS="-arch x86_64 -j8"
 
 #Need to be before .zshconf because of fct redifining
-source /usr/share/doc/pkgfile/command-not-found.zsh
 source $(which crossdev)
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 setopt ksh_glob
 setopt no_bare_glob_qual
