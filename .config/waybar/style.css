@@ -98,7 +98,7 @@ window#waybar {
 }
 
 #workspaces button {
-    color: #494d64;
+    color: #7f849c;
     padding: 4px 8px;
     transition: 0.25s linear;
 }
@@ -116,7 +116,11 @@ window#waybar {
 }
 
 #workspaces button.active {
-    color: #cad3f5;
+    color: #cdd6f4;
+}
+
+#workspaces button.persistent {
+    color: #313244;
 }
 
 #custom-power {
