@@ -25,6 +25,7 @@ dhcpcd
 dialog
 diffutils
 dmenu
+dunst
 e2fsprogs
 easytag
 efibootmgr
@@ -107,12 +108,14 @@ pcmciautils
 perl
 pkg-config
 pkgfile
+playerctl
 primus
 procps-ng
 psmisc
 pulseaudio
 pulseaudio-alsa
 pulseaudio-ctl
+python-gobject
 python-pip
 python-pylint
 reiserfsprogs

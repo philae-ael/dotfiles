@@ -63,7 +63,7 @@ function! StripTrailingWhitespace()
     " do the business:
     %s/\s\+$//e
     " clean up: restore previous search
-    history, and cursor position
+    "history, and cursor position
     let @/=_s
     call cursor(l, c)
 endfunction

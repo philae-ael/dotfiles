@@ -84,13 +84,13 @@ alt + w
 #
 
 alt + p
-        mpc toggle
+        playerctl play-pause
 
 alt + greater
-        mpc next
+        playerctl next
 
 alt + less
-        mpc prev
+        playerctl previous
 
 alt + Return
 	urxvtc
