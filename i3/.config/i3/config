@@ -180,26 +180,16 @@ bindsym $mod + less exec playerctl previous || mpc prev
 
 bindsym Print exec scrot
 
-bindsym XF86AudioMute exec amixer -q sset 'Master' toggle
+bindsym XF86MonBrightnessUp exec light -A 10
+bindsym XF86MonBrightnessDown exec light -U 10
+bindsym XF86AudioRaiseVolume exec pamixer -i 5
+bindsym XF86AudioLowerVolume exec pamixer -d 5
+bindsym XF86AudioMute exec pamixer -t
 
-bindsym XF86AudioRaiseVolume exec amixer -q sset 'Master' 10%+
-bindsym shift + XF86AudioRaiseVolume exec amixer -q sset 'Master' 5%+
-bindsym $mod + XF86AudioRaiseVolume exec amixer -q sset 'Master' 80%
 
-bindsym XF86AudioLowerVolume exec amixer -q sset 'Master' 10%-
-bindsym shift + XF86AudioLowerVolume exec amixer -q sset 'Master' 5%-
-bindsym $mod + XF86AudioLowerVolume exec amixer -q sset 'Master' 0%
-
-bindsym XF86MonBrightnessDown exec light -U 2
-bindsym shift + XF86MonBrightnessDown exec light -U 20
-bindsym $mod + XF86MonBrightnessDown exec light -S 10
-
-bindsym XF86MonBrightnessUp exec light -A 2
-bindsym shift + XF86MonBrightnessUp exec light -A 20
-bindsym $mod + XF86MonBrightnessUp exec light -S 100
-
-exec_always --no-startup-id polybar bar
+exec --no-startup-id polybar bar
 exec --no-startup-id dunst 
+exec --no-startup-id xss-lock /home/tristan/bin/lock
 exec_always --no-startup-id /home/tristan/bin/autostart
 
 for_window [class="Spotify"] move --no-auto-back-and-forth to workspace $ws10

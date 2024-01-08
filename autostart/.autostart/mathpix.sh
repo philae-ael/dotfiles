@@ -1,1 +1,0 @@
-mathpix-snipping-tool

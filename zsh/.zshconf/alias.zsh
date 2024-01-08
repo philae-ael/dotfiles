@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 function make_redirect() {
-    local id
+    local -t id
     exec {id}> >(
         # fct is in subshell created by (), so it won't pollute extern scripts
 
@@ -20,7 +20,8 @@ function make_redirect() {
     print "fd is $id"
     print "redirect stderr to fd $id (2>&$id)"
     print "redirect stdout to fd $id (>&$id)"
-    print "To close fd $id do 'exec $id>&-'"
+    print "To close fd $id do close_$id"
+    eval "function close_$id { local id; id=$id; exec {id}>&- ; unset -f close_$id }"
 }
 
 function stderred {
@@ -52,3 +53,5 @@ alias sync_books_to_drive="rclone sync $HOME/Documents/Maths/Livres 'remote:Livr
 
 alias sync_administratif_from_drive="rclone sync 'remote:Administratif' $HOME/Documents/administratif -P"
 alias sync_administratif_to_drive="rclone sync $HOME/Documents/administratif 'remote:Administratif' -P"
+
+alias tmpdir='cd $(mktemp -d)'

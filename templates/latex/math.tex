@@ -1,0 +1,68 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[left=3cm,right=3cm,top=0cm,bottom=2cm]{geometry}
+\usepackage{amsmath, amsthm, amssymb} 
+
+\newtheoremstyle{break}
+  {\topsep}{\topsep}%
+  {\itshape}{}%
+  {\bfseries}{}%
+  {\newline}{}%
+
+\theoremstyle{break}
+\newtheorem{thm}{Théorème}[section]
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{lem}[thm]{Lemme}
+\newtheorem{cor}[thm]{Corollaire}
+
+\theoremstyle{definition}
+\newtheorem{definition}[thm]{Definition}
+\newtheorem{example}[thm]{Example}
+
+\renewcommand\qedsymbol{$\square$}
+
+
+%\setlength{\parindent}{4em}
+%\setlength{\parskip}{1em}
+%\renewcommand{\baselinestretch}{2.0}
+
+\input{algebra.tex}
+\input{darkmode.tex}
+
+\begin{document}
+
+\title{}
+\author{}
+\date{\today}
+\maketitle
+
+\section{Test 1}%
+\label{sec:test_1}
+
+\begin{thm}[Gauss]
+    Truc!
+\end{thm}
+
+\begin{prop}
+    PROP
+\end{prop}
+
+\begin{proof}
+    MEUH
+\end{proof}
+
+\begin{cor}
+    COR
+\end{cor}
+
+
+\section{TEST 2}%
+\begin{thm}
+    aaaa
+\end{thm}
+\label{sec:test_2}
+
+
+\end{document}
+

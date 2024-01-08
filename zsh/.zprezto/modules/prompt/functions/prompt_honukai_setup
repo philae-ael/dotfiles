@@ -22,28 +22,35 @@
 pmodload 'helper'
 
 function prompt_honukai_async_callback {
-    case $1 in
-        prompt_honukai_async_git)
-            # We can safely split on ':' because it isn't allowed in ref names.
-            IFS=':' read _git_target _git_post_target <<<"$3"
+  case $1 in
+    prompt_honukai_async_git)
+      # We can safely split on ':' because it isn't allowed in ref names.
+      IFS=':' read _git_target _git_post_target <<<"$3"
 
-            # The target actually contains 3 space separated possibilities, so we need to
-            # make sure we grab the first one.
-            _git_target=$(coalesce ${(@)${(z)_git_target}})
+      # The target actually contains 3 space separated possibilities, so we need to
+      # make sure we grab the first one.
+      _git_target=$(coalesce ${(@)${(z)_git_target}})
 
-            if [[ -z "$_git_target" ]]; then
-                # No git target detected, flush the git fragment and redisplay the prompt.
-                if [[ -n "$_prompt_honukai_git" ]]; then
-                    _prompt_honukai_git=''
-                    zle && zle reset-prompt
-                fi
-            else
-                # Git target detected, update the git fragment and redisplay the prompt.
-                _prompt_honukai_git="git:${_git_target}${_git_post_target}"
-                zle && zle reset-prompt
-            fi
-            ;;
-    esac
+      if [[ -z "$_git_target" ]]; then
+        # No git target detected, flush the git fragment and redisplay the prompt.
+        if [[ -n "$_prompt_honukai_git" ]]; then
+          _prompt_honukai_git=''
+          zle && zle reset-prompt
+        fi
+      else
+        # Git target detected, update the git fragment and redisplay the prompt.
+        _prompt_honukai_git="${_git_target}${_git_post_target}"
+        zle && zle reset-prompt
+      fi
+      ;;
+    "[async]")
+      # Code is 1 for corrupted worker output and 2 for dead worker.
+      if [[ $2 -eq 2 ]]; then
+	  # Our worker died unexpectedly.
+          typeset -g prompt_prezto_async_init=0
+      fi
+      ;;
+  esac
 }
 
 function prompt_honukai_async_git {
@@ -106,6 +113,8 @@ function prompt_honukai_setup {
     # Add hook for calling git-info before each command.
     add-zsh-hook precmd prompt_honukai_precmd
 
+    zstyle ':prezto:module:prompt' managed 'yes'
+    
     # Set editor-info parameters.
     zstyle ':prezto:module:editor:info:completing' format '%B%F{7}...%f%b'
 

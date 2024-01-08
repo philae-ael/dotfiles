@@ -1,0 +1,22 @@
+#!/bin/sh 
+
+if [ ! -f "~/.wallpaper/wallpaper-blurred.jpg" ] ; then
+    convert ~/.wallpaper/wallpaper.jpg -resize $(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')^ -channel RGBA -blur 0x15 ~/.wallpaper/wallpaper-blurred.jpg
+fi
+
+
+
+xset s off dpms 0 10 0
+i3lock -i ~/.wallpaper/wallpaper-blurred.jpg \
+    --indicator --radius 20 --ring-width=5 \
+    --insidecolor=00000000 --ringcolor=ebdbb2 \
+    --wrongtext="Mot de passe incorrect" \
+    --noinputtext="" \
+    --veriftext="Vérification...." \
+    --indpos="x+2*r:y+2*r" --timestr="%H:%M:%S" --force-clock --timepos="ix+2*r:iy+15" --time-align=1 \
+    --verifpos="x+w/2:y+h/2" --wrongpos="x+w/2:y+h/2" --greeterpos="x+w/2:y+h/2" \
+    --insidevercolor=00000000 --insidewrongcolor=00000000 --ringvercolor=98971a \
+    --ringwrongcolor=cc241d \
+    --bshlcolor=cc241d --keyhlcolor=98971a --separatorcolor=00000000 --line-uses-inside \
+    --modifpos="-5*r:-5*r" --datecolor=ebdbb2 --timecolor=ebdbb2 --wrongcolor=ebdbb2 --verifcolor=ebdbb2
+xset s off -dpms
