@@ -14,10 +14,12 @@ logger = logging.getLogger(__name__)
 def write_output(text, player):
     logger.info('Writing output')
 
-    output = {'text': text,
-              'alt': player.props.player_name}
-
-    sys.stdout.write(json.dumps(output) + '\n')
+    if text != '': 
+        output = {'text': text,
+                  'alt': player.props.player_name}
+        sys.stdout.write(json.dumps(output) + '\n')
+    else:
+        sys.stdout.write('\n')
     sys.stdout.flush()
 
 

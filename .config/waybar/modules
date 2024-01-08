@@ -74,7 +74,7 @@
     "spacing": 6
   },
   "custom/media": {
-    "format": "<span line_height='0.5' font='22' rise='-1500'>{icon}</span> <span font='Liberation 12'>{}</span>",
+    "format": "<span line_height='0.5' font='12' rise='-1500'>{icon}</span> <span font='Liberation 12'>{}</span>",
     "return-type": "json",
     "max-length": 40,
     "format-icons": {

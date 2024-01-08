@@ -1,0 +1,8 @@
+[user]
+	email = gouge.tristan@gmail.com
+	name = Tristan Gouge
+[alias]
+	tree = log --graph --pretty=oneline --abbrev-commit
+	s = status
+[core]
+	pager = less -+$LESS -RS
