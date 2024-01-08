@@ -100,6 +100,10 @@ super + shift + space
 ctrl + shift + space
         rofi -show window
 
+#lockscreen
+super + shift + x
+    xset s activate
+
 # make sxhkd reload its configuration files:
 super + Escape
 	pkill -USR1 -x sxhkd
