@@ -123,7 +123,7 @@ class ConsoleDisplay:
     def update(self):
         self.display()
         try:
-            with self.non_blocking_input():
+            with self.input_non_canonical_no_echo():
                 for c in self.wait_one_char():
                     status = self.process_input(c)
                     if status:
@@ -186,8 +186,11 @@ class ConsoleDisplay:
             yield c
 
     @contextmanager
-    def non_blocking_input(self):
-        """/!\ Don't use inputs while the generator is still existing"""
+    def input_non_canonical_no_echo(self):
+        """ /!\ Don't use inputs in the context manager
+        Put input in non canonicam mode, (input are available immediatly) and no echo,
+            (as in passwords field in terminals)
+        """
 
         old_settings = termios.tcgetattr(sys.stdin)
         new_settings = termios.tcgetattr(sys.stdin)
