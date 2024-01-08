@@ -9,13 +9,19 @@ SETUVAR _fisher_jorgebucaran_2F_fisher_files:\x7e/\x2econfig/fish/functions/fish
 SETUVAR _fisher_jorgebucaran_2F_hydro_files:\x7e/\x2econfig/fish/functions/fish_mode_prompt\x2efish\x1e\x7e/\x2econfig/fish/functions/fish_prompt\x2efish\x1e\x7e/\x2econfig/fish/conf\x2ed/hydro\x2efish
 SETUVAR _fisher_plugins:jorgebucaran/fisher\x1ejorgebucaran/hydro\x1ecatppuccin/fish
 SETUVAR _fisher_upgraded_to_4_4:\x1d
+SETUVAR _hydro_git_1000:\x1d
 SETUVAR _hydro_git_11297:vulkan\x20\u21911\x20
 SETUVAR _hydro_git_159917:main\x20
 SETUVAR _hydro_git_21017:master\u2022\x20
 SETUVAR _hydro_git_2641:\x1d
+SETUVAR _hydro_git_293597:\x1d
 SETUVAR _hydro_git_2982:vulkan\u2022\x20\u21912\x20
 SETUVAR _hydro_git_33607:master\x20
+SETUVAR _hydro_git_34542:master\u2022\x20
+SETUVAR _hydro_git_5744:develop\u2022\x20
+SETUVAR _hydro_git_78866:master\u2022\x20
 SETUVAR _hydro_git_8291:master\u2022\x20
+SETUVAR _hydro_git_998:master\u2022\x20
 SETUVAR fish_color_autosuggestion:555\x1ebrblack
 SETUVAR fish_color_cancel:\x2dr
 SETUVAR fish_color_command:blue
@@ -44,4 +50,4 @@ SETUVAR fish_pager_color_description:B3A06D\x1eyellow\x1e\x2di
 SETUVAR fish_pager_color_prefix:normal\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
 SETUVAR fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
 SETUVAR fish_pager_color_selected_background:\x2dr
-SETUVAR fish_user_paths:/home/tgouge/\x2ebin
+SETUVAR fish_user_paths:/home/tgouge/go/bin\x1e/home/tgouge/\x2ebin

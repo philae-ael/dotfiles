@@ -5,7 +5,7 @@
     "format-icons": {
       "urgent": "",
       "active": "",
-      "default": "",
+      "default": ""
     },
     "persistent_workspaces": {
       "1": [],
@@ -17,17 +17,17 @@
       "7": [],
       "8": [],
       "9": [],
-      "10": [],
+      "10": []
     },
     "on-scroll-up": "hyprctl dispatch workspace e+1",
     "on-scroll-down": "hyprctl dispatch workspace e-1",
     "sort-by-number": true
   },
   "clock": {
-    "interval": 60,
+    "interval": 2,
     "align": 0,
     "rotate": 0,
-    "format": "<span font='18' rise='-2000'></span> {:%I:%M}",
+    "format": "<span font='18' rise='-2000'></span> {:%I:%M:%S}",
     "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
   },
   "disk": {
@@ -50,7 +50,7 @@
     "format-disconnected": "睊 Disconnected",
     "format-disabled": "睊 Disabled",
     "format-alt": " {bandwidthUpBits} |  {bandwidthDownBits}",
-    "tooltip-format": " {ifname} via {gwaddr}",
+    "tooltip-format": " {ifname} via {gwaddr}"
   },
   "pulseaudio": {
     "format": "<span line_height='0.5' font='18' rise='-2500'>{icon}</span> {volume}",
@@ -61,7 +61,7 @@
       "default": [
         "󰕿",
         "󰖀",
-        "󰕾",
+        "󰕾"
       ]
     },
     "scroll-step": 5,
