@@ -10,6 +10,8 @@ set linebreak   " Break lines at word (requires Wrap lines)
 set showbreak=++        " Wrap-broken line prefix
 set colorcolumn=120
 
+set foldmethod=marker
+
 set showmatch	" Highlight matching brace
 set ruler	" Show row and column ruler informationa
 set cursorline " Highlight current line
@@ -116,6 +118,8 @@ set hlsearch
 set t_Co=256
 set background=dark
 colorscheme gruvbox
+""" let the terminal's transparent background
+hi Normal ctermbg=none
 
 """ Mouse accepted but no when writing
 set mouse=a
@@ -124,8 +128,9 @@ set mousehide
 """End of words 
 set iskeyword-=.                    " '.' is an end of word designator
 set iskeyword-=#                    " '#' is an end of word designator
-set iskeyword-=-                    " '-' is an end of word designator   "
-
+set iskeyword-=-                    " '-' is an end of word designator   
+set iskeyword-=_                    " '_' is an end of word designator
+1
 "" Plugins conf
 "syntastic
 let g:syntastic_always_populate_loc_list = 1
@@ -147,14 +152,15 @@ nnoremap <F2> :GundoToggle<CR>
 let g:SuperTabDefaultCompletionType = '<C-n>'
 
 " better key bindings for UltiSnipsExpandTrigger
-let g:UltiSnipsExpandTrigger = "<tab>"
-let g:UltiSnipsJumpForwardTrigger = "<tab>"
-let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+let g:UltiSnipsExpandTrigger = "<C-e>"
+let g:UltiSnipsJumpForwardTrigger = "<C-f>"
+let g:UltiSnipsJumpBackwardTrigger = "<C-b>"
 
 let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
 let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
 let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ycm_auto_trigger = 1
+let g:ycm_confirm_extra_conf = 0
 
 "necoghc
 let g:necoghc_enable_detailed_browse = 1

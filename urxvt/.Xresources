@@ -50,6 +50,7 @@ URxvt.intensityStyles: false
 
 ! hard contrast: *background: #1d2021
 *background: #282828
+urxvt.background: rgba:2828/2828/2828/dddd
 ! soft contrast: *background: #32302f
 *foreground: #ebdbb2
 ! Black + DarkGrey
@@ -107,3 +108,15 @@ URxvt.color245: #928374
 URxvt.color246: #a89984
 URxvt.color248: #bdae93
 URxvt.color250: #d5c4a1
+
+! ------------------------------------------------------------------------------
+! ROFI Color theme
+! ------------------------------------------------------------------------------
+rofi.color-enabled: true
+rofi.color-window: #282828, #ebdbb2, #ebdbb2
+rofi.color-normal: #282828, #ebdbb2, #282828, #928374, #ffffff
+rofi.color-active: #282828, #80cbc4, #282828, #928374, #80cbc4
+rofi.color-urgent: #282828, #fb4934, #282828, #928374, #fb4934
+
+! Separator style (none, dash, solid)
+rofi.separator-style:                solid
