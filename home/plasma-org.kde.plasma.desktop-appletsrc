@@ -1,4 +1,7 @@
-[Containments][1]
+[ActionPlugins][1]
+RightButton;NoModifier=org.kde.contextmenu
+
+[Containments][23]
 ItemGeometries-2560x1440=Applet-2:2496,1360,64,80,0;
 ItemGeometries-1920x1080=Applet-2:1859,1004,64,80,0;
 activityId=54c12e9b-8785-4105-8428-97c995d7a278
@@ -9,9 +12,9 @@ location=0
 plugin=org.kde.desktopcontainment
 wallpaperplugin=org.kde.image
 
-[Containments][1][Applets][2]
+[Containments][23][Applets][2]
 immutability=1
 plugin=org.kde.plasma.notifications
 
-[Containments][1][Wallpaper][org.kde.image][General]
+[Containments][23][Wallpaper][org.kde.image][General]
 Image=file:///home/tristan/.background.jpg

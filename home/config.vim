@@ -17,6 +17,8 @@ set wildmode=longest,list,full
 set modeline
 set mouse=a
 
+set path+=**
+
 "" tabs
 set expandtab
 set autoindent
@@ -34,6 +36,8 @@ set smartcase
 
 set timeoutlen=300
 set updatetime=800
+
+set signcolumn=yes
 
 au WinLeave * set nocursorline nocursorcolumn
 au WinEnter * set cursorline cursorcolumn
@@ -66,7 +70,7 @@ xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
 vmap < <gv
-vmap > <gv
+vmap > >gv
 
 let g:airline_powerline_fonts = 1
 
@@ -204,17 +208,17 @@ local function on_attach_generic(clent, bufnr)
     -- see `:help vim.lsp.*` for documentation on any of the below functions
     buf_set_keymap('n', '<leader><shift>n', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
     buf_set_keymap('n', '<leader>n',        '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
-    buf_set_keymap('n', '<leader>s',        '<cmd>lspsage signature_help<cr>',         opts)
-    buf_set_keymap('n', '<leader>l',        '<cmd>lspsaga show_line_diagnostics<cr>',  opts)
-    buf_set_keymap('n', '<leader>r',        '<cmd>lspsaga rename<cr>',                 opts)
-    buf_set_keymap('n', '<leader>p',        '<cmd>lspsaga preview_definition<cr>',     opts)
-    buf_set_keymap('n', '<leader>d',        '<cmd>lspsaga hover_doc<cr>',              opts)
-    buf_set_keymap('n', 'k',                '<cmd>lspsaga hover_doc<cr>',              opts)
-    buf_set_keymap('n', '<leader>f',        '<cmd>lspsaga lsp_finder<cr>',             opts)
-    buf_set_keymap('n', '<leader>i',        '<cmd>lspsaga implement<cr>',              opts)
+    buf_set_keymap('n', '<leader>s',        '<cmd>Lspsage signature_help<cr>',         opts)
+    buf_set_keymap('n', '<leader>l',        '<cmd>Lspsaga show_line_diagnostics<cr>',  opts)
+    buf_set_keymap('n', '<leader>r',        '<cmd>Lspsaga rename<cr>',                 opts)
+    buf_set_keymap('n', '<leader>p',        '<cmd>Lspsaga preview_definition<cr>',     opts)
+    buf_set_keymap('n', '<leader>d',        '<cmd>Lspsaga hover_doc<cr>',              opts)
+    buf_set_keymap('n', 'K',                '<cmd>Lspsaga hover_doc<cr>',              opts)
+    buf_set_keymap('n', '<leader>f',        '<cmd>Lspsaga lsp_finder<cr>',             opts)
+    buf_set_keymap('n', '<leader>i',        '<cmd>Lspsaga implement<cr>',              opts)
     buf_set_keymap('n', '<leader>=',        '<cmd>lua vim.lsp.buf.formatting()<cr>',   opts)
-    buf_set_keymap('n', '<leader>a',        '<cmd>lspsaga code_action<cr>',            opts)
-    buf_set_keymap('v', '<leader>a',        '<cmd><c-u>lspsaga range_code_action<cr>', opts)
+    buf_set_keymap('n', '<leader>a',        '<cmd>Lspsaga code_action<cr>',            opts)
+    buf_set_keymap('v', '<leader>a',        '<cmd><c-u>Lspsaga range_code_action<cr>', opts)
 
 
     -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<cr>', opts)
@@ -243,10 +247,10 @@ end
 local function on_attach_clang(client, bufnr)
     on_attach_generic(client, bufnr)
 
-    vim.cmd("unmap k") -- to keep vim help
+    vim.cmd("unmap K") -- to keep vim help
 end
 local function on_attach_clang(client, bufnr)
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>w", "<cmd>clangdswitchsourceheader<cr>",{ noremap=true, silent=true })
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>w", "<cmd>ClangdSwitchSourceHeader<cr>",{ noremap=true, silent=true })
     require("which-key").register({ w = { "switch between source & header" }}, { prefix = "<leader>" })
 
     on_attach_generic(client, bufnr)
@@ -255,6 +259,7 @@ end
 nvim_lsp.hls.setup           { on_attach = on_attach_generic }
 nvim_lsp.vimls.setup         { on_attach = on_attach_generic }
 nvim_lsp.clangd.setup        { on_attach = on_attach_clang   }
+nvim_lsp.cmake.setup         { on_attach = on_attach_generic }
 nvim_lsp.rust_analyzer.setup { on_attach = on_attach_generic }
 nvim_lsp.rnix.setup          { on_attach = on_attach_generic }
 

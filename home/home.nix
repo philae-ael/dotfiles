@@ -22,7 +22,6 @@ let
       rev = "518c12e2897edd2542bee76278a693cc7eea2f51";
       sha256 = "1ilyl26xdwq9ws6mb86rz83kq267gsgfpjmrpc87snx1h8z9rq4v";
     };
-    buildPhase = ":";
   };
   polybar_config = import ./polybar.nix pkgs;
 in
@@ -215,6 +214,7 @@ in
     userName = "Tristan Gouge";
     userEmail = "gouge.tristan@gmail.com";
     extraConfig = {
+      init.defaultBranch = "main";
       core.editor = "nvim";
       github.username = "naegi";
     };
@@ -236,12 +236,13 @@ in
     vimAlias = true;
     plugins = with pkgs.vimPlugins; [
       vim-sensible
-      vim-nix
+
       vim-airline
       vim-surround
 
+      vim-polyglot
+
       rainbow_parentheses
-      auto-pairs
 
       vim-gitgutter
       vim-easy-align
@@ -257,7 +258,6 @@ in
       vim-vsnip-integ
 
       gruvbox
-      haskell-vim
 
       which-key-nvim
 
@@ -295,7 +295,7 @@ in
     };
 
     initExtra = ''
-      if [[ -z $DISPLAY ]] ; then 
+      if [[ -z $DISPLAY ]] ; then
         case $(tty) in /dev/tty1)
           exec startx
         esac
