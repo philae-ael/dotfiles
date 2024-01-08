@@ -6,7 +6,7 @@ HYPHEN_INSENSITIVE="true"
 
 COMPLETION_WAITING_DOTS="true"
 
-plugins=(sudo git common-aliases virtualenvwrapper systemd)
+plugins=(sudo git common-aliases virtualenvwrapper systemd pip cabal python pass)
 
 PATH="$HOME/bin:$PATH"
 
@@ -31,3 +31,8 @@ for f in ~/.zshconf/*
 do
 	source $f
 done
+
+
+[[ -n "$AUTO_RANGER" && -z "$RANGER_LEVEL" ]] && { 
+    /usr/bin/ranger && exit  # don't exit on fails
+}
