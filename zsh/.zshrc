@@ -1,25 +1,14 @@
-export ZSH=/home/tristan/.oh-my-zsh
+#
+# Executes commands at the start of an interactive session.
+#
+# Authors:
+#   Sorin Ionescu <sorin.ionescu@gmail.com>
+#
 
-ZSH_THEME="honukai"
-HYPHEN_INSENSITIVE="true"
-
-plugins=(sudo git common-aliases systemd pip)
-
-PATH="$HOME/bin:$HOME/scripts:$HOME/.local/bin:$PATH"
-
-source $ZSH/oh-my-zsh.sh
-
-# You may need to manually set your language environment
-export LANG=fr_FR.UTF-8
-
-export DIFFPROG='nvim -d'
-export EDITOR='nvim'
-export PROJECT_HOME="$HOME/programmation/"
-
-
-#Need to be before .zshconf because of fct redifining
-source $(which crossdev)
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
+# Source Prezto.
+if [[ -s "$HOME/.zprezto/init.zsh" ]]; then
+  source "$HOME/.zprezto/init.zsh"
+fi
 
 setopt ksh_glob
 setopt no_bare_glob_qual
