@@ -29,7 +29,7 @@ set softtabstop=2
 set tabstop=8
 set shiftround
 
-set listchars=tab:▸\ ,trail:·,multispace:\|\ \ \ ,extends:❯,precedes:❮,nbsp:×
+set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:×
 set list
 set conceallevel=1
 
@@ -295,6 +295,23 @@ h = {
     u = { "undo" },
     }
 }, { prefix = "<leader>" })
+
+require("indent_blankline").setup {
+    show_current_context = true,
+    show_current_context_start = true,
+}
+
+
+require'nvim-treesitter.configs'.setup {
+    ensure_installed = "maintained",
+    sync_install = false,
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false
+    }
+}
+
+
 
 EOF
 set termguicolors

@@ -275,6 +275,8 @@ in
       gruvbox
 
       which-key-nvim
+      indent-blankline-nvim
+      nvim-treesitter
 
     ];
     extraConfig = builtins.readFile ./config.vim;
