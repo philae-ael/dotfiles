@@ -43,9 +43,10 @@ if dein#load_state('/home/tristan/.nvim')
     call dein#add('posva/vim-vue')
     call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
 
+    call dein#add('sheerun/vim-polyglot')
+
     call dein#add('godlygeek/tabular')
 
-    call dein#add('neovimhaskell/haskell-vim')
     call dein#add('eagletmt/neco-ghc')
     call dein#add('eagletmt/ghcmod-vim')
 
