@@ -17,7 +17,8 @@ fish
 git
 hwinfo
 plasma
-plasma-wayland-sessionegl-wayland
+plasma-wayland-session
+egl-wayland
 kde-system-meta
 sddm 
 sddm-kcm
@@ -34,7 +35,7 @@ handlr
 slurp
 grim
 wofi
-ghithub-cli
+github-cli
 exa
 bat 
 yadm 
@@ -55,3 +56,9 @@ noto-fonts-extra
 p7zip
 bluez
 polkit-kde-agent
+glow
+docker
+kvantum
+okular 
+discover
+qbittorrent

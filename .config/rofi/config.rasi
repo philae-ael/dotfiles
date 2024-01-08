@@ -1,11 +1,12 @@
 configuration {
-    combi-modes: "window,drun";
+    combi-modes: "drun,window";
     modi: "run,drun,window,combi";
     icon-theme: "Colloid";
     show-icons: true;
     terminal: "kitty";
     drun-display-format: "{icon} {name}";
     location: 0;
+    matching: "fuzzy";
     disable-history: false;
     hide-scrollbar: true;
     display-drun: " 󰲋  Apps ";

@@ -1,6 +1,6 @@
 # First 
 Install packages: 
-- see package.list 
+- see package.list (`tr '\n' ' ' < package.list`)
 - install ucode
 - install driverso
 - install paru 
@@ -17,6 +17,7 @@ AUR:
 - hyprland-nvidia-git if nvidia
 - waybar-hyprland 
 - rofi-lbonn-wayland
+- qt5ct-kde
 
 ## Second
 - Yadm clone 
@@ -24,3 +25,4 @@ AUR:
 - Cartograph CF https://en.bestfonts.pro/fonts_files/600c045b6a101229c67525c5/font.zip to .local/share/fonts/cartograph
 
 - install packer `git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim`
+- add user to docker group `sudo usermod -aG docker $USER`
