@@ -8,6 +8,10 @@ import subprocess
 import termios
 import select
 import sys
+import argparse
+import unicodedata
+
+NON_PRINTABLE_CATEGORY = {"Cc", "Cf", "Cs", "Co", "Cn"}
 
 try:
     import fuzzywuzzy.process
@@ -30,26 +34,10 @@ CURSOR_DOWN_ONE = '\x1b[1B'
 ERASE_LINE = '\x1b[2K'
 
 
-# To use debug set this flag to true and use fpass like this
-# >> mkfifo /tmp/fifo-debug-fpass
-# >> fpass 2> /tmp/fifo-debug-fpass
-# in an other terminal
-# >> cat /tmp/fifo-debug-fpass
-
-DEBUG = False
-
-if DEBUG:
-    def debug(*args, **kwargs):
-        print(*args, **kwargs, file=sys.stderr)
-        sys.stderr.flush()
-else:
-    def debug(*args, **kwargs):
-        pass
-
 class History:
     """Load and write into history file"""
     def __init__(self):
-        debug("Initializing history")
+        debug("Initializing history", level=1)
         self.entry = 0
         self.history = []
         self.err = False # when true, will not try to write history to file
@@ -57,32 +45,33 @@ class History:
         try:
             with open(HIST_FILE, 'r') as f:
                 self.history = f.read().splitlines()
+                debug("History:", '-'*15, *enumerate(self.history), '-'*15, sep='\n', level=2)
         except FileNotFoundError:
             pass
         except OSError:
             self.err = True
             debug("Can't open history file", HIST_FILE)
 
-        debug("Length history", len(self.history))
+        debug("Length history", len(self.history), level=1)
 
     def write(self):
         if self.err:
             return
         try:
             with open(HIST_FILE, 'w') as f:
-                f.write('\n'.join(self.history[-MAX_HISTORY_SIZE - 1:]))
+                f.write('\n'.join(self.history[:MAX_HISTORY_SIZE]))
         except OSError:
             debug("Can't write history file")
 
     def entry_up(self):
-        entry = max(self.entry - 1, -max(1, len(self.history)))
-        changed = entry != self.entry
+        entry = min(self.entry + 1, max(1, len(self.history)))
+        changed = (entry != self.entry)
         self.entry = entry
         return changed
 
     def entry_down(self):
-        entry = min(self.entry + 1, 0)
-        changed = entry != self.entry
+        entry = max(self.entry - 1, 0)
+        changed = (entry != self.entry)
         self.entry = entry
         return changed
 
@@ -93,11 +82,16 @@ class History:
         return out
 
     def add_entry(self, entry):
-        self.history.append(entry)
+        # Remove old occurences of entry in history and put it at top
+        indices = [i for i, x in enumerate(self.history) if x == entry]
+        for indice in sorted(indices, reverse=True):
+            del self.history[indice]
+
+        self.history.insert(0, entry)
 
 class ConsoleStatus(enum.IntEnum):
     NONE           = 0
-    CHANGED        = 1
+    ENTRY_CHANGED  = 1
     HISTORY_UP     = 2
     HISTORY_DOWN   = 3
     REDISPLAY      = 4
@@ -192,7 +186,7 @@ class ConsoleDisplay:
     @contextmanager
     def input_non_canonical_no_echo(self):
         """ /!\ Don't use inputs in the context manager
-        Put input in non canonicam mode, (input are available immediatly) and no echo,
+        Put input in non canonical mode, (input are available immediatly) and no echo,
             (as in passwords field in terminals)
         """
 
@@ -215,7 +209,7 @@ class ConsoleDisplay:
         if c is None:
             pass
 
-        debug(hex(ord(c)))
+        debug("Input to process: " + hex(ord(c)), level=3)
 
         if c == '\n':
             return ConsoleStatus.COMMIT
@@ -232,24 +226,35 @@ class ConsoleDisplay:
             self.cursor_column = len(entry_front_tmp)
             self.entry = entry_front_tmp + entry_back_tmp
 
-            return ConsoleStatus.CHANGED
-        elif c == '\x01': # Ctrl + A
+            return ConsoleStatus.ENTRY_CHANGED
+        elif c == '\x01': # Ctrl + A -- Go to begining
             self.cursor_column = 0
             return ConsoleStatus.REDISPLAY
-        elif c == '\x05':
+
+        elif c == '\x05': # Ctrl + E -- Go to end
             self.cursor_column = len(self.entry)
             return ConsoleStatus.REDISPLAY
-        elif c == '\x7f': # backspace
+
+        elif c == '\x7f': # backspace -- remove Char
             self.entry = self.entry[:-1]
             self.cursor_column = max(0, self.cursor_column - 1)
-            return ConsoleStatus.CHANGED
-        elif c == '\x15': # ?
+            return ConsoleStatus.ENTRY_CHANGED
+
+        elif c == '\x15': # Ctrl + U -- Kill line
             self.cursor_column = 0
             self.entry = ''
-            return ConsoleStatus.CHANGED
-        elif c == '\x0b': #
+            return ConsoleStatus.ENTRY_CHANGED
+
+        elif c == '\x0b': # Ctrl + K -- Kill end of line
             self.entry = self.entry[:self.cursor_column]
-            return ConsoleStatus.CHANGED
+            return ConsoleStatus.ENTRY_CHANGED
+
+        elif c == '\x17': # Ctrl + W -- kill word
+            last_space = max(0, self.entry[:self.cursor_column].rfind(' '))
+            self.entry = self.entry[:last_space] \
+                        + self.entry[self.cursor_column:]
+            self.cursor_column = last_space
+            return ConsoleStatus.ENTRY_CHANGED
         elif c == '\x1b':
             c = sys.stdin.read(1)
             if c == '[':
@@ -264,12 +269,13 @@ class ConsoleDisplay:
                 if c == 'D':
                     self.cursor_column = max(0, self.cursor_column - 1)
                     return ConsoleStatus.REDISPLAY
-        else:
-            self.entry = self.entry[:self.cursor_column] + c + self.entry[self.cursor_column:]
-            self.cursor_column += 1
-            return ConsoleStatus.CHANGED
+        elif unicodedata.category(c) in NON_PRINTABLE_CATEGORY: # Drop non printable characters
+            return ConsoleStatus.NONE
 
-        return ConsoleStatus.NONE
+        # Normal characters
+        self.entry = self.entry[:self.cursor_column] + c + self.entry[self.cursor_column:]
+        self.cursor_column += 1
+        return ConsoleStatus.ENTRY_CHANGED
 
 
 class Fpass:
@@ -288,7 +294,8 @@ class Fpass:
             self.display.send(out, self.index)
 
         for status in self.display.update():
-            if status == ConsoleStatus.CHANGED:
+            debug("Status: ", status, level=3)
+            if status == ConsoleStatus.ENTRY_CHANGED:
                 self.index = 0
                 update_out()
 
@@ -343,7 +350,6 @@ class Fpass:
         else:
             outputs = [""]
 
-        debug("Index of search: ", self.index)
         self.index = min(self.index, len(outputs) - 1)
         return outputs[self.index]
         return ''
@@ -353,4 +359,24 @@ def main():
     fpass.run()
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--debug', action='count', default=0,
+        help="Set debug mode."
+            "The more this argument appear, the more debug output is verbose"
+            "Output should be redirected to a file. "
+            "The best is to create a fifo to get directly output.")
+
+    args = parser.parse_args()
+    if args.debug != 0:
+        def debug(*_args, **kwargs):
+            level = 0
+            if 'level' in kwargs:
+                level = kwargs.pop('level')
+
+            if level <= args.debug:
+                print(*_args, **kwargs, file=sys.stderr)
+                sys.stderr.flush()
+    else:
+        def debug(*args, **kwargs):
+            pass
     main()
