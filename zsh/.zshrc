@@ -30,3 +30,4 @@ do
 	source $f
 done
 
+screenfetch

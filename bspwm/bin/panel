@@ -17,7 +17,7 @@ bspc control --subscribe > "$PANEL_FIFO" &
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
 while true 
 do 
-    date +'S%a %H:%M:%S'
+    date +'S%a %d %b %H:%M:%S'
     sleep 2
 done > "$PANEL_FIFO" &
 

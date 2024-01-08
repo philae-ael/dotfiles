@@ -83,6 +83,15 @@ alt + w
 # wm independent hotkeys
 #
 
+alt + p
+        mpc toggle
+
+alt + greater
+        mpc next
+
+alt + less
+        mpc prev
+
 alt + Return
 	urxvtc
 

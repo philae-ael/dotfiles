@@ -47,6 +47,7 @@ set smartindent	" Enable smart-indent
 set smarttab	" Enable smart-tabs
 set softtabstop=4	" Number of spaces per Tab
 set tabstop=8 " because of hlint
+set shiftround                  "Round indent to nearest shiftwidth multiple
 
 "" Toggle whitespace visibility with ,s
 nmap <Leader>s :set list!<CR>
@@ -90,8 +91,9 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'Townk/vim-autoclose'
 Plugin 'tpope/vim-surround'
 Plugin 'sjl/gundo.vim'
+" Haskell
 Plugin 'dag/vim2hs'
-Plugin 'godlygeek/tabular'
+Plugin 'eagletmt/neco-ghc'
 "Plugin 'Valloric/YouCompleteMe' " -> managed throught AUR (vim-youcompleteme-git)
 call vundle#end()
 
@@ -140,10 +142,19 @@ nnoremap <F2> :GundoToggle<CR>
 
 "" YouCompleteMe
 let g:ycm_key_list_previous_completion=['<Up>']
+let g:ycm_semantic_triggers = {'haskell' : ['.']}
+let g:ycm_auto_trigger = 1
+
+"necoghc
+let g:necoghc_enable_detailed_browse = 1
+let g:haskellmode_completion_ghc = 0
+
+autocmd Filetype haskell setlocal omnifunc=necoghc#omnifunc
 
 "" Ultisnips
-let g:UltiSnipsExpandTrigger="<s-tab>"
-let g:UltiSnipsListSnippets="<s-space-tab>"
+let g:UltiSnipsExpandTrigger="<c-j>"
+let g:UltiSnipsJumpForwardTrigger="<c-j>"
+let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 "Other undo opts
 set undofile " So is persistent undo ... "
 set undolevels=1000         " Maximum number of changes that can be undone
