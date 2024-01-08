@@ -5,3 +5,9 @@
 	name = naegi
 [push]
 	default = simple
+[alias]
+	c = commit
+	p = push
+	pl = pull
+	a = add
+	s = status
