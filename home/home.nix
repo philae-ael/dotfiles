@@ -65,9 +65,8 @@ in
     file
     unzip
     p7zip
+    ripgrep
 
-    clang
-    clang-tools
     nodePackages.vim-language-server
     rust-analyzer
     rnix-lsp
