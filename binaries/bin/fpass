@@ -10,17 +10,20 @@ import select
 import sys
 import argparse
 import unicodedata
+import json
 
 NON_PRINTABLE_CATEGORY = {"Cc", "Cf", "Cs", "Co", "Cn"}
 
 try:
     import fuzzywuzzy.process
+    import fuzzywuzzy.fuzz
 except ModuleNotFoundError:
     print("Can't find fuzzywuzzy, you first need to install it via " +
           "'pip install --user fuzzywuzzy' or other")
     sys.exit(-1)
 
 PASS_DIR = os.path.expanduser("~/.password-store/")
+BITWARDEN_SESSION_PATH = os.path.expanduser("~/.bitwarden_session")
 HIST_FILE = os.path.expanduser("~/.fpass-history")
 MAX_HISTORY_SIZE = 10
 WORD_CHAR_SEP = " /" # char need to be escaped for if has any effect in bracket context regex
@@ -64,19 +67,19 @@ class History:
             debug("Can't write history file")
 
     def entry_up(self):
-        entry = min(self.entry + 1, max(1, len(self.history)))
+        entry = min(self.entry + 1, len(self.history) - 1)
         changed = (entry != self.entry)
         self.entry = entry
         return changed
 
     def entry_down(self):
-        entry = max(self.entry - 1, 0)
+        entry = max(self.entry - 1, -1)
         changed = (entry != self.entry)
         self.entry = entry
         return changed
 
     def get_entry(self):
-        if self.entry == 0:
+        if self.entry == -1:
             return ""
         out = self.history[self.entry]
         return out
@@ -280,17 +283,23 @@ class ConsoleDisplay:
 
 class Fpass:
     """Deals with datas and logic of fuzzy finding the correct pass"""
-    def __init__(self):
-        self.pass_data = self.get_pass_data()
+    def __init__(self, passwordManager):
+        self.passwordManager = passwordManager
+        self.pass_data = self.passwordManager.get_pass_data()
         self.history = History()
         self.display = ConsoleDisplay()
         self.index = 0
 
     def run(self):
-        out = ""
+        id_p = None
         def update_out():
-            nonlocal out
-            out = self.fuzzy_find(self.display.get_entry(), self.pass_data)
+            nonlocal id_p
+            try:
+                id_p = self.fuzzy_find(self.display.get_entry(), self.pass_data)
+                out = self.pass_data[id_p]
+            except LookupError:
+                id_p = None
+                out = ""
             self.display.send(out, self.index)
 
         for status in self.display.update():
@@ -302,13 +311,15 @@ class Fpass:
             if status == ConsoleStatus.HISTORY_UP:
                 self.index = 0
                 if self.history.entry_up():
-                    self.display.set_entry(self.history.get_entry())
+                    ent = self.pass_data.get(self.history.get_entry(), "")
+                    self.display.set_entry(ent)
                     update_out()
 
             if status == ConsoleStatus.HISTORY_DOWN:
                 self.index = 0
                 if self.history.entry_down():
-                    self.display.set_entry(self.history.get_entry())
+                    ent = self.pass_data.get(self.history.get_entry(), "")
+                    self.display.set_entry(ent)
                     update_out()
 
             if status == ConsoleStatus.REDISPLAY:
@@ -319,13 +330,14 @@ class Fpass:
                 return # No history write, no pass_call
 
             if status == ConsoleStatus.COMMIT:
-                if out:
-                    self.history.add_entry(out)
+                if id_p:
+                    self.history.add_entry(id_p)
                     self.history.write()
                 self.display.end()
 
-                self.pass_run(out)
+                self.passwordManager.commit(id_p)
                 return
+
             if status == ConsoleStatus.NEXT_ENTRY:
                 self.index += 1
                 update_out()
@@ -333,38 +345,84 @@ class Fpass:
                 self.index = max(0, self.index - 1)
                 update_out()
 
+    def fuzzy_find(self, entry, pass_data):
+        entry = fuzzywuzzy.utils.full_process(entry)
+        if not entry:
+            raise LookupError
+
+        outputs = fuzzywuzzy.process.extract(entry, pass_data, limit=None)
+
+        self.index = min(self.index, len(outputs) - 1)
+        return outputs[self.index][2]
+
+
+class PasswordManager:
+    def get_pass_data(self):
+        """Should return a dict of the kind: {id: passwordName}"""
+        raise NotImplementedError
+
+    def commit(self, id_pass):
+        """Should copy in clipboard password associated with id_pass"""
+        raise NotImplementedError
+
+class BitWarden(PasswordManager):
+    def __init__(self):
+        self.pass_data = None
+
+    def bw_list(self):
+        with open(BITWARDEN_SESSION_PATH) as f:
+            s = f.read()
+            return subprocess.check_output(["bw", "list", "items", "--session", s]).decode()
+
+    def get_pass_data(self):
+        try:
+            out = self.bw_list()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            subprocess.run("bwu")
+            out = self.bw_list()
+
+        data = json.loads(out)
+
+        self.pass_data = {i["id"]: i["login"]["password"] for i in data if "login" in i.keys() and i['type'] == 1}
+        out = {i["id"]: f"{i['name']} | {i['login']['username']}" for i in data if "login" in i.keys() and i['type'] == 1}
+        return out
+
+    def commit(self, id_pass):
+        if not id_pass:
+            return
+
+        p = subprocess.Popen(['xclip', '-selection', 'clipboard'],
+                             stdin=subprocess.PIPE, close_fds=True)
+        p.communicate(input=self.pass_data[id_pass].encode('utf-8'))
+
+
+class Pass(PasswordManager):
 
     def get_pass_data(self):
         """Get list of all stored passwords in pass"""
         out = subprocess.check_output(["find", PASS_DIR, "-type", "f", "-name", "*.gpg"]).decode()
 
-        return [reg_pass_file.search(l).groups()[0] for l in out.splitlines() if l]
+        cleaned_up = [reg_pass_file.search(l).groups()[0] for l in out.splitlines() if l]
 
-    def pass_run(self, out):
-        subprocess.call(["pass", out, "-c"])
+        return {c: c for c in cleaned_up} # Path is unique
 
-    def fuzzy_find(self, entry, pass_data):
-        entry = fuzzywuzzy.utils.full_process(entry)
-        if entry:
-            outputs, _ = zip(*fuzzywuzzy.process.extract(entry, pass_data, limit=None))
-        else:
-            outputs = [""]
+    def commit(self, id_pass):
+        subprocess.call(["pass", id_pass, "-c"])
 
-        self.index = min(self.index, len(outputs) - 1)
-        return outputs[self.index]
-        return ''
 
-def main():
-    fpass = Fpass()
+def main(passwordManager):
+    fpass = Fpass(passwordManager)
     fpass.run()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--password-manager', action='store', default='bitwarden', choices=['bitwarden', "pass"],
+                        help='choose password manager to use. Default is BitWarden.')
     parser.add_argument('-d', '--debug', action='count', default=0,
-        help="Set debug mode."
-            "The more this argument appear, the more debug output is verbose"
-            "Output should be redirected to a file. "
-            "The best is to create a fifo to get directly output.")
+                        help="Set debug mode."
+                        "The more this argument appear, the more debug output is verbose"
+                        "Output should be redirected to a file. "
+                        "The best is to create a fifo to get directly output.")
 
     args = parser.parse_args()
     if args.debug != 0:
@@ -379,4 +437,6 @@ if __name__ == "__main__":
     else:
         def debug(*args, **kwargs):
             pass
-    main()
+    if args.password_manager == 'bitwarden': passwordManager = BitWarden()
+    if args.password_manager == 'pass': passwordManager = Pass()
+    main(passwordManager)

@@ -1,6 +1,6 @@
 let g:python_host_prog  = '/usr/bin/python2'
 let g:python3_host_prog = '/usr/bin/python3'
-let mapleader=","
+let maplocalleader=","
 
 set number      " Show line numbers
 set linebreak   " Break lines at word (requires Wrap lines)

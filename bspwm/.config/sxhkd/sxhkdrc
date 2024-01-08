@@ -1,0 +1,103 @@
+#
+# bspwm hotkeys
+#
+
+super + q
+	bspc node -c
+
+super + shift + q
+	bspc node -k
+
+super + t
+	bspc desktop -l next
+
+super + b
+	bspc desktop -B
+
+super + {s,f,d,g}
+	bspc node -t '~{floating,fullscreen,pseudo_tiled,tiled}'
+
+super + Tab
+	bspc desktop -f last
+
+super + {o,i}
+	bspc wm --record-history off; \
+	bspc node {older,newer} -f; \
+	bspc wm --record-history on
+
+super + {_,shift + }{h,j,k,l}
+	bspc node -{f,s} {west,south,north,east}
+
+super + {_,shift + }c
+	bspc node -f {next,prev}
+
+super + {comma,period}
+	bspc desktop -C {backward,forward}
+
+super + {Left,Right}
+	bspc desktop -f {prev,next}
+
+super + ctrl + {h,j,k,l,c}
+	bspc node -p {west,south,north,east,cancel}
+
+super + {_,shift + }{ampersand, eacute, quotedbl, apostrophe, parenleft, minus, egrave, underscore, ccedilla, agrave}
+	bspc {desktop -f,node -d} ^{1,2,3,4,5,6,7,8,9,10}
+
+super + {shift,_} + equal
+    bspc config -d focused window_gap $((`bspc config -d focused window_gap` {+,-} 2 ))
+
+# Sticky windows
+super + e
+    bspc node -g sticky
+
+# Preventing closing
+super + r
+    bspc node -g locked
+
+# Private window -> using with sticky give you the possibility to have a window on all desktops, mantaining the tiling and the position
+super + z
+    bspc node -g private
+
+#
+# wm independent hotkeys
+#
+
+super + n
+        chromium
+
+super + p
+        playerctl play-pause || mpc toggle
+
+super + greater
+        playerctl next || mpc next
+
+super + less
+        playerctl previous || mpc prev
+
+super + Return
+	gnome-terminal
+
+super + space
+        j4-dmenu-desktop --dmenu="rofi -dmenu -i"
+ctrl + shift + space
+        rofi -show window
+
+Print
+    scrot
+
+#lockscreen
+super + shift + x
+    xset s activate
+
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd
+
+XF86AudioMute
+	amixer -q sset 'Master' toggle
+
+ {_,shift + }XF86Audio{Raise,Lower}Volume
+	amixer -q sset 'Master' {5%+, 10%+, 5%-, 10%-}
+
+{_,shift + ,super + }XF86MonBrightness{Down,Up}
+    light {-U 2,-U 20,-S 10, -A 2, -A 20,-S 100}

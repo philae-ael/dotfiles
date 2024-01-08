@@ -1,0 +1,35 @@
+#! /bin/sh
+
+config(){
+    bspc config border_width        2
+    bspc config window_gap          5
+
+    bspc config focused_border_color "#A89984"
+    bspc config normal_border_color "#282828"
+    bspc config border_width 2
+
+    bspc config split_ratio         0.52
+    bspc config borderless_monocle  true
+    bspc config gapless_monocle     true
+
+    bspc monitor -d I II III IV V VI VII VIII IX S
+
+    bspc rule -a "Mathpix Snipping Tool" follow=on floating=on
+    bspc rule -a Chromium follow=on desktop=^2 
+
+    xsetroot -cursor_name left_ptr
+
+    sleep 1 && # Wait kdb to be correctly setup
+        polybar bar &
+
+    sxhkd -m 1 &
+    dunst & 
+
+    sleep 2 &
+
+    for f in ~/.bspwmautostart/*; do
+        . $f &
+    done
+}
+
+config 2>&1 | tee /tmp/bspc.log

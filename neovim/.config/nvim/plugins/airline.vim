@@ -1,4 +1,4 @@
-let g:airline_extensions = ['tagbar']
+let g:airline_extensions = []
 
 ""Status line
 if !exists('g:airline_symbols')

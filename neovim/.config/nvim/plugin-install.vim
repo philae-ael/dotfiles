@@ -19,10 +19,7 @@ if dein#load_state('~/.cache/dein')
     call dein#add('morhetz/gruvbox')
     call dein#add('kien/rainbow_parentheses.vim') " Change parentheses colors
     call dein#add('Shougo/vimproc.vim', {'build' : 'make'}) " Used by others plugins
-    call dein#add('tpope/vim-dispatch') " :Make
-    call dein#add('tpope/vim-fugitive') " Git support
     call dein#add('tpope/vim-surround') " Quoting/parenthezing
-    call dein#add('majutsushi/tagbar') " Window with scope (look at your right)
 
     call dein#add('vim-airline/vim-airline') " Status bar
     call dein#add('vim-airline/vim-airline-themes')
@@ -35,6 +32,13 @@ if dein#load_state('~/.cache/dein')
     call dein#add('sheerun/vim-polyglot') " Pack of langs (syntax, indent, ftplugin...)
 
     call dein#add('godlygeek/tabular') " Fast align 
+
+    call dein#add('lervag/vimtex')
+    call dein#add('KeitaNakamura/tex-conceal.vim')
+
+    call dein#add('justinmk/vim-sneak')
+    call dein#add('kshenoy/vim-signature')
+
 
     call dein#end()
     call dein#save_state()

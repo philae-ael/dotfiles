@@ -34,7 +34,12 @@ inoremap <expr><CR> pumvisible() ? deoplete#mappings#close_popup() : "\<CR>"
 
 cmap w!! %!sudo tee > /dev/null %
 
+nmap f <Plug>Sneak_s
+nmap F <Plug>Sneak_S
 
+let g:UltiSnipsExpandTrigger = '<c-e>'
+let g:UltiSnipsJumpForwardTrigger="<c-f>"
+let g:UltiSnipsJumpBackwardTrigger="<c-b>"
 
 nnoremap <F2> :GundoToggle<CR>
 nnoremap <F4> :call NumberToggle()<cr>

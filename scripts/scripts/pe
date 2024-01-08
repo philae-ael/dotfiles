@@ -27,21 +27,22 @@ def print_eval(x, style, expand_list, remove_falses):
     if isinstance(x, list) and expand_list:
         for a in x:
             print_eval(a, style, expand_list - 1, remove_falses)
-    elif x is None or (x and remove_falses):
+    elif not x and remove_falses:
         pass
     else:
         try:
             style_table_output[style](x)
         except Exception as e:
             colors.print_err("Error while output", style,
-                             colors=colors.fg.red)
+                             fg=colors.fg.red)
 
             if verbose > 0:
-                colors.print_err(e, colors=colors.fg.orange)
+                colors.print_err(e, fg=colors.fg.orange)
             sys.exit(-1)
 
 
 def create_globals(modules):
+    """Create globals which will be used the python instance and import external modules as needed"""
     glob = {}
 
     if modules:
@@ -50,12 +51,13 @@ def create_globals(modules):
             try:
                 mod = __import__(m, glob)
             except ModuleNotFoundError:
-                colors.print_err("Can't find module", m, colors=colors.fg.red)
+                colors.print_err("Can't find module", m, fg=colors.fg.red)
                 sys.exit(-1)
 
             glob[m.split('.')[0]] = mod
 
     def frange(start, end, step=1):
+        """Range-like, also for floats"""
         x = start
         while True:
             yield x
@@ -68,82 +70,87 @@ def create_globals(modules):
     return glob
 
 
-def execute_code(code, err_msg, glob, loc, store_return_value=True):
+def execute_code(code, glob, loc, store_return_value=True):
     if verbose > 1:
-        colors.print_err("Before execute code", colors=colors.fg.cyan)
-        colors.print_err(f"Code: {code}", colors=colors.fg.cyan)
+        colors.print_err("Before execute code", fg=colors.fg.cyan)
+        colors.print_err(f"Code: {code}", fg=colors.fg.cyan)
         colors.print_err(f"Locals: {pprint.pformat(loc)}",
-                         colors=colors.fg.cyan)
+                         fg=colors.fg.cyan)
     if verbose > 2:
         colors.print_err(f"Globals: {pprint.pformat(glob)}",
-                         colors=colors.fg.cyan)
+                         fg=colors.fg.cyan)
 
     try:
         ret = eval(code, glob, loc)
     except Exception as e:
-        colors.print_err(err_msg, colors=colors.fg.red)
+        colors.print_err("Error while initialization part", fg=colors.fg.red)
         if verbose > 0:
-            colors.print_err(f'{e} in "{code}"', colors=colors.fg.orange)
+            colors.print_err(f'{e} in "{code}"', fg=colors.fg.orange)
         sys.exit(-1)
 
     if store_return_value:
         loc['_'] = ret
 
     if verbose > 1:
-        colors.print_err("After execute code", colors=colors.fg.cyan)
+        colors.print_err("After execute code", fg=colors.fg.cyan)
         colors.print_err(f"Locals: {pprint.pformat(loc)}",
-                         colors=colors.fg.cyan)
-        colors.print_err("------------------", colors=colors.fg.cyan)
+                         fg=colors.fg.cyan)
+        colors.print_err("------------------", fg=colors.fg.cyan)
 
     return ret
 
 
-def execute_print(code, err_msg, glob, loc, style, expand_list, remove_falses):
+def execute_print(code, glob, loc, style, expand_list, remove_falses, do_print):
     for c in code:
-        execute_code(c, err_msg, glob, loc)
-    print_eval(loc["_"], style, expand_list, remove_falses)
+        execute_code(c, glob, loc)
+    if do_print:
+        print_eval(loc["_"], style, expand_list, remove_falses)
 
 
 def run_in_pipe(code, preprocess, converter, converter_options,
-                glob, loc, style, expand_list, remove_falses):
+                glob, loc, style, expand_list, remove_falses, last_only):
+
+    loc["lc"] = 0
     for line in sys.stdin.readlines():
         line = line.rstrip('\n')
 
         if preprocess:
             loc["i"] = line
-            line = execute_code(preprocess, "Error while preprocessing input",
-                                glob, loc, False)
+            line = execute_code(preprocess, glob, loc, False)
         try:
             loc["i"] = convertdata.get_converter(converter,
                                                  converter_options)(line)
         except Exception as e:
             colors.print_err("Error while converting stdin to", converter,
-                             colors=colors.fg.red)
+                             fg=colors.fg.red)
             if verbose:
-                colors.print_err(e, colors=colors.fg.orange)
+                colors.print_err(e, fg=colors.fg.orange)
             sys.exit(-1)
 
-        execute_print(code, "Error while interpreting code", glob, loc,
-                      style, expand_list, remove_falses)
+        execute_print(code, glob, loc,
+                      style, expand_list, remove_falses, not last_only)
 
+        loc["lc"] = loc["lc"] + 1
 
 def main(code, preprocess, init,
          converter, converter_options,
          style, expand_list,
-         modules, remove_falses):
+         modules, remove_falses, last_only):
 
     glob = create_globals(modules)
     loc = {}
 
     if init:
-        execute_code(init, "Error while initialization part", glob, loc)
+        execute_code(init, glob, loc)
 
     if not sys.stdin.isatty():
         run_in_pipe(code, preprocess, converter, converter_options,
-                    glob, loc, style, expand_list, remove_falses)
+                    glob, loc, style, expand_list, remove_falses, last_only)
     else:
-        execute_print(code, "Error while interpreting code", glob, loc,
-                      style, expand_list, remove_falses)
+        execute_print(code, glob, loc, style, expand_list, remove_falses, not last_only)
+
+    if last_only:
+        print_eval(loc["_"], style, expand_list, remove_falses)
 
 
 if __name__ == "__main__":
@@ -163,11 +170,13 @@ if __name__ == "__main__":
                         dest='modules')
 
     parser.add_argument('-s', '--style-output',
-                        choices=list(style_table_output .keys()),
+                        choices=list(style_table_output.keys()),
                         dest='style',
                         help='set the output style')
 
-    parser.add_argument("-r", "--remove-falses")
+    parser.add_argument("-l", "--last-only", action="store_true", default=False,
+                              help="Print only last result if set")
+    parser.add_argument("-r", "--remove-falses", action="store_true", default=False)
     parser.add_argument("-x", "--expand-list",
                               action='count',
                               default=0,
@@ -176,7 +185,7 @@ if __name__ == "__main__":
                                     line of the arg)",
                               dest='expand_list')
 
-    convertdata.configure_argparser(parser)
+    convertdata.configure_argparser(parser, default='string')
 
     parser.add_argument("-v", "--verbose", action="count", default=0)
     args = parser.parse_args()
@@ -196,7 +205,7 @@ if __name__ == "__main__":
                             Expand list: {args.expand_list}
                             Modules: {args.modules}
                             """),
-                         colors=colors.fg.cyan)
+                         fg=colors.fg.cyan)
 
     main(args.code,
          args.preprocess,
@@ -206,4 +215,4 @@ if __name__ == "__main__":
          args.style,
          args.expand_list,
          args.modules,
-         args.remove_falses)
+         args.remove_falses, args.last_only)

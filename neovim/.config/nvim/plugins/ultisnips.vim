@@ -1,6 +1,5 @@
-let g:UltiSnipsExpandTrigger = '<C-e>'
-let g:UltiSnipsJumpForwardTrigger="<c-f>"
-let g:UltiSnipsJumpBackwardTrigger="<c-b>"
+ 
+let g:UltiSnipsEditSplit='tabdo'
 
 " Custom snippets location
-let g:UltiSnipsSnippetDirectories = ['custom-snippets', 'UltiSnips']
+let g:UltiSnipsSnippetDirectories = [$HOME . '/custom-snippets', 'UltiSnips']

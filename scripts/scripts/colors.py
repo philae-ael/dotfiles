@@ -7,6 +7,22 @@ __print = print
 class utils:
     reset = '\033[0m'
 
+class bg:
+    black = '\033[40m'
+    red = '\033[41m'
+    green = '\033[42m'
+    orange = '\033[43m'
+    blue = '\033[44m'
+    purple = '\033[45m'
+    cyan = '\033[46m'
+    lightgrey = '\033[47m'
+    darkgrey = '\033[100m'
+    lightred = '\033[101m'
+    lightgreen = '\033[102m'
+    yellow = '\033[103m'
+    lightblue = '\033[104m'
+    pink = '\033[105m'
+    lightcyan = '\033[106m'
 
 class fg:
     black = '\033[30m'
@@ -31,23 +47,22 @@ def print_err(*args, **kwargs):
 
 
 def print(*args, **kwargs):
-    c = kwargs.pop("colors", [])
+    f = kwargs.pop("fg", "")
+    b = kwargs.pop("bg", "")
 
-    if not isinstance(c, list):
-        c = list(c)
-
-    args = list(args) + [utils.reset]
+    args = list(args)
+    args[-1] = args[-1] + utils.reset
 
     if "file" in kwargs:
-        __print(*c, sep='', end='', file=kwargs["file"])
+        __print(f, b, sep='', end='', file=kwargs["file"])
     else:
-        __print(*c, sep='', end='')
+        __print(f, b, sep='', end='')
     __print(*args, **kwargs)
 
 
 def print_rainbow(*args, **kwargs):
     import random
-    print(*args, **kwargs, colors=random.choices(print_rainbow.color_list))
+    print(*args, **kwargs, fg=random.choices(print_rainbow.color_list)[0])
 
 
 print_rainbow.color_list = [c for i, c in fg.__dict__.items() if not i.startswith('_')]

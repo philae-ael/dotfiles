@@ -1,7 +1,8 @@
 #!/usr/bin/zsh
 
 function make_redirect() {
-    exec {id}<> >(
+    local id
+    exec {id}> >(
         # fct is in subshell created by (), so it won't pollute extern scripts
 
         function join_by {
@@ -24,10 +25,10 @@ function make_redirect() {
 
 function stderred {
     # fd 8 will always be colored in red
-    make_redirect 'tput setaf 1; echo @$ ; tput sgr0'
+    make_redirect 'tput setaf 1; echo $@ ; tput sgr0'
 }
 
-alias ealias="nvim ~/.zshconf/alias.zsh"
+alias ealias="${EDITOR} ${(%):-%N}"
 
 alias tailf="tail -f"
 alias wttr='curl "http://wttr.in/Plouzané?lang=fr"'
@@ -36,10 +37,18 @@ alias g=git
 alias groot='cd $(git rev-parse --show-toplevel)'
 
 alias py=ipython3
+alias vim=nvim
 
 export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
-alias pmake='time nice make -j$NUMCPUS --load-average=$NUMCPUS'
+alias pmake='time make -j$NUMCPUS --load-average=$NUMCPUS'
 
 alias gdb-kern='gdb kernel/apropos.kernel  -iex "target remote localhost:1234"'
 alias msfconsole="msfconsole --quiet -x \"db_connect ${USER}@msf\""
 
+alias bws='export BW_SESSION=$(cat ~/.bitwarden_session)'
+
+alias sync_books_from_drive="rclone sync 'remote:Livres Math' $HOME/Documents/Maths/Livres -P"
+alias sync_books_to_drive="rclone sync $HOME/Documents/Maths/Livres 'remote:Livres Math' -P"
+
+alias sync_administratif_from_drive="rclone sync 'remote:Administratif' $HOME/Documents/administratif -P"
+alias sync_administratif_to_drive="rclone sync $HOME/Documents/administratif 'remote:Administratif' -P"
