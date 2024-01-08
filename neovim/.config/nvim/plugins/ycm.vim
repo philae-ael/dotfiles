@@ -12,7 +12,7 @@ let which_key_map_localleader.y = {
             \ }
 
 function Refactor_rename()
-    execute "YcmCompleter RefactorName" . input('New name ?')
+    execute "YcmCompleter RefactorName " . input('New name ?')
 endfunction
 
 nn <silent> <localleader>yi :YcmCompleter GoToInclude<CR>
@@ -22,3 +22,14 @@ nn <silent> <localleader>yg :YcmCompleter GoTo<CR>
 nn <silent> <localleader>yt :YcmCompleter GetType<CR>
 nn <silent> <localleader>yr :call Refactor_rename()<CR>
 nn <silent> <localleader>yf :YcmCompleter Format<CR>
+
+let g:ycm_language_server =
+\ [
+\   {
+\     'name': 'rust',
+\     'cmdline': ['rust-analyzer'],
+\     'filetypes': ['rust'],
+\     'project_root_files': ['Cargo.toml']
+\   }
+\ ]
+

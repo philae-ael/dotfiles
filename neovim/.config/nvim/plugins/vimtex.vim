@@ -24,4 +24,4 @@ augroup vimtex_maps
 augroup end
 
 set conceallevel=2
-let g:tex_conceal="abdgm"
+let g:tex_conceal="abg"

@@ -40,7 +40,7 @@ def mathw():
     return math() and not suc("\\\\")
 endglobal
 
-snippet beg "\begin{} / \end{}" bA
+snippet beg "\begin{} / \end{}" b
 \begin{$1}
     $0
 \end{$1}
@@ -52,12 +52,12 @@ $0
 endsnippet
 
 context "mathw()"
-snippet sr "^2" iA
+snippet sr "^2" i
 ^2
 endsnippet
 
 context "mathw()"
-snippet '([a-zA-Z])([-0-9])' "x2" wrA
+snippet '([a-zA-Z])([-0-9])' "x2" wr
 `!p snip.rv = match.group(1)
 `^`!p snip.rv = match.group(2)`
 endsnippet
@@ -97,7 +97,7 @@ endsnippet
 ####
 
 context "mathw()"
-snippet pi "pi" wA
+snippet pi "pi" w
 \pi
 endsnippet
  
@@ -107,28 +107,28 @@ snippet lim "limite" w
 endsnippet
     
 context "mathw()"
-snippet cos "cosinus" wA
+snippet cos "cosinus" w
 \cos
 endsnippet
 
 context "mathw()"
-snippet sin "sinus" wA
+snippet sin "sinus" w
 \sin
 endsnippet
 
 context "mathw()"
-snippet tan "tangente" wA
+snippet tan "tangente" w
 \tan
 endsnippet
 
 context "mathw()"
-snippet cotan "cotangente" wA
+snippet cotan "cotangente" w
 \cotan
 endsnippet
 
 
 context "mathw()"
-snippet ln "log népérien" wA
+snippet ln "log népérien" w
 \ln
 endsnippet
 
@@ -149,51 +149,15 @@ snippet sum "sum" w
 endsnippet
 
 context "mathw()"
-snippet txt "text" wA
+snippet txt "text" w
 \text{$1}$0
 endsnippet
 
 context "mathw()"
-snippet mto "\mapsto" wA
+snippet mto "\mapsto" w
 \mapsto $0
 endsnippet
 
-####
-# Math fractions
-####
-
-snippet // "Fraction" iA
-\\frac{$1}{$2}$0
-endsnippet
-
-
-priority 9
-context "mathw()"
-snippet / "Fraction" iA
-\\frac{${VISUAL}}{$1}$0
-endsnippet
-
-priority 10
-context "mathw()"
-snippet '((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/' "Fraction" wrA
-\\frac{`!p snip.rv = match.group(1)`}{$1}$0
-endsnippet
-
-priority 11
-context "mathw()"
-snippet '^.*\)/' "() Fraction" wrA
-`!p
-stripped = match.string[:-1]
-depth = 0
-i = len(stripped) - 1
-while True:
-	if stripped[i] == ')': depth += 1
-	if stripped[i] == '(': depth -= 1
-	if depth == 0 : break;
-	i -= 1
-snip.rv = stripped[0 :i] + "\\frac{" + stripped[i+1:-1] + "}"
-`{$1}$0
-endsnippet
 
 ####
 # Math sub/super script
@@ -234,9 +198,9 @@ else:
 `$2
 endsnippet
 
-snippet dm "display math" wA
+snippet dm "display math" w
 \\[
-$1.
+${VISUAL}$1.
 \\]
 $0
 endsnippet
@@ -247,23 +211,23 @@ snippet si "SI units" w
 endsnippet
 
 context "mathw()"
-snippet sqrt "Square root" wA
+snippet sqrt "Square root" w
 \sqrt$0
 endsnippet
 
 context "mathw()"
-snippet bb "mathbb" wA
+snippet bb "mathbb" w
 \mathbb $0
 endsnippet
     
 context "mathw()"
-snippet rm "mathbb" wA
+snippet rm "mathbb" w
 \mathrm $0
 endsnippet
 
 
 context "mathw()"
-snippet cal "mathcal" wA
+snippet cal "mathcal" w
 \mathcal $0
 endsnippet
     
@@ -314,19 +278,19 @@ else:
 $0
 endsnippet 
 
-snippet tbf "Text bold font" wA
+snippet tbf "Text bold font" w
 \textbf{$1} $0
 endsnippet
 
-snippet tit "\textit" wA
+snippet tit "\textit" w
 \textit{$1} $0
 endsnippet
 
-snippet emp "\temph" wA
+snippet emp "\temph" w
 \emph{$1} $0
 endsnippet
 
-snippet ssi "si et seulement si" wA
+snippet ssi "si et seulement si" w
 si et seulement si$0
 endsnippet
 
