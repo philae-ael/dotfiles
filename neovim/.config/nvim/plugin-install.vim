@@ -31,6 +31,9 @@ if dein#load_state('~/.cache/dein')
 
     call dein#add('godlygeek/tabular') " Fast align 
 
+    call dein#add('rust-lang/rust.vim')
+    call dein#add('vim-syntastic/syntastic')
+
     call dein#add('lervag/vimtex')
     call dein#add('KeitaNakamura/tex-conceal.vim')
 
