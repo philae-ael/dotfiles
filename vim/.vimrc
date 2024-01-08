@@ -1,5 +1,4 @@
 set nocompatible
-
 syntax on
 
 let mapleader=","
@@ -168,9 +167,6 @@ let g:tagbar_type_markdown = {
     \ 'sort': 0,
 \ }
 
-"auto pairs
-let g:AutoPairsFlyMode = 1
-
 "syntastic
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
@@ -185,7 +181,8 @@ nnoremap <F3> :NERDTreeToggle<CR>
 
 set completeopt=longest,menuone
 inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
-inoremap <expr> <Esc>       pumvisible() ? "\<C-y>" : "\<Esc>"
+
+"inoremap <expr> <Esc>       pumvisible() ? "\<C-y>" : "\<Esc>"
 
 "Gundo
 nnoremap <F2> :GundoToggle<CR>
