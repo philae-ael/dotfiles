@@ -14,7 +14,7 @@ let
     commandLineArgs = "--enable-features=WebUIDarkMode --force-dark-mode";
   };
 
-  lspsaga-nvim  = pkgs.vimUtils.buildVimPlugin {
+  lspsaga-nvim = pkgs.vimUtils.buildVimPlugin {
     name = "lspsaga-nvim";
     src = pkgs.fetchFromGitHub {
       owner = "tami5";
@@ -25,7 +25,7 @@ let
   };
   polybar_config = import ./polybar.nix pkgs;
 in
-  {
+{
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -45,8 +45,12 @@ in
     qt4 # for qdbus
 
     # graphical apps
-    firefox spotify anki evince
-    zathura kitty
+    firefox
+    spotify
+    anki
+    evince
+    zathura
+    kitty
     dark-chrome
 
     pavucontrol
@@ -55,12 +59,19 @@ in
     direnv
 
     # various bash utilities
-    xclip tree htop file unzip p7zip
+    xclip
+    tree
+    htop
+    file
+    unzip
+    p7zip
 
-    clang clang-tools
+    clang
+    clang-tools
     nodePackages.vim-language-server
     rust-analyzer
     rnix-lsp
+    zsh-completions
   ];
 
 
@@ -69,7 +80,7 @@ in
     tray = {
       Unit = {
         Description = "Tray";
-        Requires = ["graphical-session.target"];
+        Requires = [ "graphical-session.target" ];
       };
 
       Install = { WantedBy = [ "graphical-session.target" ]; };
@@ -77,7 +88,7 @@ in
     };
   };
 
-  home.file.".xinitrc".source =  "${config.home.homeDirectory}/.config/nixpkgs/xinitrc";
+  home.file.".xinitrc".source = "${config.home.homeDirectory}/.config/nixpkgs/xinitrc";
   xdg = {
     enable = true;
     configFile = {
@@ -231,7 +242,7 @@ in
   };
 
 
-  programs.neovim  = {
+  programs.neovim = {
     enable = true;
     vimAlias = true;
     plugins = with pkgs.vimPlugins; [
@@ -258,7 +269,7 @@ in
       cmp-buffer
 
       cmp_luasnip
-      luasnip 
+      luasnip
 
       lspsaga-nvim
 
@@ -296,7 +307,7 @@ in
     };
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "aliases" "sudo" "direnv" "dotenv"];
+      plugins = [ "git" "aliases" "sudo" "direnv" "dotenv" ];
       theme = "apple";
     };
 

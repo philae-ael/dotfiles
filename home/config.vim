@@ -1,6 +1,7 @@
 set linebreak
 set showbreak=++
-set foldmethod=marker
+set foldmethod=indent
+set nofoldenable
 set showmatch
 set number
 
@@ -151,8 +152,8 @@ cmp.setup({
     })
 })
 
-vim.api.nvim_set_keymap("i", "<C-E>", "<Plug>luasnip-next-choice", {})
-vim.api.nvim_set_keymap("s", "<C-E>", "<Plug>luasnip-next-choice", {})
+vim.api.nvim_set_keymap("i", "<C-C>", "<Plug>luasnip-next-choice", {})
+vim.api.nvim_set_keymap("s", "<C-C>", "<Plug>luasnip-next-choice", {})
 
 
 -- use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
@@ -215,6 +216,7 @@ require'luasnip'.config.setup({
     }
   },
 })
+require("luasnip/loaders/from_vscode").load()
 
 -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md to add more servers
 local nvim_lsp = require('lspconfig')
@@ -266,6 +268,11 @@ local function on_attach_generic(clent, bufnr)
     }, { prefix = "<leader>" })
 end
 
+function on_attach_clangd(cliet, bufnr)
+    on_attach_generic(clent, bufnr)
+    wk.register({w = { "<cmd>ClangdSwitchSourceHeader<CR>", "switch header/source file" }}, {prefix = "<leader>"})
+end
+
 
 
 -- setup lspconfig.
@@ -273,10 +280,11 @@ local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protoco
 
 nvim_lsp.hls.setup           { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.vimls.setup         { capabilities = capabilities, on_attach = on_attach_generic }
-nvim_lsp.ccls.setup          { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.cmake.setup         { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.rust_analyzer.setup { capabilities = capabilities, on_attach = on_attach_generic }
 nvim_lsp.rnix.setup          { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.clangd.setup        { capabilities = capabilities, on_attach = on_attach_clangd,
+                               cmd = { 'clangd', '--background-index', "--clang-tidy", "--header-insertion=iwyu"}}
 
 wk.register({
 h = {
