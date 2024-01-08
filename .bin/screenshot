@@ -1,1 +1,7 @@
-maim --hidecursor ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png -g "$(slop)"
+#!/bin/sh
+
+set -e
+
+zone=$(slop)
+
+maim --hidecursor -g "$zone" | tee ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png | xclip -selection clipboard -target image/png

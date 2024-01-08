@@ -18,4 +18,4 @@ opt.undofile = true
 
 opt.spelllang = { "en", "fr" }
 
-opt.mouse = ""
+opt.mouse = "a"

@@ -8,7 +8,3 @@ vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "copy end of line to system c
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]], { desc = "delete word without changing registers" })
 
 
-vim.keymap.set("", "<Up>", "<Nop>")
-vim.keymap.set("", "<Down>", "<Nop>")
-vim.keymap.set("", "<Left>", "<Nop>")
-vim.keymap.set("", "<Right>", "<Nop>")
