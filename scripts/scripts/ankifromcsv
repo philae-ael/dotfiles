@@ -1,0 +1,122 @@
+#!/usr/bin/python3
+"""Generate a apkg for anki from csv file
+
+Usage:
+  {exe} <deck_name> [-o FILE|--output FILE] <csv_file> <question> <tag1> [<tag2> [<tag3> [<tag4>]]]
+  {exe} -h | --help
+
+Options:
+  -h --help              Show this screen.
+  -o FILE --output FILE  The file where to export the collection [default: output.apkg]
+"""
+import random
+import csv
+import itertools
+
+import genanki
+from docopt import docopt
+
+import sys
+
+__doc__ = __doc__.format(exe=sys.argv[0].split('/')[-1])
+
+
+MODEL = genanki.Model(
+    1607392332,
+    'Table from csv',
+    fields=[
+        # Question
+        {'name': "Question"},
+
+        # Answer
+        {'name': "Field 1"},
+
+        {'name': "Field 2"},
+
+        {'name': "Field 3"},
+
+        {'name': "Field 4"}
+    ],
+    templates=[
+        {
+            'name': 'Card 1',
+            'qfmt': '{{Question}}',
+            'afmt': """\
+{{FrontSide}}
+<hr id="answer">
+{{Field 1}}
+<br>
+
+{{Field 2}}
+<br>
+
+{{Field 3}}
+<br>
+
+{{Field 4}}
+""",
+        }
+    ],
+    css="""\
+.card {
+ font-family: arial;
+ font-size: 20px;
+ color: black;
+ background-color: white;
+}
+
+.card1 { background-color: #FFFFFF; }
+"""
+)
+
+def main():
+    args = docopt(__doc__)
+
+    csv_file_name = args['<csv_file>']
+    tags = [
+        args["<question>"],
+        args["<tag1>"],
+        args["<tag2>"],
+        args["<tag3>"],
+        args["<tag4>"]
+    ]
+
+    output_file = args["--output"]
+    output_file = args["--output"]
+
+    deck_name = args["<deck_name>"]
+
+    deck = genanki.Deck(
+        random.randrange(1 << 30, 1 << 31),
+        deck_name)
+
+    with open(csv_file_name, 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+
+        next(csv_reader) # Pop first line
+
+        def join(iter1, iter2):
+            it1 = itertools.chain(iter(iter1), itertools.repeat(None))
+            it2 = itertools.chain(iter(iter2), itertools.repeat(None))
+
+            for _ in range(5): # Question, tag1/2/3/4
+                r1 = next(it1)
+                r2 = next(it2)
+                if r1 and r2:
+                    yield r1 + ": " + r2
+                else:
+                    yield ""
+
+
+        for line in csv_reader:
+            line = [" <br> ".join(field.splitlines()) for field in line]
+            note = genanki.Note(
+                model=MODEL,
+                fields=list(join(tags, line))
+            )
+            print(*list(join(tags, line)), sep="\n\t")
+            deck.add_note(note)
+        genanki.Package(deck).write_to_file(output_file)
+
+if __name__ == "__main__":
+    main()

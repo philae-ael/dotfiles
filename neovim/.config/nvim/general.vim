@@ -5,7 +5,7 @@ let mapleader=","
 set number      " Show line numbers
 set linebreak   " Break lines at word (requires Wrap lines)
 set showbreak=++        " Wrap-broken line prefix
-set colorcolumn=120
+set colorcolumn=90
 set foldmethod=marker
 set showmatch	" Highlight matching brace
 set ruler	" Show row and column ruler informationa
@@ -25,6 +25,8 @@ set wildmode=longest,list,full
 " Allow modelines
 set modeline
 set modelines=2
+
+set mouse=a
 
 "" tabs
 set expandtab	" Use spaces instead of tabs

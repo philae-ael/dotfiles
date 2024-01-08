@@ -1,0 +1,89 @@
+#!/usr/bin/python3
+import argparse
+import binascii
+import usb.core
+import usb.util
+import sys
+
+
+class Mouse:
+    idVendor = 0x046d
+    idProduct = 0xc084
+
+    # The USB controll transfer parameters
+    bmRequestType = 0x21
+    bmRequest = 0x09
+    wValue = 0x0210
+    wIndex = 0x0001
+    colorCommand = "11ff0e3c0001{}0200000000000000000000"
+
+    def __init__(self, verbose=False):
+        self.device = None
+        self.detached = False
+        self.verbose = verbose
+
+    def connect(self):
+        self.device = usb.core.find(idVendor=self.idVendor,
+                                    idProduct=self.idProduct)
+        if self.device is None:
+            raise ValueError("USB device not found")
+
+        if self.device.is_kernel_driver_active(self.wIndex):
+            self.device.detach_kernel_driver(self.wIndex)
+            self.detached = True
+
+        if self.verbose:
+            print("Connected G203")
+
+    def disconnect(self):
+        usb.util.dispose_resources(self.device)
+        if self.detached:
+            self.device.attach_kernel_driver(self.wIndex)
+
+        if self.verbose:
+            print("Disconnected G203")
+
+    def send_data(self, data):
+        if self.verbose:
+            print("Sending data:", data, "to device")
+            print("\tbmRequestType:", self.bmRequestType)
+            print("\tbmRequest:", self.bmRequest)
+            print("\twValue:", self.wValue)
+            print("\twIndex:", self.wIndex)
+
+        self.device.ctrl_transfer(self.bmRequestType, self.bmRequest,
+                                  self.wValue, self.wIndex,
+                                  binascii.unhexlify(data))
+
+    def set_color(self, r, g, b):
+        if self.verbose:
+            print("Setting color to rgb({}, {}, {})".format(r, g, b))
+
+        self.connect()
+        self.send_data(self.colorCommand.format('%02x%02x%02x' % (r, g, b)))
+        self.disconnect()
+
+        if self.verbose:
+            print("Color set")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('r', type=int)
+    parser.add_argument('g', type=int)
+    parser.add_argument('b', type=int)
+
+    parser.add_argument('-v', '--verbose',
+                        action='store_true', default=False)
+
+    args = parser.parse_args()
+
+    if args.r > 255 or args.g > 255 or args.b > 255:
+        print("Incorrect value, color should be between 0 and 255")
+        sys.exit(-1)
+
+    Mouse(args.verbose).set_color(args.r, args.g, args.b)
+
+
+if __name__ == "__main__":
+    main()

@@ -20,9 +20,9 @@ function crossdev
     _crossdev_clean_path
     TARGET=$1
     PREFIX="$HOME/opt/$1"
+    CROSSDEV=$TARGET
 
     export PATH="$PREFIX/bin:$PATH"
-    export CROSSDEV=$TARGET
 
     if [[ -d $PREFIX ]];
     then
@@ -32,6 +32,8 @@ function crossdev
     then
         crossdev_deactivate
     fi
+
+    export CROSSDEV
 
 }
 

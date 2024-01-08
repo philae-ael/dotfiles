@@ -23,7 +23,7 @@ if dein#load_state('/home/tristan/.nvim')
     call dein#add('majutsushi/tagbar')
     call dein#add('vim-airline/vim-airline')
     call dein#add('vim-airline/vim-airline-themes')
-    
+
     call dein#add('w0rp/ale')
 
     call dein#add('Vimjas/vim-python-pep8-indent')

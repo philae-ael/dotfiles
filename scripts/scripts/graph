@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+import matplotlib.pyplot as plt
+import argparse
+import sys
+
+import convertdata
+
+
+def main(converter, converter_options,
+         two_dimensions, one_line):
+    convert = convertdata.get_converter(converter, converter_options)
+
+    x = []
+    y = []
+
+    if one_line:
+        line = sys.stdin.readline().strip()
+        if two_dimensions:
+            x, y = zip(*convert(line))
+        else:
+            y = convert(line)
+    else:
+        for line in sys.stdin.readlines():
+            line.strip()
+            if two_dimensions:
+                x_, y_ = convert(line)
+                x.append(x_)
+                y.append(y_)
+            else:
+                y_ = convert(line)
+                y.append(y_)
+
+    if not two_dimensions:
+        x = list(range(len(y)))
+
+    plt.plot(x, y)
+    plt.show()
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser("Graph", description="Generate a \
+                                     graph from data in input")
+    parser.add_argument("-2d", dest="two_dimensions",
+                        action="store_true")
+    parser.add_argument("-1", dest="one_line", help="data on one line",
+                        action="store_true")
+
+    convertdata.configure_argparser(parser)
+
+    args = parser.parse_args()
+
+    main(args.converter,
+         args.converter_options,
+         args.two_dimensions,
+         args.one_line)

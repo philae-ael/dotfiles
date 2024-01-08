@@ -1,0 +1,205 @@
+#!/usr/bin/python3
+import argparse
+import json
+import pprint
+import sys
+import textwrap
+
+import colors
+import convertdata
+
+verbose = 0
+
+style_table_output = {
+    "plain": print,
+    "pprint": pprint.pprint,
+    "json": lambda x: print(json.dumps(x))
+}
+
+
+def print_eval(x, style, expand_list):
+    if hasattr(x, '__iter__') and not isinstance(x, str):
+        x = list(x)
+
+    if isinstance(x, list) and len(x) == 1:
+        x = x[0]
+
+    if isinstance(x, list) and expand_list:
+        for a in x:
+            print_eval(a, style, expand_list - 1)
+    else:
+        try:
+            style_table_output[style](x)
+        except Exception as e:
+            colors.print_err("Error while output", style,
+                             colors=colors.fg.red)
+
+            if verbose > 0:
+                colors.print_err(e, colors=colors.fg.orange)
+            sys.exit(-1)
+
+
+def create_globals(modules):
+    glob = {}
+
+    if modules:
+        for m in modules.split(';'):
+            m = m.strip()  # remove unwanted spaces and newlines
+            try:
+                mod = __import__(m, glob)
+            except ModuleNotFoundError:
+                colors.print_err("Can't find module", m, colors=colors.fg.red)
+                sys.exit(-1)
+
+            glob[m.split('.')[0]] = mod
+
+    def frange(start, end, step=1):
+        x = start
+        while True:
+            yield x
+            x += step
+            if x > end:
+                break
+
+    glob["frange"] = frange
+
+    return glob
+
+
+def execute_code(code, err_msg, glob, loc, store_return_value=True):
+    if verbose > 1:
+        colors.print_err("Before execute code", colors=colors.fg.cyan)
+        colors.print_err(f"Code: {code}", colors=colors.fg.cyan)
+        colors.print_err(f"Locals: {pprint.pformat(loc)}",
+                         colors=colors.fg.cyan)
+    if verbose > 2:
+        colors.print_err(f"Globals: {pprint.pformat(glob)}",
+                         colors=colors.fg.cyan)
+
+    try:
+        ret = eval(code, glob, loc)
+    except Exception as e:
+        colors.print_err(err_msg, colors=colors.fg.red)
+        if verbose > 0:
+            colors.print_err(f'{e} in "{code}"', colors=colors.fg.orange)
+        sys.exit(-1)
+
+    if store_return_value:
+        loc['_'] = ret
+
+    if verbose > 1:
+        colors.print_err("After execute code", colors=colors.fg.cyan)
+        colors.print_err(f"Locals: {pprint.pformat(loc)}",
+                         colors=colors.fg.cyan)
+        colors.print_err("------------------", colors=colors.fg.cyan)
+
+    return ret
+
+
+def execute_print(code, err_msg, glob, loc, style, expand_list):
+    for c in code:
+        execute_code(c, err_msg, glob, loc)
+    print_eval(loc["_"], style, expand_list)
+
+
+def run_in_pipe(code, preprocess, converter, converter_options,
+                glob, loc, style, expand_list,):
+    for line in sys.stdin.readlines():
+        line = line.rstrip('\n')
+
+        if preprocess:
+            loc["i"] = line
+            line = execute_code(preprocess, "Error while preprocessing input",
+                                glob, loc, False)
+        try:
+            loc["i"] = convertdata.get_converter(converter,
+                                                 converter_options)(line)
+        except Exception as e:
+            colors.print_err("Error while converting stdin to", converter,
+                             colors=colors.fg.red)
+            if verbose:
+                colors.print_err(e, colors=colors.fg.orange)
+            sys.exit(-1)
+
+        execute_print(code, "Error while interpreting code", glob, loc,
+                      style, expand_list)
+
+
+def main(code, preprocess, init,
+         converter, converter_options,
+         style, expand_list,
+         modules):
+
+    glob = create_globals(modules)
+    loc = {}
+
+    if init:
+        execute_code(init, "Error while initialization part", glob, loc)
+
+    if not sys.stdin.isatty():
+        run_in_pipe(code, preprocess, converter, converter_options,
+                    glob, loc, style, expand_list)
+    else:
+        execute_print(code, "Error while interpreting code", glob, loc,
+                      style, expand_list)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('code', nargs='*', help="The executed code.\
+                        _ is last returned val, i is current val",
+                        default=["i"])
+    parser.add_argument('-p', '--preprocess', help="preprocess the input string \
+                        with given code")
+    parser.add_argument('-i', '--init', help="initialize the _ val \
+                        with given code",
+                        default='0')
+
+    parser.add_argument("-m", "--modules",
+                        help="coma-separated list of module to load",
+                        dest='modules')
+
+    parser.add_argument('-s', '--style-output',
+                        choices=list(style_table_output .keys()),
+                        dest='style',
+                        help='set the output style')
+
+    parser.add_argument("-x", "--expand-list",
+                              action='count',
+                              default=0,
+                              help="Expand list up to n times \
+                                    (n = nbr of occurence on command\
+                                    line of the arg)",
+                              dest='expand_list')
+
+    convertdata.configure_argparser(parser)
+
+    parser.add_argument("-v", "--verbose", action="count", default=0)
+    args = parser.parse_args()
+
+    if args.style is None:
+        args.style = "pprint" if sys.stdout.isatty() else "plain"
+
+    verbose = args.verbose
+
+    if verbose > 0:
+        colors.print_err(textwrap.dedent(f"""\
+                            Preprocess: {args.preprocess}
+                            Code: {args.code}
+                            Converter: {args.converter}
+                            Converter options: {args.converter_options}
+                            Style: {args.style}
+                            Expand list: {args.expand_list}
+                            Modules: {args.modules}
+                            """),
+                         colors=colors.fg.cyan)
+
+    main(args.code,
+         args.preprocess,
+         args.init,
+         args.converter,
+         args.converter_options,
+         args.style,
+         args.expand_list,
+         args.modules)

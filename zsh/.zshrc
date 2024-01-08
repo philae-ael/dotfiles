@@ -3,9 +3,9 @@ export ZSH=/home/tristan/.oh-my-zsh
 ZSH_THEME="honukai"
 HYPHEN_INSENSITIVE="true"
 
-plugins=(sudo git common-aliases virtualenvwrapper systemd pip docker)
+plugins=(sudo git common-aliases systemd pip)
 
-PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+PATH="$HOME/bin:$HOME/scripts:$HOME/.local/bin:$PATH"
 
 source $ZSH/oh-my-zsh.sh
 
