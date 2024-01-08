@@ -22,14 +22,15 @@ set path+=**
 "" tabs
 set expandtab
 set autoindent
-set shiftwidth=4
+set shiftwidth=2
 set smartindent
-set softtabstop=4
+set softtabstop=2
 set tabstop=8
 set shiftround
 
 set listchars=tab:▸\ ,trail:·,multispace:\|\ \ \ ,extends:❯,precedes:❮,nbsp:×
 set list
+set conceallevel=1
 
 set ignorecase
 set smartcase
@@ -97,12 +98,16 @@ end
 
 -- setup nvim-cmp.
 local cmp = require'cmp'
+local lspkind = require'lspkind'
+local luasnip = require'luasnip'
 
 cmp.setup({
-    snippet = {
-        -- required - you must specify a snippet engine
-        expand = function(args) vim.fn["vsnip#anonymous"](args.body) end,
+    formatting = {
+        format = lspkind.cmp_format({})
     },
+    snippet = {
+        expand = function(args) require('luasnip').lsp_expand(args.body) end,
+        },
     mapping = {
         ['<c-b>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
         ['<c-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
@@ -111,38 +116,44 @@ cmp.setup({
         ['<c-e>'] = cmp.mapping({
             i = cmp.mapping.abort(),
             c = cmp.mapping.close(),}),
-        ["<tab>"] = cmp.mapping(
-            function(fallback)
-                if cmp.visible() then
-                    cmp.select_next_item()
-                elseif vim.fn["vsnip#available"](1) == 1 then
-                    feedkey("<Plug>(vsnip-expand-or-jump)", "")
-                elseif has_words_before() then
-                    cmp.complete()
-                else
-                    fallback() -- the fallback function sends a already mapped key. in this case, it's probably `<tab>`.
-                end
-            end, { "i", "s" }),
-        ["<s-tab>"] = cmp.mapping(
-            function()
-                if cmp.visible() then
-                    cmp.select_prev_item()
-                elseif vim.fn["vsnip#jumpable"](-1) == 1 then
-                    feedkey("<Plug>(vsnip-jump-prev)", "")
-                end
-            end, { "i", "s" }),
+        ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable(1) then
+                luasnip.expand_or_jump(1)
+            elseif has_words_before() then
+                cmp.complete()
+            else
+                fallback()
+            end
+        end, { "i", "s" }),
 
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+                luasnip.jump(-1)
+            else
+                fallback()
+            end
+        end, { "i", "s" }),
         -- accept currently selected item. if none selected, `select` first item.
         -- set `select` to `false` to only confirm explicitly selected items.
         ['<cr>'] = cmp.mapping.confirm({ select = true }),
     },
     sources = cmp.config.sources({
         { name = 'nvim_lsp' },
-        { name = 'vsnip' }, -- for vsnip users.
+        { name = 'luasnip', option = { use_show_condition = false } },
+        { name = 'path' },
+
     }, {
-        { name = 'buffer' },
+    { name = 'buffer' },
     })
 })
+
+vim.api.nvim_set_keymap("i", "<C-E>", "<Plug>luasnip-next-choice", {})
+vim.api.nvim_set_keymap("s", "<C-E>", "<Plug>luasnip-next-choice", {})
+
 
 -- use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline('/', {
@@ -185,14 +196,28 @@ saga.setup { -- defaults ...
   diagnostic_prefix_format = "%d. ",
   }
 
+
 local wk = require("which-key")
 
--- setup lspconfig.
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local types = require("luasnip.util.types")
+
+require'luasnip'.config.setup({
+  ext_opts = {
+    [types.choiceNode] = {
+      active = {
+        virt_text = {{"●", "GruvboxOrange"}}
+      }
+    },
+    [types.insertNode] = {
+      active = {
+        virt_text = {{"●", "GruvboxBlue"}}
+      }
+    }
+  },
+})
 
 -- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md to add more servers
 local nvim_lsp = require('lspconfig')
-
 
 
 local function on_attach_generic(clent, bufnr)
@@ -208,7 +233,7 @@ local function on_attach_generic(clent, bufnr)
     -- see `:help vim.lsp.*` for documentation on any of the below functions
     buf_set_keymap('n', '<leader><shift>n', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
     buf_set_keymap('n', '<leader>n',        '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
-    buf_set_keymap('n', '<leader>s',        '<cmd>Lspsage signature_help<cr>',         opts)
+    buf_set_keymap('n', '<leader>s',        '<cmd>Lspsaga signature_help<cr>',         opts)
     buf_set_keymap('n', '<leader>l',        '<cmd>Lspsaga show_line_diagnostics<cr>',  opts)
     buf_set_keymap('n', '<leader>r',        '<cmd>Lspsaga rename<cr>',                 opts)
     buf_set_keymap('n', '<leader>p',        '<cmd>Lspsaga preview_definition<cr>',     opts)
@@ -228,40 +253,30 @@ local function on_attach_generic(clent, bufnr)
 
 
     wk.register({
-        d = { "documentation" },
-        f = { "finder" },
-        r = { "rename" },
-        s = { "signature help" },
-        n = { "diagnotic next" },
-        p = { "preview definition" },
-        l = { "show line diagnostics" },
-        a = {"code action"},
-        i = {"implementation"},
-        ["="] = {"formatting"},
+    d = { "documentation" },
+    f = { "finder" },
+    r = { "rename" },
+    s = { "signature help" },
+    n = { "diagnotic next" },
+    p = { "preview definition" },
+    l = { "show line diagnostics" },
+    a = {"code action"},
+    i = {"implementation"},
+    ["="] = {"formatting"},
     }, { prefix = "<leader>" })
-
-
 end
 
 
-local function on_attach_clang(client, bufnr)
-    on_attach_generic(client, bufnr)
 
-    vim.cmd("unmap K") -- to keep vim help
-end
-local function on_attach_clang(client, bufnr)
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>w", "<cmd>ClangdSwitchSourceHeader<cr>",{ noremap=true, silent=true })
-    require("which-key").register({ w = { "switch between source & header" }}, { prefix = "<leader>" })
+-- setup lspconfig.
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-    on_attach_generic(client, bufnr)
-end
-
-nvim_lsp.hls.setup           { on_attach = on_attach_generic }
-nvim_lsp.vimls.setup         { on_attach = on_attach_generic }
-nvim_lsp.clangd.setup        { on_attach = on_attach_clang   }
-nvim_lsp.cmake.setup         { on_attach = on_attach_generic }
-nvim_lsp.rust_analyzer.setup { on_attach = on_attach_generic }
-nvim_lsp.rnix.setup          { on_attach = on_attach_generic }
+nvim_lsp.hls.setup           { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.vimls.setup         { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.ccls.setup          { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.cmake.setup         { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.rust_analyzer.setup { capabilities = capabilities, on_attach = on_attach_generic }
+nvim_lsp.rnix.setup          { capabilities = capabilities, on_attach = on_attach_generic }
 
 wk.register({
 h = {

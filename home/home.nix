@@ -215,7 +215,7 @@ in
     userEmail = "gouge.tristan@gmail.com";
     extraConfig = {
       init.defaultBranch = "main";
-      core.editor = "nvim";
+      core.editor = "vim";
       github.username = "naegi";
     };
     aliases = {
@@ -248,14 +248,19 @@ in
       vim-easy-align
 
       nvim-lspconfig
+      lspkind-nvim
 
+      friendly-snippets
       nvim-cmp
       cmp-nvim-lsp
+      cmp-path
+      cmp-cmdline
+      cmp-buffer
+
+      cmp_luasnip
+      luasnip 
 
       lspsaga-nvim
-
-      vim-vsnip
-      vim-vsnip-integ
 
       gruvbox
 
@@ -283,6 +288,7 @@ in
     enable = true;
     shellAliases = {
       "cat" = "bat";
+      "toWindows" = "systemctl reboot --boot-loader-entry=auto-windows";
     };
     history = {
       size = 10000;
@@ -290,7 +296,7 @@ in
     };
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "aliases" "sudo" "direnv"];
+      plugins = [ "git" "aliases" "sudo" "direnv" "dotenv"];
       theme = "apple";
     };
 
