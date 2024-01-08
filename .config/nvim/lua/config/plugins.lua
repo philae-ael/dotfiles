@@ -14,7 +14,6 @@ return require('packer').startup(function(use)
   use { 'nvim-treesitter/nvim-treesitter-textobjects' }
   use { 'nvim-treesitter/nvim-treesitter-context' }
   use { 'mbbill/undotree' }
-  use { 'tpope/vim-fugitive' }
   use { 'lewis6991/gitsigns.nvim' }
   use {
     "kylechui/nvim-surround",
@@ -70,4 +69,5 @@ return require('packer').startup(function(use)
   use 'nvim-lualine/lualine.nvim'
   use 'nvim-tree/nvim-web-devicons'
   use 'folke/trouble.nvim'
+  use 'phaazon/hop.nvim'
 end)

@@ -229,6 +229,6 @@ ins_right {
   padding = { left = 1 },
 }
 
-vim.opt.cmdheight = 0
+vim.opt.showmode = false
 -- Now don't forget to initialize lualine
 lualine.setup(config)

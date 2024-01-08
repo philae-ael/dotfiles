@@ -140,6 +140,8 @@ lsp.on_attach(function(client, bufnr)
   vim.keymap.set("n", "<leader>vl", builtin.loclist, opts("open loclist"))
 
   require("lsp-inlayhints").on_attach(client, bufnr)
+  vim.keymap.set("n", "<leader>vh", require('lsp-inlayhints').toggle, {desc="Toggle inlay hints"})
+
 end)
 
 lsp.nvim_workspace()
