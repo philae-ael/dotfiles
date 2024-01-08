@@ -4,11 +4,12 @@
 
 from subprocess import Popen
 
+"""Spotify and other MPRIS players"""
+
 from gi import require_version
 require_version('Playerctl','1.0')
 
 from gi.repository import Playerctl, GLib
-
 
 PLAYER = Playerctl.Player()
 
@@ -17,5 +18,7 @@ def on_track_change(player, _):
     Popen(['notify-send', "-a", player.props.player_name, track_info])
 
 PLAYER.on('metadata', on_track_change)
+
+
 
 GLib.MainLoop().run()

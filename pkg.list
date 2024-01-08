@@ -6,6 +6,7 @@ bash
 bbswitch
 binutils
 bison
+blockify
 bluez
 bluez-hid2hci
 bluez-utils
