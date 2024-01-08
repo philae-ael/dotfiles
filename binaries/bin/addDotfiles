@@ -1,0 +1,32 @@
+#!/usr/bin/sh
+
+DOTFILES_DIR="$HOME/dotfiles"
+
+if [ $# -lt 1 ]
+then
+    echo usage : AddDotfiles pkg_name file
+    exit -1
+fi
+
+PKG=$1
+echo $1
+shift
+
+while [ $# -gt 0 ]
+do
+    echo archiving $1
+    mkdir -p "$DOTFILES_DIR/$PKG/$(dirname $1)"
+    mv "$HOME/$1" "$DOTFILES_DIR/$PKG/$1"
+    [ ! $? ] && exit -1
+
+    echo stowing "$DOTFILES_DIR/$PKG"
+    cd "$DOTFILES_DIR"
+    stow "$PKG"
+    shift;
+done
+
+echo backing up package list
+
+pacman -Qqe > "$DOTFILES_DIR/pkg.list"
+
+echo "Don't forget to commit"
