@@ -175,6 +175,11 @@ in
     };
     aliases = {
       c = "commit";
+      a = "add";
+      s = "status";
+      cl = "clone";
+      co = "checkout";
+      p = "push";
       l = "log --graph --pretty='%Cred%h%Creset - %C(bold blue)<%an>%Creset %s%C(yellow)%d%Creset %Cgreen(%cr)' --abbrev-commit --date=relative";
 
     };
@@ -330,6 +335,7 @@ in
   programs.zsh = {
     enable = true;
     shellAliases = {
+      "cat" = "bat";
     };
     history = {
       size = 10000;
