@@ -4,11 +4,22 @@ syntax on
 
 let mapleader=","
 
-"" General
+" General
 set number      " Show line numbers
 set linebreak   " Break lines at word (requires Wrap lines)
 set showbreak=++        " Wrap-broken line prefix
 set colorcolumn=120
+
+
+function! NumberToggle()
+  if(&relativenumber == 1)
+    set norelativenumber
+  else
+    set relativenumber
+  endif
+endfunc
+
+nnoremap <F4> :call NumberToggle()<cr>
 
 set foldmethod=marker
 
@@ -74,34 +85,39 @@ autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,pe
 
 au BufRead,BufNewFile make.config setfiletype make
 
-au! BufWritePost .vimrc source % 
-
 filetype on
 filetype off
 
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/syntastic'
+Plugin 'Valloric/YouCompleteMe' " Auto Completion
+Plugin 'scrooloose/syntastic' " Syntax verification
 Plugin 'airblade/vim-gitgutter'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'morhetz/gruvbox'
-Plugin 'ap/vim-css-color'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-fugitive'
-Plugin 'Townk/vim-autoclose'
-Plugin 'tpope/vim-surround'
-Plugin 'sjl/gundo.vim'
-Plugin 'isRuslan/vim-es6'
+Plugin 'jiangmiao/auto-pairs'
+Plugin 'SirVer/ultisnips' " Snippet engine
+Plugin 'honza/vim-snippets' " more snippets
+Plugin 'morhetz/gruvbox' " Colorscheme
+Plugin 'lilydjwg/colorizer' " Colorize #625664
+Plugin 'tpope/vim-commentary' " comment stuff
+Plugin 'tpope/vim-fugitive' " Git integration
+Plugin 'tpope/vim-surround' " allow to modify surrounding char: ' <> etc.
+Plugin 'sjl/gundo.vim' " Allow to navigate in modification tree
+Plugin 'scrooloose/nerdtree' " Navigate in files
+Plugin 'Xuyuanp/nerdtree-git-plugin' "Add git support to NERDTree
+Plugin 'godlygeek/tabular'
+Plugin 'majutsushi/tagbar'
+Plugin 'vim-scripts/nextval'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+" ES6 js
+Plugin 'isRuslan/vim-es6' " ES6 support
 " Haskell
 Plugin 'dag/vim2hs'
 Plugin 'eagletmt/neco-ghc'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'ervandew/supertab'
-" Rust 
+" Rust
 Plugin 'rust-lang/rust.vim'
-" ASM 
+" ASM
 Plugin 'shirk/vim-gas'
 call vundle#end()
 
@@ -127,38 +143,63 @@ hi Normal ctermbg=none
 set mouse=a
 set mousehide
 
-"""End of words 
+"""End of words
 set iskeyword-=.                    " '.' is an end of word designator
 set iskeyword-=#                    " '#' is an end of word designator
-set iskeyword-=-                    " '-' is an end of word designator   
+set iskeyword-=-                    " '-' is an end of word designator
 set iskeyword-=_                    " '_' is an end of word designator
 1
 "" Plugins conf
+
+" Ctags
+
+let g:tagbar_type_markdown = {
+    \ 'ctagstype': 'markdown',
+    \ 'ctagsbin' : 'markdown2ctags',
+    \ 'ctagsargs' : '-f - --sort=yes',
+    \ 'kinds' : [
+        \ 's:sections',
+        \ 'i:images'
+    \ ],
+    \ 'sro' : '|',
+    \ 'kind2scope' : {
+        \ 's' : 'section',
+    \ },
+    \ 'sort': 0,
+\ }
+
+"auto pairs
+let g:AutoPairsFlyMode = 1
+
 "syntastic
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-    return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-endfunction
+" Autostart NERDTree if no file
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+" Toogle nerdtree
+nnoremap <F3> :NERDTreeToggle<CR>
+
+set completeopt=longest,menuone
+inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
+inoremap <expr> <Esc>       pumvisible() ? "\<C-y>" : "\<Esc>"
 
 "Gundo
 nnoremap <F2> :GundoToggle<CR>
 
+" TagBar
 
-let g:SuperTabDefaultCompletionType = '<C-n>'
+nnoremap <F6> :Tagbar<CR>
 
 " better key bindings for UltiSnipsExpandTrigger
 let g:UltiSnipsExpandTrigger = "<C-e>"
 let g:UltiSnipsJumpForwardTrigger = "<C-f>"
 let g:UltiSnipsJumpBackwardTrigger = "<C-b>"
 
-let g:ycm_key_list_select_completion = ['tab', '<C-n>', '<Down>']
+let g:ycm_key_list_select_completion = ['<tab>', '<C-n>', '<Down>']
 let g:ycm_key_list_previous_completion = ['<S-tab>', '<C-p>', '<Up>']
 let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ycm_auto_trigger = 1
@@ -169,23 +210,35 @@ let g:ycm_rust_src_path = "/usr/src/rust/src/"
 let g:necoghc_enable_detailed_browse = 1
 let g:haskellmode_completion_ghc = 0
 
+" colorizer
+let g:colorizer_maxlines = 1000
+
 autocmd Filetype haskell setlocal omnifunc=necoghc#omnifunc
 
 "Other undo opts
 set undolevels=1000         " Maximum number of changes that can be undone
 set undoreload=10000        " Maximum number lines to save for undo on buffer reload  "
 
+
+let g:airline_extensions = ['ycm', 'tagbar', 'syntastic']
+
 ""Status line
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
 
+" unicode symbols
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
+let g:airline_symbols.crypt = ''
+let g:airline_symbols.linenr = ''
+let g:airline_symbols.maxlinenr = '☰'
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.paste = 'ρ'
+let g:airline_symbols.paste = 'Þ'
+let g:airline_symbols.paste = '∥'
+let g:airline_symbols.spell = 'Ꞩ'
+let g:airline_symbols.notexists = '∄'
+let g:airline_symbols.whitespace = 'Ξ'
 set laststatus=2
-
-" Broken down into easily includeable segments
-set statusline=%<%f\                     " Filename
-set statusline+=%w%h%m%r                 " Options
-set statusline+=%{fugitive#statusline()} " Git Hotness
-set statusline+=%#warningmsg# "Syntastic
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-set statusline+=\ [%{&ff}/%Y]            " Filetype
-set statusline+=\ [%{getcwd()}]          " Current dir
-set statusline+=%=%-14.(%l,%c%V%)\ %p%%  " Right aligned file nav info
+set noshowmode
