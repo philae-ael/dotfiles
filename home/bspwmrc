@@ -20,7 +20,7 @@ config(){
 
     feh --bg-fill --no-fehbg ~/.background.jpg
     sxhkd &
-    systemctl --user restart polybar
+    systemctl --user restart tray.target
 }
 
 config 2>&1 | tee /tmp/bspc.log

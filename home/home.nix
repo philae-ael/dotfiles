@@ -7,22 +7,29 @@ let
     requests
     dbus-python
     # other python packages you want
-  ]; 
+  ];
   python = python3.withPackages my-python-packages;
 
   dark-chrome = pkgs.google-chrome.override {
     commandLineArgs = "--enable-features=WebUIDarkMode --force-dark-mode";
   };
 
+  lspsaga-nvim  = pkgs.vimUtils.buildVimPlugin {
+    name = "lspsaga-nvim";
+    src = pkgs.fetchFromGitHub {
+      owner = "tami5";
+      repo = "lspsaga.nvim";
+      rev = "518c12e2897edd2542bee76278a693cc7eea2f51";
+      sha256 = "1ilyl26xdwq9ws6mb86rz83kq267gsgfpjmrpc87snx1h8z9rq4v";
+    };
+    buildPhase = ":";
+  };
+  polybar_config = import ./polybar.nix pkgs;
 in
   {
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  imports = [
-    ./dconf.nix
-  ];
-
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -31,29 +38,54 @@ in
 
 
   home.packages = with pkgs; [
-    firefox spotify anki evince
-
-    xclip tree htop zathura kitty
-
-
+    # required for DE
     python
-    dark-chrome
-
     feh
     sxhkd
     j4-dmenu-desktop
+    qt4 # for qdbus
+
+    # graphical apps
+    firefox spotify anki evince
+    zathura kitty
+    dark-chrome
+
+    pavucontrol
+    inkscape
+
+    direnv
+
+    # various bash utilities
+    xclip tree htop file unzip p7zip
+    clang clang-tools
   ];
 
-  xdg = {
-    enable = true;
-    configFile = {
-      "bspwm/bspwmrc".source = "${config.home.homeDirectory}/.config/nixpkgs/bspwmrc";
-      "sxhkd/sxhkdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/sxhkdrc";
-      "polybar/spotify_status.py".source = "${config.home.homeDirectory}/.config/nixpkgs/spotify_status.py";
+
+  # tray service, used to run polybar
+  systemd.user.targets = {
+    tray = {
+      Unit = {
+        Description = "Tray";
+        Requires = ["graphical-session.target"];
+      };
+
+      Install = { WantedBy = [ "graphical-session.target" ]; };
 
     };
   };
 
+  xdg = {
+    enable = true;
+    configFile = {
+      ".config/plasma-org.kde.plasma.desktop-appletsrc".source = "${config.home.homeDirectory}/.config/nixpkgs/plasma-org.kde.plasma.desktop-appletsrc";
+      "kxkbrc".source = "${config.home.homeDirectory}/.config/nixpkgs/kxkbrc";
+      "kdeglobals".source = "${config.home.homeDirectory}/.config/nixpkgs/kdeglobals";
+      "kded5rc".source = "${config.home.homeDirectory}/.config/nixpkgs/kded5rc";
+      "bspwm/bspwmrc".source = "${config.home.homeDirectory}/.config/nixpkgs/bspwmrc";
+      "sxhkd/sxhkdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/sxhkdrc";
+      "polybar/spotify_status.py".source = "${config.home.homeDirectory}/.config/nixpkgs/spotify_status.py";
+    };
+  };
 
   xsession = {
     pointerCursor = {
@@ -64,6 +96,9 @@ in
     };
   };
 
+
+  services.lorri.enable = true;
+
   services.dropbox = {
     enable = true;
     path = "${config.home.homeDirectory}/synced";
@@ -71,12 +106,14 @@ in
 
   services.polybar = {
     enable = true;
-    config = "${config.home.homeDirectory}/.config/nixpkgs/polybar";
+    config = polybar_config;
     script = "PATH=${pkgs.python3}/bin:${pkgs.bspwm}/bin:$PATH polybar bar &";
     package = pkgs.polybar.override {
       pulseSupport = true;
-    }; 
+    };
   };
+
+  services.mpris-proxy.enable = true;
 
   services.picom = {
     enable = true;
@@ -87,7 +124,7 @@ in
     fadeDelta = 3;
     shadow = true;
     shadowOpacity = "0.75";
-    opacityRule = [ 
+    opacityRule = [
       "100:class_g = 'kitty' && focused"
       "95:class_g = 'kitty' && !focused"
     ];
@@ -109,6 +146,8 @@ in
       font_family      monospace
       bold_font        auto
       italic_font      auto
+      enable_audio_bell no
+
       bold_italic_font auto
 
       disable_ligatures cursor
@@ -170,7 +209,7 @@ in
     userName = "Tristan Gouge";
     userEmail = "gouge.tristan@gmail.com";
     extraConfig = {
-      core.editor = "vim";
+      core.editor = "nvim";
       github.username = "naegi";
     };
     aliases = {
@@ -186,136 +225,37 @@ in
   };
 
 
-  programs.vim = {
+  programs.neovim  = {
     enable = true;
-    packageConfigurable = pkgs.vimHugeX;
+    vimAlias = true;
     plugins = with pkgs.vimPlugins; [
       vim-sensible
       vim-nix
       vim-airline
       vim-surround
+
       rainbow_parentheses
+      auto-pairs
+
       vim-gitgutter
       vim-easy-align
+
+      nvim-lspconfig
+
+      nvim-cmp
+      cmp-nvim-lsp
+
+      lspsaga-nvim
+
+      vim-vsnip
+      vim-vsnip-integ
+
       gruvbox
-      auto-pairs
+
+      which-key-nvim
+
     ];
-    extraConfig = ''
-      set linebreak
-      set showbreak=++
-      set foldmethod=marker
-      set showmatch
-      set ruler
-      set number
-
-      set cursorline
-      set cursorcolumn
-      " Only on current windows
-      au WinLeave * set nocursorline nocursorcolumn
-      au WinEnter * set cursorline cursorcolumn
-
-      set backspace=indent,eol,start
-      set autoread
-      set showcmd
-
-
-      set completeopt+=menuone
-
-      " Selected characters/lines in visual mode
-      nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
-      nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
-
-      let &t_SI = "\<esc>[5 q"
-      let &t_SR = "\<esc>[5 q"
-      let &t_EI = "\<esc>[2 q"
-
-
-      set wildmenu
-      set wildmode=longest,list,full
-
-      set modeline
-
-      set mouse=a
-
-      set hidden
-
-      "" tabs
-      set expandtab   " Use spaces instead of tabs
-      set autoindent
-      set shiftwidth=4    " Number of auto-indent spaces
-      set smartindent
-      set smarttab
-      set softtabstop=4
-      set tabstop=8
-      set shiftround
-
-      set listchars=tab:▸\ ,trail:·,extends:❯,precedes:❮,nbsp:×
-      set list
-
-      set laststatus=2
-      set noshowmode
-
-      "Other undo opts
-      set undolevels=1000
-      set undoreload=10000
-
-      set incsearch
-      set ignorecase
-      set smartcase
-
-      let g:mapleader = "\<Space>"
-      let g:maplocalleader = ','
-
-      "Toggle relative/absolute line numbers
-      function! NumberToggle()
-      if(&relativenumber == 1)
-        set norelativenumber
-      else
-        set relativenumber
-      endif
-      endfunction
-
-
-      "" remove trailing spaces
-      function! StripTrailingWhitespace()
-      " Preparation: save last search, and cursor position.
-      let _s=@/
-      let l = line(".")
-      let c = col(".")
-      " do the business:
-      %s/\s\+$//e
-      " clean up: restore previous search
-      "history, and cursor position
-      let @/=_s
-      call cursor(l, c)
-      endfunction
-
-
-      " completion with tab
-      inoremap <expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-      inoremap <expr><s-tab> pumvisible() ? "\<c-p>" : "\<tab>"
-
-      cmap w!! %!sudo tee > /dev/null %
-
-      nnoremap <F4> :call NumberToggle()<cr>
-      nnoremap <silent> <F5> :call StripTrailingWhitespace()<CR>
-      set termguicolors
-      set background=dark
-      let g:gruvbox_contrast_dark="medium"
-      colorscheme gruvbox
-
-      au VimEnter * RainbowParenthesesToggle
-      au Syntax * RainbowParenthesesLoadRound
-      au Syntax * RainbowParenthesesLoadSquare
-      au Syntax * RainbowParenthesesLoadBraces
-
-      xmap ga <Plug>(EasyAlign)
-      nmap ga <Plug>(EasyAlign)
-
-      let g:airline_powerline_fonts = 1
-
-
-    '';
+    extraConfig = builtins.readFile ./config.vim;
   };
 
   # A cat(1) clone with syntax highlighting and Git integration.
@@ -323,7 +263,7 @@ in
     enable = true;
   };
 
-  # This project is a rewrite of GNU ls with lot of added features 
+  # This project is a rewrite of GNU ls with lot of added features
   programs.lsd = {
     enable = true;
 
@@ -343,7 +283,7 @@ in
     };
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "aliases" "sudo" ];
+      plugins = [ "git" "aliases" "sudo" "direnv"];
       theme = "apple";
     };
 
