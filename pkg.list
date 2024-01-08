@@ -5,9 +5,13 @@ bash
 bbswitch
 binutils
 bison
+bluez
+bluez-hid2hci
+bluez-utils
 bspwm
 bumblebee
 bzip2
+cabal-install
 cairo-infinality-ultimate
 calibre
 conky
@@ -103,7 +107,7 @@ python-pylint
 reiserfsprogs
 rsync
 ruby
-rxvt-unicode
+rxvt-unicode-256xresources
 s-nail
 screenfetch
 scrot
@@ -169,6 +173,7 @@ urxvt-perls
 usbutils
 util-linux
 vim
+vim-youcompleteme-git
 which
 wpa_actiond
 wpa_supplicant
@@ -181,6 +186,7 @@ xorg-server-utils
 xorg-xev
 xorg-xinit
 xsel
+xterm
 xtitle
 yaourt
 zip
