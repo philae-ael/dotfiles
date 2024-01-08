@@ -7,6 +7,7 @@
 	default = simple
 [alias]
 	c = commit
+	cl = clone
 	p = push
 	pl = pull
 	a = add

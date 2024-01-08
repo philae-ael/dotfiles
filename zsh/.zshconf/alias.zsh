@@ -13,3 +13,4 @@ function mkdirvenv(){
     echo $ENV_NAME > .venv
     export CD_VIRTUAL_ENV="$ENV_NAME"
 }
+alias jnb="cd ~/programmation/notebooks/; jupyter-notebook"
