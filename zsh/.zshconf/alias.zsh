@@ -8,19 +8,10 @@ function xruns {
     fi
 }
 
-
-function ask_yes_or_no() {
-    read -k "?$1 [Y/n]"
-    case $(echo $REPLY | tr '[A-Z]' '[a-z]') in
-        n) return 1;;
-        y) return 0;;
-        *) return ask_yes_or_no;;
-    esac
-}
 alias ealias="vim ~/.zshconf/alias.zsh"
 
 alias optirun="vblank_mode=0 optirun"
-
+alias tailf="tail -f"
 alias wttr='curl "http://wttr.in/Plouzané?lang=fr"'
 alias moon='curl "http://wttr.in/Moon?lang=fr"'
 alias v=nvim
@@ -35,7 +26,6 @@ alias groot='cd $(git rev-parse --show-toplevel)'
 alias py=ipython
 
 # startx alias
-alias kx='ask_yes_or_no "Kill X ?" && pkill X'
 alias sxg='startx gnome'
 alias sx='startx'
 alias sxb='startx bspwm'

@@ -1,0 +1,20 @@
+[Desktop Entry]
+DefaultProfile=Profile beautiful.profile
+
+[Favorite Profiles]
+Favorites=
+
+[KonsoleWindow]
+ShowMenuBarByDefault=false
+
+[MainWindow]
+Height 768=706
+MenuBar=Disabled
+State=AAAA/wAAAAD9AAAAAAAABToAAALCAAAABAAAAAQAAAAIAAAACPwAAAAA
+ToolBarsMovable=Disabled
+Width 1360=683
+Width 1366=1338
+Window-Maximized 768x1360=true
+
+[TabBar]
+TabBarVisibility=AlwaysHideTabBar

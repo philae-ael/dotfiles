@@ -3,7 +3,7 @@ export ZSH=/home/tristan/.oh-my-zsh
 ZSH_THEME="honukai"
 HYPHEN_INSENSITIVE="true"
 
-plugins=(sudo git common-aliases virtualenvwrapper systemd pip zsh-autosuggestions)
+plugins=(sudo git common-aliases virtualenvwrapper systemd pip)
 
 PATH="$HOME/bin:$PATH"
 

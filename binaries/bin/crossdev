@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 function _crossdev_clean_path
 {
@@ -28,7 +28,11 @@ function crossdev
     then
         return
     fi
-    _create_crossdev
+    if ! _create_crossdev;
+    then
+        crossdev_deactivate
+    fi
+
 }
 
 function _create_crossdev
@@ -36,18 +40,22 @@ function _create_crossdev
     OLDPWD=`pwd`
     PROCNUM=$(nproc)
 
-    read -p "Do you want do compile the target $1 ? [Yn]" -n 1 -r
+    echo -n "Do you want do compile the target $1 ? [yN]: " 
+    read -q
     echo
     if [[ $REPLY =~ "(n|N)" ]]
     then
-        exit 1
+        return 1
     fi
 
     mkdir -p $HOME/opt/src
 
-    read -p "What's the version of binutils needed ? (e.g 2.26)" binutilsver
-    read -p "What's the version of gcc needed ? (e.g 6.1.0)" gccver
-    read -p "What's the version of ClooG needed ? (e.g 0.18.4)" cloogver
+    echo -n "What's the version of binutils needed ? (e.g 2.26)"
+    read  binutilsver
+    echo -n "What's the version of gcc needed ? (e.g 6.1.0)"
+    read  gccver
+    echo -n "What's the version of ClooG needed ? (e.g 0.18.4)"
+    read  cloogver
 
 
     cd $HOME/opt/src

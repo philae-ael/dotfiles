@@ -28,3 +28,5 @@
 	required = true
 [credential]
 	helper = cache
+[color]
+	ui = auto
