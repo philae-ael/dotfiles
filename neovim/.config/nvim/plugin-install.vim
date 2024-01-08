@@ -1,47 +1,35 @@
-set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
+call plug#begin(stdpath('data') . '/plugged')
 
-if dein#load_state('~/.cache/dein')
-    call dein#begin('~/.cache/dein')
-    call dein#add('~/.cache/dein')
+Plug 'junegunn/vim-plug'
 
-    call dein#add('Shougo/deoplete.nvim') " Completion framework
-    call dein#add('zchee/deoplete-jedi') " Python deoplete provider
-    call dein#add('Shougo/neco-vim')
+Plug 'morhetz/gruvbox'
+Plug 'jiangmiao/auto-pairs' " Insert or delete brackets, parens, quotes in pair
+Plug 'kien/rainbow_parentheses.vim' " Change parentheses colors
+Plug 'airblade/vim-gitgutter' " Print diff info in the gutter (1st left column)
+Plug 'liuchengxu/vim-which-key'
+Plug 'liuchengxu/vista.vim'
+Plug 'tpope/vim-surround' " Quoting/parenthezing
+Plug 'ludovicchabant/vim-gutentags'
 
-    call dein#add('airblade/vim-gitgutter') " Print diff info in the gutter (1st left column)
-    call dein#add('jiangmiao/auto-pairs') " Insert or delete brackets, parens, quotes in pair
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 
-    call dein#add('SirVer/ultisnips')
-    call dein#add('honza/vim-snippets')
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
-    call dein#add('morhetz/gruvbox')
-    call dein#add('kien/rainbow_parentheses.vim') " Change parentheses colors
-    call dein#add('Shougo/vimproc.vim', {'build' : 'make'}) " Used by others plugins
-    call dein#add('tpope/vim-surround') " Quoting/parenthezing
+function! BuildYCM(info)
+  if a:info.status == 'installed' || a:info.force
+    !./install.py --all
+  endif
+endfunction
 
-    call dein#add('vim-airline/vim-airline') " Status bar
-    call dein#add('vim-airline/vim-airline-themes')
+Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
 
-    call dein#add('dense-analysis/ale') " Lint engine
+Plug 'lervag/vimtex', {'for': 'tex'}
+Plug 'KeitaNakamura/tex-conceal.vim', {'for': 'tex'}
 
-    call dein#add('ctrlpvim/ctrlp.vim') " Fast Fast
+Plug 'neomake/neomake'
 
+Plug 'junegunn/vim-easy-align'
 
-    call dein#add('sheerun/vim-polyglot') " Pack of langs (syntax, indent, ftplugin...)
-
-    call dein#add('godlygeek/tabular') " Fast align 
-
-    call dein#add('rust-lang/rust.vim')
-    call dein#add('vim-syntastic/syntastic')
-
-    call dein#add('lervag/vimtex')
-    call dein#add('KeitaNakamura/tex-conceal.vim')
-
-    call dein#add('justinmk/vim-sneak')
-    call dein#add('kshenoy/vim-signature')
-    call dein#end()
-    call dein#save_state()
-end
-
-filetype plugin indent on
-syntax enable
+call plug#end()

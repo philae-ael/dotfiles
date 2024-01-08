@@ -1,0 +1,11 @@
+snippet aufiletype "augroup for a filetype" b
+augroup filetype_${1/,/_/g}
+	au!
+	function Filetype_${1/,/_/g}()
+		${2:nnoremap <buffer><leader>fs :source %<CR>
+		let g:which_key_map_leader.f.s = 'source file'}
+	endfunction
+	au Filetype ${1:c,cpp} call Filetype_${1/,/_/g}()
+augroup end
+endsnippet
+

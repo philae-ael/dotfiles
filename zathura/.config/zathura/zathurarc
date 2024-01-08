@@ -1,0 +1,17 @@
+set adjust-open "width"
+set pages-per-row 1
+set scroll-page-aware "true"
+
+set highlight-color "#d5c4a1"
+set highlight-active-color "#ebdbb2"
+
+set highlight-transparency 0.1
+
+map <C-r> recolor toogle
+
+map <C-g> zoom width
+
+set recolor true
+set recolor-darkcolor "#fbf1c7"
+set recolor-lightcolor "#282828"
+set recolor-reserse-video true
