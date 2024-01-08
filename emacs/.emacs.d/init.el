@@ -16,6 +16,8 @@
 ;; Line No
 (global-linum-mode 1)
 
+(recentf-mode 1)
+
 (setq backup-by-copying t)
 (setq backup-directory-alist `(("." . "~/.saves")))
 
