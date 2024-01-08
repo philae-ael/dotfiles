@@ -62,3 +62,7 @@ nbproject
 node_modules
 
 .venv
+
+# Ctags #
+#########
+tags
