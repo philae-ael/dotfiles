@@ -2,8 +2,12 @@
 
 xressources=$HOME/.Xresources
 
-# merge in defaults and keymaps
 
+xrandr --setprovideroutputsource modesetting NVIDIA-0
+xrandr --auto
+xrandr --dpi 96
+
+# merge in defaults and keymaps
 
 if [ -f "$xressources" ]; then
     xrdb -merge "$xressources"
