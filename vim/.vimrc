@@ -5,10 +5,11 @@ syntax on
 let mapleader=","
 
 "" General
-set number	" Show line numbers
-set linebreak	" Break lines at word (requires Wrap lines)
-set showbreak=++ 	" Wrap-broken line prefix
-set textwidth=100	" Line wrap (number of cols)
+set number      " Show line numbers
+set linebreak   " Break lines at word (requires Wrap lines)
+set showbreak=++        " Wrap-broken line prefix
+set colorcolumn=120
+
 set showmatch	" Highlight matching brace
 set ruler	" Show row and column ruler informationa
 set cursorline " Highlight current line
