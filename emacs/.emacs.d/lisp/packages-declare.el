@@ -24,6 +24,22 @@
 (setq company-minimum-prefix-length 1)
 (add-hook 'after-init-hook #'global-company-mode)
 
+(require-package 'markdown-mode)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+(autoload 'gfm-mode "markdown-mode"
+   "Major mode for editing GitHub Flavored Markdown files" t)
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+(setq markdown-command "pandoc")
+
+(require-package 'magit)
+(global-set-key (kbd "C-x g") 'magit-status)
+(global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
+
+
+(require-package 'edit-indirect)
+
 ;; (require-package 'yasnippet)
 
 (provide 'packages-declare)
