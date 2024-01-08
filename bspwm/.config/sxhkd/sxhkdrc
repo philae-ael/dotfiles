@@ -83,13 +83,22 @@ super + greater
 super + less
         playerctl previous || mpc prev
 
+super + shift + Return
+        AUTO_RANGER=1 urxvtc
+
 super + Return
 	urxvtc
 
+#if daemon fails
+super + ctrl + Return
+        urxvt
+
 super + space
-	dmenu_run
+	rofi -show run
 super + shift + space
         passmenu
+ctrl + shift + space
+        rofi -show window
 
 # make sxhkd reload its configuration files:
 super + Escape
