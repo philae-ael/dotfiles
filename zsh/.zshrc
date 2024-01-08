@@ -1,24 +1,18 @@
 export ZSH=/home/tristan/.oh-my-zsh
 
 ZSH_THEME="honukai"
-
 HYPHEN_INSENSITIVE="true"
 
-COMPLETION_WAITING_DOTS="true"
-
-plugins=(sudo git common-aliases virtualenvwrapper systemd pip cabal python pass)
+plugins=(sudo git common-aliases virtualenvwrapper systemd pip zsh-autosuggestions)
 
 PATH="$HOME/bin:$PATH"
-
-#clean a bit the path (remove doublons)
-export PATH=$(echo $PATH | sed 's/:/\n/g' |  awk '!a[$0]++' | tr '\n' ':' | sed 's/:$//')
 
 source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 export LANG=fr_FR.UTF-8
 
-export EDITOR='vim'
+export EDITOR='nvim'
 export PROJECT_HOME="$HOME/programmation/"
 
 # Compilation flags
@@ -36,8 +30,3 @@ for f in ~/.zshconf/*
 do
 	source $f
 done
-
-
-[[ -n "$AUTO_RANGER" && -z "$RANGER_LEVEL" ]] && { 
-    /usr/bin/ranger && exit  # don't exit on fails
-}

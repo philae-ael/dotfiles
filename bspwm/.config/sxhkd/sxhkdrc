@@ -75,17 +75,13 @@ super + less
         playerctl previous || mpc prev
 
 super + shift + Return
-        AUTO_RANGER=1 urxvtc
+        AUTO_RANGER=1 konsole
 
 super + Return
-	urxvtc
-
-#if daemon fails
-super + ctrl + Return
-        urxvt
+	konsole
 
 super + space
-	rofi -show run
+        j4-dmenu-desktop --dmenu="(cat ; (stest -flx $(echo $PATH | tr : ' ') | sort -u)) | rofi -dmenu"
 super + shift + space
         passmenu
 ctrl + shift + space
