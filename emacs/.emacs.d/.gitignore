@@ -7,3 +7,5 @@ eshell/
 ede-projects.el
 projectile-bookmarks.eld
 session.*
+.python-environments/
+recentf
