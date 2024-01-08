@@ -15,6 +15,9 @@ case $2 in
     g|gnome|gdm )
         exec gnome-session
         ;;
+    win) #BOOOOOUUUUHHH
+        virtualbox --startvm Win10 --fullscreen
+        ;;
     b|bspwm|* )
         for f in .x11autostart/*
         do
