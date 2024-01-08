@@ -70,6 +70,9 @@ endfunction
 nnoremap <silent> <F5> :call StripTrailingWhitespace()<CR>
 autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql autocmd BufWritePre <buffer> call StripTrailingWhitespace()
 
+
+au! BufWritePost .vimrc source % 
+
 filetype on
 filetype off
 
@@ -96,7 +99,7 @@ call vundle#end()
 filetype indent on
 syntax enable
 
-cmap w!! %!sudo tee > /dev/null %a
+cmap w!! %!sudo tee > /dev/null %
 
 set incsearch
 set ignorecase

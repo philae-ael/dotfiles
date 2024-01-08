@@ -11,3 +11,5 @@
 	pl = pull
 	a = add
 	s = status
+	conf = config
+	d = diff
