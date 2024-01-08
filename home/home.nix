@@ -47,9 +47,9 @@ in
   xdg = {
     enable = true;
     configFile = {
-      "bspwm/bspwmrc".source = "/home/tristan/.config/nixpkgs/bspwmrc";
-      "sxhkd/sxhkdrc".source = "/home/tristan/.config/nixpkgs/sxhkdrc";
-      "polybar/spotify_status.py".source = "/home/tristan/.config/nixpkgs/spotify_status.py";
+      "bspwm/bspwmrc".source = "${config.home.homeDirectory}/.config/nixpkgs/bspwmrc";
+      "sxhkd/sxhkdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/sxhkdrc";
+      "polybar/spotify_status.py".source = "${config.home.homeDirectory}/.config/nixpkgs/spotify_status.py";
 
     };
   };
@@ -64,10 +64,14 @@ in
     };
   };
 
+  services.dropbox = {
+    enable = true;
+    path = "${config.home.homeDirectory}/synced";
+  };
 
   services.polybar = {
     enable = true;
-    config = "/home/tristan/.config/nixpkgs/polybar";
+    config = "${config.home.homeDirectory}/.config/nixpkgs/polybar";
     script = "PATH=${pkgs.python3}/bin:${pkgs.bspwm}/bin:$PATH polybar bar &";
     package = pkgs.polybar.override {
       pulseSupport = true;
@@ -343,7 +347,7 @@ in
     enable = true;
     theme = "gruvbox-dark";
 
-    
+
   };
 
 

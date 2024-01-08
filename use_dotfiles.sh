@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/usr/bin/env sh
 
 
 sudo cp ./configuration.nix /etc/nixos/configuration.nix

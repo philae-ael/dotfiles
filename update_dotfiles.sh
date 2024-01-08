@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/usr/bin/env sh
 cd "$(dirname "$0")"
 rm home -rf
 cp -r $HOME/.config/nixpkgs home
