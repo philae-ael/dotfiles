@@ -72,4 +72,4 @@ ${git_info} \
 %{$terminfo[bold]$fg[red]%}→ %{$reset_color%}"
 fi
 
-RPROMPT='%{${fg[cyan]}%}$(if [[ ! -z "$VIRTUAL_ENV" ]]; then; basename "$VIRTUAL_ENV";fi)%{${reset_color}%}'
+RPROMPT='%{${fg[cyan]}%}$(if [[ ! -z "$CROSSDEV" ]]; then echo $CROSSDEV;fi) $(if [[ ! -z "$VIRTUAL_ENV" ]]; then; basename "$VIRTUAL_ENV";fi)%{${reset_color}%}'
