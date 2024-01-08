@@ -13,3 +13,5 @@
 	s = status
 	conf = config
 	d = diff
+	tree = log --oneline --decorate --all --graph
+	t = log --oneline --decorate --all --graph
