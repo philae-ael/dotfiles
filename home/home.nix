@@ -92,14 +92,15 @@ in
   xdg = {
     enable = true;
     configFile = {
-      "plasma-org.kde.plasma.desktop-appletsrc".source = "${config.home.homeDirectory}/.config/nixpkgs/plasma-org.kde.plasma.desktop-appletsrc";
-      "kactivitymanagerdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/kactivitymanagerdrc";
-      "kxkbrc".source = "${config.home.homeDirectory}/.config/nixpkgs/kxkbrc";
-      "kdeglobals".source = "${config.home.homeDirectory}/.config/nixpkgs/kdeglobals";
-      "kded5rc".source = "${config.home.homeDirectory}/.config/nixpkgs/kded5rc";
-      "bspwm/bspwmrc".source = "${config.home.homeDirectory}/.config/nixpkgs/bspwmrc";
-      "sxhkd/sxhkdrc".source = "${config.home.homeDirectory}/.config/nixpkgs/sxhkdrc";
-      "polybar/spotify_status.py".source = "${config.home.homeDirectory}/.config/nixpkgs/spotify_status.py";
+      "gdb/gdbinit".source = ./gdbinit;
+      "plasma-org.kde.plasma.desktop-appletsrc".source = ./plasma-org.kde.plasma.desktop-appletsrc;
+      "kactivitymanagerdrc".source = ./kactivitymanagerdrc;
+      "kxkbrc".source = ./kxkbrc;
+      "kdeglobals".source = ./kdeglobals;
+      "kded5rc".source = ./kded5rc;
+      "bspwm/bspwmrc".source = ./bspwmrc;
+      "sxhkd/sxhkdrc".source = ./sxhkdrc;
+      "polybar/spotify_status.py".source = ./spotify_status.py;
     };
   };
 
