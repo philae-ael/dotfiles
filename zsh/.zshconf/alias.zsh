@@ -22,7 +22,8 @@ function ask_yes_or_no() {
     read -k "?$1 [Y/n]"
     case $(echo $REPLY | tr '[A-Z]' '[a-z]') in
         n) return 1;;
-        *) return 0;;
+        y) return 0;;
+        *) return ask_yes_or_no;;
     esac
 }
 alias ealias="vim ~/.zshconf/alias.zsh"
