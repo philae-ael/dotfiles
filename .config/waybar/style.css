@@ -1,5 +1,5 @@
 * {
-    font-family: 'FiraCode Nerd', 'Roboto Condensed', sans-serif;
+    font-family: 'FiraCode Nerd Font Mono', sans-serif;
     font-size: 14px;
 }
 
@@ -31,7 +31,7 @@ window#waybar {
     padding: 4px 10px;
     margin: 0 2px;
     background-color: #1e1e2e;
-    /*border: 2px solid #1e1e2e */
+    /* border: 2px solid #1e1e2e; */
 }
 
 #workspaces {

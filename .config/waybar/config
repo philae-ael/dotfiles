@@ -1,7 +1,6 @@
 {
   "include": "~/.config/waybar/modules",
   "layer": "top",
-  //"mode": "dock",
   "exclusive": true,
   "passthrough": false,
   "position": "top",
@@ -12,8 +11,8 @@
   "margin-top": 5,
   "margin-bottom": 0,
 
-  "modules-left": ["memory", "disk", "wlr/workspaces", "custom/media"],
+  "modules-left": [ "wlr/workspaces", "custom/media"],
   "modules-center": ["hyprland/window"],
-  "modules-right": ["bluetooth", "pulseaudio", "network", "clock", "tray", "custom/power"],
+  "modules-right": ["pulseaudio", "network", "memory", "disk", "clock", "tray"],
 }
 
