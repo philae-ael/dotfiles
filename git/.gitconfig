@@ -16,3 +16,7 @@
 	d = diff
 	tree = log --oneline --decorate --all --graph
 	t = log --oneline --decorate --all --graph
+	br = branch
+	ck = checkout
+[merge]
+	tool = meld

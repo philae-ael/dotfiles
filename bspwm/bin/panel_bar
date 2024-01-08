@@ -2,6 +2,7 @@
 #
 # Example panel for LemonBoy's bar
 
+set -e
 . panel_colors
 
 num_mon=$(bspc query -M | wc -l)
@@ -77,5 +78,7 @@ while read -r line ; do
             wm_infos="${wm_infos}%{A}%{A}"
             ;;
     esac
-    printf "%s\n" "%{l}${wm_infos}%{c}${title}%{r}${sys_infos}"
+    BAT=$(panel_battery || echo '')
+    OTHER=$(panel_other || echo '')
+    printf "%s\n" "%{l}${wm_infos}%{c}${title}%{r}${BAT}${OTHER}${sys_infos}"
 done

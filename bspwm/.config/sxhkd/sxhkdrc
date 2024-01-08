@@ -2,109 +2,109 @@
 # bspwm hotkeys
 #
 
-alt + q
+super + q
 	bspc node -c
 
-alt + shift + q
+super + shift + q
 	bspc node -k
 
-alt + t
+super + t
 	bspc desktop -l next
 
-alt + b
+super + b
 	bspc desktop -B
 
-alt + {s,f,d,g}
+super + {s,f,d,g}
 	bspc node -t '~{floating,fullscreen,pseudo_tiled,tiled}'
 
-alt + Tab
+super + Tab
 	bspc desktop -f last
 
-alt + {o,i}
+super + {o,i}
 	bspc control --record-history off; \
 	bspc node {older,newer} -f; \
 	bspc control --record-history on
 
-alt + {_,shift + }{h,j,k,l}
+super + {_,shift + }{h,j,k,l}
 	bspc node -{f,s} {west,south,north,east}
 
-alt + {_,shift + }c
+super + {_,shift + }c
 	bspc node -f {next,prev}
 
-alt + {comma,period}
+super + {comma,period}
 	bspc desktop -C {backward,forward}
 
-alt + {Left,Right}
+super + {Left,Right}
 	bspc desktop -f {prev,next}
 
-alt + super + {h,j,k,l,c}
+super + ctrl + {h,j,k,l,c}
 	bspc node -p {west,south,north,east,cancel}
 
-alt + ctrl + {h,j,k,l}
-	bspc node -r {west -10,north -10,north +10,west +10}
-
-alt + ctrl + shift + {h,j,k,l}
-	bspc node -r {east -10, south -10, south +10, east +10}
-
-alt + {_,shift + }{ampersand, eacute, quotedbl, apostrophe, parenleft, minus, egrave, underscore, ccedilla, agrave}
+super + {_,shift + }{ampersand, eacute, quotedbl, apostrophe, parenleft, minus, egrave, underscore, ccedilla, agrave}
 	bspc {desktop -f,node -d} ^{1,2,3,4,5,6,7,8,9,10}
 
 ~button1
 	bspc pointer -g focus
 
-alt + button{1-3}
+super + button{1-3}
 	bspc pointer -g {move,resize_side,resize_corner}
 
-alt + @button{1-3}
+super + @button{1-3}
 	bspc pointer -u
 
-alt + {shift,_} + equal
+super + {shift,_} + equal
     bspc config -d focused window_gap $((`bspc config -d focused window_gap` {+,-} 2 ))
 
 # Sticky windows
-alt + e
+super + e
     bspc node -g sticky
 
-# Preventing closing 
-alt + r
+# Preventing closing
+super + r
     bspc node -g locked
 
 # Private window -> using with sticky give you the possibility to have a window on all desktops, mantaining the tiling and the position
-alt + z
+super + z
     bspc node -g private
 
 #
 # wm independent hotkeys
 #
 
-alt + p
+super + n
+        firefox
+
+super + p
         playerctl play-pause || mpc toggle
 
-alt + greater
+super + greater
         playerctl next || mpc next
 
-alt + less
+super + less
         playerctl previous || mpc prev
 
-alt + Return
+super + Return
 	urxvtc
 
-alt + space
+super + space
 	dmenu_run
+super + shift + space
+        passmenu
 
 # make sxhkd reload its configuration files:
-alt + Escape
+super + Escape
 	pkill -USR1 -x sxhkd
 
 XF86AudioMute
 	pulseaudio-ctl mute
 
 XF86AudioRaiseVolume
-	pulseaudio-ctl up   
+	pulseaudio-ctl up
 
 XF86AudioLowerVolume
-	pulseaudio-ctl down 
-XF86MonBrightnessDown
-        xbacklight -dec 5
-XF86MonBrightnessUp
-        xbacklight -inc 5
+	pulseaudio-ctl down
+
+
+
+{_,shift + ,super + }XF86MonBrightness{Down,Up}
+    xbacklight {-dec 1,-dec 10,-set 0, -inc 1, -inc 10,-set 100}

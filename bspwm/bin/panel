@@ -1,5 +1,4 @@
 #! /bin/sh
-
 if [ $(pgrep -cx panel) -gt 1 ] ; then
     printf "%s\n" "The panel is already running." >&2
     exit 1
@@ -25,6 +24,4 @@ done > "$PANEL_FIFO" &
 cat "$PANEL_FIFO" | panel_bar |\
     lemonbar -g x$PANEL_HEIGHT -f "$PANEL_FONT_FAMILY"\
     -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" |\
-    while read line; do eval "$line"; done &
-
-        wait
+    while read line; do eval "$line"; done

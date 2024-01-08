@@ -72,6 +72,7 @@ endfunction
 nnoremap <silent> <F5> :call StripTrailingWhitespace()<CR>
 autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql autocmd BufWritePre <buffer> call StripTrailingWhitespace()
 
+au BufRead,BufNewFile make.config setfiletype make
 
 au! BufWritePost .vimrc source % 
 
@@ -92,10 +93,12 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'Townk/vim-autoclose'
 Plugin 'tpope/vim-surround'
 Plugin 'sjl/gundo.vim'
+Plugin 'isRuslan/vim-es6'
 " Haskell
 Plugin 'dag/vim2hs'
 Plugin 'eagletmt/neco-ghc'
-"Plugin 'Valloric/YouCompleteMe' " -> managed throught AUR (vim-youcompleteme-git)
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'ervandew/supertab'
 call vundle#end()
 
 
@@ -141,8 +144,15 @@ endfunction
 nnoremap <F2> :GundoToggle<CR>
 
 
-"" YouCompleteMe
-let g:ycm_key_list_previous_completion=['<Up>']
+let g:SuperTabDefaultCompletionType = '<C-n>'
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger = "<tab>"
+let g:UltiSnipsJumpForwardTrigger = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
+
+let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
 let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ycm_auto_trigger = 1
 
@@ -152,12 +162,7 @@ let g:haskellmode_completion_ghc = 0
 
 autocmd Filetype haskell setlocal omnifunc=necoghc#omnifunc
 
-"" Ultisnips
-let g:UltiSnipsExpandTrigger="<c-j>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
 "Other undo opts
-set undofile " So is persistent undo ... "
 set undolevels=1000         " Maximum number of changes that can be undone
 set undoreload=10000        " Maximum number lines to save for undo on buffer reload  "
 

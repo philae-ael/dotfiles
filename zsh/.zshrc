@@ -6,10 +6,7 @@ HYPHEN_INSENSITIVE="true"
 
 COMPLETION_WAITING_DOTS="true"
 
-
-plugins=(sudo git common-aliases web-search virtualenvwrapper)
-
-ps aux | grep -v grep | grep ssh-agent > /dev/null || eval $(ssh-agent) > /dev/null
+plugins=(sudo git common-aliases virtualenvwrapper systemd)
 
 PATH="$HOME/bin:$PATH"
 
@@ -29,7 +26,6 @@ export ARCHFLAGS="-arch x86_64 -j8"
 
 #Need to be before .zshconf because of fct redifining
 source /usr/share/doc/pkgfile/command-not-found.zsh
-source /usr/bin/virtualenvwrapper.sh
 
 for f in ~/.zshconf/* 
 do
