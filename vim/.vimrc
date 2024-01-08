@@ -101,6 +101,8 @@ Plugin 'Valloric/YouCompleteMe'
 Plugin 'ervandew/supertab'
 " Rust 
 Plugin 'rust-lang/rust.vim'
+" ASM 
+Plugin 'shirk/vim-gas'
 call vundle#end()
 
 
