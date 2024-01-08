@@ -8,3 +8,5 @@ export LESS=' -R -N'  #Allow color and lines numbers
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 export WINEDLLOVERRIDES=winemenubuilder.exe=d
+
+JUPYTERLAB_DIR=$HOME/.config/jupyter/lab

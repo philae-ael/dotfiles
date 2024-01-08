@@ -7,7 +7,8 @@ import convertdata
 
 
 def main(converter, converter_options,
-         two_dimensions, one_line):
+         two_dimensions, one_line,
+         color, marker_style):
     convert = convertdata.get_converter(converter, converter_options)
 
     x = []
@@ -33,7 +34,7 @@ def main(converter, converter_options,
     if not two_dimensions:
         x = list(range(len(y)))
 
-    plt.plot(x, y)
+    plt.scatter(x, y, c=color or list(range(len(x))), marker=marker_style)
     plt.show()
 
 
@@ -45,6 +46,11 @@ if __name__ == "__main__":
                         action="store_true")
     parser.add_argument("-1", dest="one_line", help="data on one line",
                         action="store_true")
+    parser.add_argument("-s", "-style", dest="markerstyle", default='o',
+                        help="matplotlib plot marker style")
+    parser.add_argument("-k", "--kolor", dest="color",
+                        help="matplotlib plot color",
+                        default=None)
 
     convertdata.configure_argparser(parser)
 
@@ -53,4 +59,6 @@ if __name__ == "__main__":
     main(args.converter,
          args.converter_options,
          args.two_dimensions,
-         args.one_line)
+         args.one_line,
+         args.color,
+         args.markerstyle)

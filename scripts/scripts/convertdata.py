@@ -1,30 +1,36 @@
 import argparse
 import json
 import re
+import functools
+
+import parser
+
+def compose(f, g):
+    #  because it's g's interface that is seen
+    @functools.wraps(g)
+    def wrap(*args, **kwargs):
+        return f(g(*args, **kwargs))
+    return wrap
 
 
 class Converter:
     def __init__(self, *args, **kwargs):
-        try:
-            self.can_chain
-        except AttributeError:
-            self.can_chain = False
-
-        self._chain = None
+        self._chain = []
 
     def setup(self, *args, **kwargs):
-        if self._chain:
-            self._chain.setup(*args, **kwargs)
+        for c in self._chain:
+            if isinstance(c, Converter):
+                self.c.setup(*args, **kwargs)
         return self
 
-    def __call__(self, str):
-        return self.converter(str)
+    def __call__(self, inp):
+        chain = getattr(self, "__chain__", lambda f, x: f(x))
+        for f in self._chain:
+            inp = chain(f, inp)
+        return inp
 
     def chain(self, other):
-        if not self.can_chain:
-            raise NotImplementedError
-
-        self._chain = other
+        self._chain.append(other)
         return self
 
 
@@ -33,24 +39,26 @@ class SimpleConverter(Converter):
         self.converter = converter_fct
         super().__init__(*args, **kwargs)
 
+    def __call__(self, inp):
+        inp = self.converter(inp)
+        return super().__call__(inp)
+
 
 class ListConverter(Converter):
-
-    def __init__(self, *args, **kwargs):
-        self.can_chain = True
-        super().__init__()
-
     def setup(self, *args, **kwargs):
         self.sep = kwargs.pop("sep")
 
         return super().setup(*args, kwargs)
 
     def __call__(self, str):
-        tmp = str.split(self.sep)
-        if self._chain is None:
-            return tmp
+        tmp = str.strip().split(self.sep)
+        return super().__call__(tmp)
 
-        return list(map(self._chain, tmp))
+    def __chain__(self, f, inp):
+        return list(map(f, inp))
+
+
+def stripstr(x): return x.strip()
 
 
 convert_table_input = {
@@ -58,35 +66,50 @@ convert_table_input = {
         (ListConverter(),
          ['sep']),
     "listint":
-        (ListConverter().chain(SimpleConverter(int)),
+        (ListConverter().chain(stripstr).chain(float),
          ['sep']),
     "listfloat":
-        (ListConverter().chain(SimpleConverter(float)),
+        (ListConverter().chain(stripstr).chain(float),
          ['sep']),
     "integer":
-        (SimpleConverter(int), []),
+        (SimpleConverter(stripstr).chain(int), []),
     "float":
-        (SimpleConverter(float), []),
+        (SimpleConverter(stripstr).chain(float), []),
     "json":
         (SimpleConverter(json.loads), []),
     "string":
         (SimpleConverter(lambda x: x), [])
 }
 
+alias = {
+    "int": "integer",
+    "i": "integer",
+    "j": "json",
+    "f": "float",
+    "s": "string",
+    "l": "list",
+    "li": "listint",
+    "lf": "listfloat",
+}
+
 
 def get_converter_list():
-    return list(convert_table_input.keys())
+    return list(convert_table_input.keys()) + list(alias.keys())
 
 
 def get_converter_options(converter):
+    if converter in alias:
+        converter = alias[converter]
     return convert_table_input[converter][1]
 
 
-def get_converter(convert_type, options):
-    return convert_table_input[convert_type][0].setup(**options)
+def get_converter(converter, options):
+    if converter in alias:
+        converter = alias[converter]
+    return convert_table_input[converter][0].setup(**options)
 
 
-def configure_argparser(parser,
+def configure_argparser(argparser,
                         default="json",
                         group_descr='Convert input',
                         cnvt_short='-c',
@@ -112,32 +135,22 @@ def configure_argparser(parser,
     rest = re.compile("""[^,]+""")
 
     def convert_opt(opt_str):
-        def test_regex(regex, f=None):
-            nonlocal opt_str
-            r = regex.match(opt_str)
-            if r:
-                end = r.end()
-                i = f(opt_str[:end]) if f else opt_str[:end]
-                opt_str = opt_str[end:]
-                return i
-            return None
+        buf = parser.Buffer(opt_str)
 
         options = {}
-        while opt_str:
-
-            n = test_regex(name)
+        while not buf.end():
+            n = buf.match_regex(name)
             if not n:
                 raise argparse.ArgumentTypeError(
                     "Can't convert convert options - Can't match a name")
 
-            if opt_str[0] != '=':
+            if not buf.match_string("="):
                 raise argparse.ArgumentTypeError(
                     "Can't convert convert options - Can't match a '='")
-            opt_str = opt_str[1:]
 
-            i = test_regex(integer, int) or \
-                test_regex(string, lambda x: x[1:-1]) or \
-                test_regex(rest)
+            i = buf.match_regex(integer, int) or \
+                buf.match_regex(string, lambda x: x[1:-1]) or \
+                buf.match_regex(rest)
 
             if not i:
                 raise argparse.ArgumentTypeError(
@@ -146,17 +159,16 @@ def configure_argparser(parser,
 
             options[n] = i
 
-            if opt_str:
-                if opt_str[0] != ',':
-                    raise argparse.ArgumentTypeError(
-                        "Can't convert convert options - Can't match a ','")
+            if not buf.end() and not buf.match_string(","):
+                raise argparse.ArgumentTypeError(
+                    "Can't convert convert options - Can't match a ','")
 
         return options
 
     def make_help():
         return
 
-    group = parser.add_argument_group(group_descr)
+    group = argparser.add_argument_group(group_descr)
 
     group.add_argument(cnvt_short,
                        cnvt_long,
@@ -174,11 +186,11 @@ def configure_argparser(parser,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input")
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("input")
 
-    configure_argparser(parser, True)
+    configure_argparser(argparser, True)
 
-    args = parser.parse_args()
+    args = argparser.parse_args()
 
-    print(get_converter(args.converter, **args.converter_options)(args.input))
+    print(get_converter(args.converter, args.converter_options)(args.input))

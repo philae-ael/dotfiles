@@ -43,3 +43,11 @@ def print(*args, **kwargs):
     else:
         __print(*c, sep='', end='')
     __print(*args, **kwargs)
+
+
+def print_rainbow(*args, **kwargs):
+    import random
+    print(*args, **kwargs, colors=random.choices(print_rainbow.color_list))
+
+
+print_rainbow.color_list = [c for i, c in fg.__dict__.items() if not i.startswith('_')]

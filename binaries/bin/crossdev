@@ -39,6 +39,7 @@ function crossdev
 
 function _create_crossdev
 {
+    set -e
     OLDPWD=`pwd`
     PROCNUM=$(nproc)
 

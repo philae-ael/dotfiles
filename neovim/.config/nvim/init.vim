@@ -1,3 +1,4 @@
+set  nocompatible
 source ~/.config/nvim/plugin-install.vim
 
 source ~/.config/nvim/general.vim

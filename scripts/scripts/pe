@@ -17,7 +17,7 @@ style_table_output = {
 }
 
 
-def print_eval(x, style, expand_list):
+def print_eval(x, style, expand_list, remove_falses):
     if hasattr(x, '__iter__') and not isinstance(x, str):
         x = list(x)
 
@@ -26,7 +26,9 @@ def print_eval(x, style, expand_list):
 
     if isinstance(x, list) and expand_list:
         for a in x:
-            print_eval(a, style, expand_list - 1)
+            print_eval(a, style, expand_list - 1, remove_falses)
+    elif x is None or (x and remove_falses):
+        pass
     else:
         try:
             style_table_output[style](x)
@@ -96,14 +98,14 @@ def execute_code(code, err_msg, glob, loc, store_return_value=True):
     return ret
 
 
-def execute_print(code, err_msg, glob, loc, style, expand_list):
+def execute_print(code, err_msg, glob, loc, style, expand_list, remove_falses):
     for c in code:
         execute_code(c, err_msg, glob, loc)
-    print_eval(loc["_"], style, expand_list)
+    print_eval(loc["_"], style, expand_list, remove_falses)
 
 
 def run_in_pipe(code, preprocess, converter, converter_options,
-                glob, loc, style, expand_list,):
+                glob, loc, style, expand_list, remove_falses):
     for line in sys.stdin.readlines():
         line = line.rstrip('\n')
 
@@ -122,13 +124,13 @@ def run_in_pipe(code, preprocess, converter, converter_options,
             sys.exit(-1)
 
         execute_print(code, "Error while interpreting code", glob, loc,
-                      style, expand_list)
+                      style, expand_list, remove_falses)
 
 
 def main(code, preprocess, init,
          converter, converter_options,
          style, expand_list,
-         modules):
+         modules, remove_falses):
 
     glob = create_globals(modules)
     loc = {}
@@ -138,10 +140,10 @@ def main(code, preprocess, init,
 
     if not sys.stdin.isatty():
         run_in_pipe(code, preprocess, converter, converter_options,
-                    glob, loc, style, expand_list)
+                    glob, loc, style, expand_list, remove_falses)
     else:
         execute_print(code, "Error while interpreting code", glob, loc,
-                      style, expand_list)
+                      style, expand_list, remove_falses)
 
 
 if __name__ == "__main__":
@@ -165,6 +167,7 @@ if __name__ == "__main__":
                         dest='style',
                         help='set the output style')
 
+    parser.add_argument("-r", "--remove-falses")
     parser.add_argument("-x", "--expand-list",
                               action='count',
                               default=0,
@@ -202,4 +205,5 @@ if __name__ == "__main__":
          args.converter_options,
          args.style,
          args.expand_list,
-         args.modules)
+         args.modules,
+         args.remove_falses)

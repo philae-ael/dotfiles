@@ -1,8 +1,8 @@
-set runtimepath+=/home/tristan/.nvim/repos/github.com/Shougo/dein.vim
+set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
-if dein#load_state('/home/tristan/.nvim')
-    call dein#begin('/home/tristan/.nvim')
-    call dein#add('/home/tristan/.nvim/repos/github.com/Shougo/dein.vim')
+if dein#load_state('~/.cache/dein')
+    call dein#begin('~/.cache/dein')
+    call dein#add('~/.cache/dein')
 
     call dein#add('Shougo/deoplete.nvim')
     call dein#add('Shougo/neoinclude.vim')
@@ -42,9 +42,7 @@ if dein#load_state('/home/tristan/.nvim')
 
     call dein#end()
     call dein#save_state()
-else
-    call dein#clear_state()
-endif
+end
 
 filetype plugin indent on
 syntax enable

@@ -12,11 +12,10 @@ source $ZSH/oh-my-zsh.sh
 # You may need to manually set your language environment
 export LANG=fr_FR.UTF-8
 
+export DIFFPROG='nvim -d'
 export EDITOR='nvim'
 export PROJECT_HOME="$HOME/programmation/"
 
-# Compilation flags
-export ARCHFLAGS="-arch x86_64 -j8"
 
 #Need to be before .zshconf because of fct redifining
 source $(which crossdev)
