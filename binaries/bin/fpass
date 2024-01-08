@@ -96,13 +96,15 @@ class History:
         self.history.append(entry)
 
 class ConsoleStatus(enum.IntEnum):
-    NONE = 0
-    CHANGED = 1
-    HISTORY_UP = 2
-    HISTORY_DOWN = 3
-    REDISPLAY = 4
-    EXIT = 5
-    COMMIT = 6 # When enter is hit
+    NONE           = 0
+    CHANGED        = 1
+    HISTORY_UP     = 2
+    HISTORY_DOWN   = 3
+    REDISPLAY      = 4
+    EXIT           = 5
+    COMMIT         = 6 # When enter is hit
+    NEXT_ENTRY     = 7
+    PREVIOUS_ENTRY = 8
 
 class ConsoleDisplay:
     def __init__(self):
@@ -215,6 +217,10 @@ class ConsoleDisplay:
 
         if c == '\n':
             return ConsoleStatus.COMMIT
+        elif c == '\x02':
+            return ConsoleStatus.PREVIOUS_ENTRY
+        elif c == '\x06':
+            return ConsoleStatus.NEXT_ENTRY
         elif c == '\x08': # Ctrl + backspace = kill word backward
             entry_front_tmp = self.entry[:self.cursor_column]
             entry_back_tmp = self.entry[self.cursor_column:]
@@ -270,6 +276,7 @@ class Fpass:
         self.pass_data = self.get_pass_data()
         self.history = History()
         self.display = ConsoleDisplay()
+        self.index = 0
 
     def run(self):
         out = ""
@@ -280,14 +287,17 @@ class Fpass:
 
         for status in self.display.update():
             if status == ConsoleStatus.CHANGED:
+                self.index = 0
                 update_out()
 
             if status == ConsoleStatus.HISTORY_UP:
+                self.index = 0
                 if self.history.entry_up():
                     self.display.set_entry(self.history.get_entry())
                     update_out()
 
             if status == ConsoleStatus.HISTORY_DOWN:
+                self.index = 0
                 if self.history.entry_down():
                     self.display.set_entry(self.history.get_entry())
                     update_out()
@@ -298,6 +308,7 @@ class Fpass:
             if status == ConsoleStatus.EXIT:
                 self.display.end()
                 return # No history write, no pass_call
+
             if status == ConsoleStatus.COMMIT:
                 if out:
                     self.history.add_entry(out)
@@ -306,6 +317,13 @@ class Fpass:
 
                 self.pass_run(out)
                 return
+            if status == ConsoleStatus.NEXT_ENTRY:
+                self.index += 1
+                update_out()
+            if status == ConsoleStatus.PREVIOUS_ENTRY:
+                self.index = max(0, self.index - 1)
+                update_out()
+
 
     def get_pass_data(self):
         """Get list of all stored passwords in pass"""
@@ -319,7 +337,10 @@ class Fpass:
     def fuzzy_find(self, entry, pass_data):
         entry = fuzzywuzzy.utils.full_process(entry)
         if entry:
-            return fuzzywuzzy.process.extractOne(entry, pass_data)[0]
+            debug("Index of search: ", self.index)
+            outputs, _ = zip(*fuzzywuzzy.process.extract(entry, pass_data))
+            self.index = min(self.index, len(outputs) - 1)
+            return outputs[self.index]
         return ''
 
 def main():
