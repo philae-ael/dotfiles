@@ -11,7 +11,7 @@ bspc config split_ratio 0.52
 bspc config borderless_monocle true
 bspc config gapless_monocle true
 polybar &
-xrandr --output DP-4 --mode 2560x1440 --rate 144
+xrandr --output DP-2 --mode 2560x1440 --rate 144
 
 xsetroot -cursor_name left_ptr &
 setxkbmap -layout us -variant qwerty-fr -option compose:rwin &

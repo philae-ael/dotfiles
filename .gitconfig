@@ -1,10 +1,6 @@
-[user]
-	email = 1511446+philae-ael@users.noreply.github
-	name = philae-ael
 [alias]
 	tree = log --graph --pretty=oneline --abbrev-commit
 	s = status
-	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$\\`echo $VAR\\`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
 [core]
     pager = delta
 
@@ -27,3 +23,10 @@
 	defaultBranch = master
 [push]
 	autoSetupRemote = yes
+
+
+
+[includeIf "gitdir:~/qomon/"]
+    path = ~/.config/git/work
+[includeIf "gitdir:~/projects/"]
+    path = ~/.config/git/personal
