@@ -8,7 +8,6 @@ return {
         },
       },
       inlay_hints = { enabled = true },
-      autoformat = false,
       servers = {
         rust_analyzer = {
           settings = {

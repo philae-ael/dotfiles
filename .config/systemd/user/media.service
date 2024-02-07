@@ -1,0 +1,12 @@
+[Unit]
+Description=Media service
+
+[Service]
+Type=OneShot
+RemainAfterExit=true
+ExecStart=/usr/bin/docker compose up --remove-orphans
+WorkingDirectory=/home/eli/media/
+ExecStop=/usr/bin/docker compose down
+
+[Install]
+WantedBy=default.target
