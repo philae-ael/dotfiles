@@ -1,5 +1,4 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+fpath+=($HOME/.zsh/pure)
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -70,7 +69,7 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git sudo direnv dirhistory per-directory-history zsh-syntax-highlighting fzf-tab)
+plugins=(conda-zsh-completion git sudo direnv dirhistory zsh-syntax-highlighting fzf-tab poetry poetry-env)
 
 zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh
@@ -89,15 +88,15 @@ alias lt="eza --tree"
 alias ltg="eza --tree --git-ignore"
 alias lta="eza --tree -A"
 alias ltga="eza --tree --git-ignore -A"
+alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
+alias nvimf="nvim \$(fzf)"
 
-fpath+=($HOME/.zsh/pure)
 autoload -U promptinit; promptinit
 zstyle :prompt:pure:git:stash show yes
 prompt pure
 
 function compctl_rehash { rehash; reply=() }
 compctl -C -c + -K compctl_rehash + -c
-
 
 alias g=git
 
@@ -106,3 +105,19 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:*' switch-group ',' '.'
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/usr/etc/profile.d/conda.sh" ]; then
+        . "/usr/etc/profile.d/conda.sh"
+    else
+        export PATH="/usr/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
