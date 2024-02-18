@@ -1,0 +1,7 @@
+[user]
+	email = elisabeth.leathe@proton.me
+	name = eli
+    signingkey = Elisabeth Leathe <elisabeth.leathe@proton.me>
+
+[commit]
+    gpgsign = true

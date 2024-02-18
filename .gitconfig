@@ -28,5 +28,7 @@
 
 [include]
     path = ~/.config/git/personal
+[includeIf "gitdir:~/projects-eli/"]
+    path = ~/.config/git/eli
 [includeIf "gitdir:~/qomon/"]
     path = ~/.config/git/work

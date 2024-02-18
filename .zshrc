@@ -69,7 +69,7 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(conda-zsh-completion git sudo direnv dirhistory zsh-syntax-highlighting fzf-tab poetry poetry-env)
+plugins=(conda-zsh-completion git sudo direnv dirhistory zsh-syntax-highlighting poetry poetry-env)
 
 zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh
@@ -77,7 +77,7 @@ source $ZSH/oh-my-zsh.sh
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-alias l="eza -lah"
+alias l="eza -lh"
 alias ls=eza
 alias ll="eza -lh"
 alias la="eza -lAh"
@@ -98,13 +98,12 @@ prompt pure
 function compctl_rehash { rehash; reply=() }
 compctl -C -c + -K compctl_rehash + -c
 
-alias g=git
-
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:*' switch-group ',' '.'
+eval "$(zoxide init zsh)"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
