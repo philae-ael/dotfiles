@@ -22,3 +22,10 @@ bspc rule -a polkit-gnome-authentication-agent-1 state=floating
 polybar &
 picom &
 dunst &
+xss-lock slock&
+
+xset s 0 0 
+xset dpms 0 0 0 
+
+dbus-update-activation-environment --all &
+gnome-keyring-daemon --start --components=secrets &

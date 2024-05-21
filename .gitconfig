@@ -24,8 +24,6 @@
 [push]
 	autoSetupRemote = yes
 
-
-
 [include]
     path = ~/.config/git/personal
 [includeIf "gitdir:~/projects-eli/"]

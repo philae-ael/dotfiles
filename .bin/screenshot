@@ -2,6 +2,8 @@
 
 set -e
 
+mkdir ~/screenshots/ 2> /dev/null || true
+
 zone=$(slop)
 
-maim --hidecursor -g "$zone" | tee ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png | xclip -selection clipboard -target image/png
+maim --hidecursor -g "$zone" 2> /dev/null | tee ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png | xclip -selection clipboard -target image/png

@@ -3,7 +3,7 @@
 #
 
 Print 
-    screenshot
+    ~/.bin/screenshot
 
 # terminal emulator
 super + Return

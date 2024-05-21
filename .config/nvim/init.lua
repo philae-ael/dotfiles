@@ -4,6 +4,7 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.opt.tabstop = 4
+vim.opt.swapfile = false
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -85,7 +86,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',  opts = {} },
+  { 'folke/which-key.nvim',   opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -186,7 +187,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',  opts = {} },
   { 'stevearc/dressing.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -207,6 +208,7 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
+      'nvim-telescope/telescope-ui-select.nvim'
     },
   },
 
@@ -217,6 +219,16 @@ require('lazy').setup({
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
     build = ':TSUpdate',
+  },
+  {
+    'echasnovski/mini.nvim',
+    version = '*',
+    setup = function()
+      require('mini.bufremove').setup({})
+    end,
+    keys = {
+      { "<leader>bd", function() require("mini.bufremove").delete() end, desc = "[B]uffer delete" }
+    }
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -306,6 +318,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
+  extensions = {
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown {}
+    }
+  },
   defaults = {
     mappings = {
       i = {
@@ -317,7 +334,9 @@ require('telescope').setup {
 }
 
 -- Enable telescope fzf native, if installed
-pcall(require('telescope').load_extension, 'fzf')
+require('telescope').load_extension('fzf')
+require('telescope').load_extension('ui-select')
+
 
 -- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
@@ -543,7 +562,6 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
-
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -551,6 +569,12 @@ local servers = {
       -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
       -- diagnostics = { disable = { 'missing-fields' } },
     },
+  },
+  typst_lsp = {
+    settings = {
+      exportPdf = "onType"
+    }
+
   },
 }
 
@@ -631,7 +655,12 @@ cmp.setup {
   },
 }
 
-vim.filetype.add({ extension = { frag = "glsl", vert = "glsl" } })
+vim.filetype.add({ extension = { frag = "glsl", vert = "glsl", typst = "typst" } })
 
+
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
+vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
