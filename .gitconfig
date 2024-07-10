@@ -20,9 +20,11 @@
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
 [init]
-	defaultBranch = master
+	defaultBranch = main
 [push]
 	autoSetupRemote = yes
+[blame]
+	ignoreRevsFile = .git-blame-ignore-revs
 
 [include]
     path = ~/.config/git/personal

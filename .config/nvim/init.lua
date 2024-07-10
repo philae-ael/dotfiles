@@ -4,6 +4,9 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.opt.tabstop = 4
+vim.opt.expandtab = true
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
 vim.opt.swapfile = false
 
 -- [[ Install `lazy.nvim` plugin manager ]]
@@ -34,9 +37,12 @@ require('lazy').setup({
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
-
-  -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  {
+    'braxtons12/blame_line.nvim',
+    opts = {
+      show_in_insert = true
+    }
+  },
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -230,6 +236,7 @@ require('lazy').setup({
       { "<leader>bd", function() require("mini.bufremove").delete() end, desc = "[B]uffer delete" }
     }
   },
+  'editorconfig/editorconfig-vim',
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -515,8 +522,12 @@ local on_attach = function(_, bufnr)
   nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
   nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
   nmap('<leader>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    vim.pretty_print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
+
+  nmap('<leader>ti', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end,
+    '[T]oggle [I]nlay Hints')
+  vim.lsp.inlay_hint.enable()
 
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
@@ -559,7 +570,13 @@ local servers = {
   clangd = {},
   gopls = {},
   pyright = {},
-  rust_analyzer = {},
+  rust_analyzer = {
+    ["rust-analyzer"] = {
+      checkOnSave = {
+        command = "clippy"
+      }
+    }
+  },
   tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   lua_ls = {

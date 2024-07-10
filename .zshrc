@@ -90,6 +90,7 @@ alias lta="eza --tree -A"
 alias ltga="eza --tree --git-ignore -A"
 alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
 alias nvimf="nvim \$(fzf)"
+alias tmp="cd $(mktemp -d)"
 
 autoload -U promptinit; promptinit
 zstyle :prompt:pure:git:stash show yes
@@ -120,3 +121,4 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+source /etc/profile.d/emscripten.sh

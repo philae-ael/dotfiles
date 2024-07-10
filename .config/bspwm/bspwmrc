@@ -17,6 +17,9 @@ setxkbmap -layout us -variant qwerty-fr -option compose:rwin &
 
 bspc rule -a tev state=floating
 bspc rule -a polkit-gnome-authentication-agent-1 state=floating
+bspc rule -a matplotlib state=floating
+bspc rule -a Matplotlib state=floating
+
 
 ~/.wall/wall
 polybar &
