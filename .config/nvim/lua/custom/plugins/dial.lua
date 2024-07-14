@@ -1,16 +1,29 @@
 return {
-	"zegervdv/nrpattern.nvim",
-	config = function()
-		local patterns = require "nrpattern.default"
-		patterns[{ "true", "false" }] = { priority = 4 }
-		patterns[{ "True", "False" }] = { priority = 5 }
-		patterns[{ "TRUE", "FALSE" }] = { priority = 5 }
-		patterns[{ "on", "off" }] = { priority = 4 }
-		patterns[{ "ON", "OFF" }] = { priority = 5 }
-		patterns[{ "On", "Off" }] = { priority = 5 }
-		patterns[{ "yes", "no" }] = { priority = 4 }
-		patterns[{ "Yes", "No" }] = { priority = 5 }
-		patterns[{ "NO", "YES" }] = { priority = 5 }
-		require "nrpattern".setup(patterns)
-	end
+    "monaqa/dial.nvim",
+    keys = {
+        { "n", "<C-a>", function()
+            require("dial.map").manipulate("increment", "normal")
+        end },
+        { "n", "<C-x>", function()
+            require("dial.map").manipulate("decrement", "normal")
+        end },
+        { "n", "g<C-a>", function()
+            require("dial.map").manipulate("increment", "gnormal")
+        end },
+        { "n", "g<C-x>", function()
+            require("dial.map").manipulate("decrement", "gnormal")
+        end },
+        { "v", "<C-a>", function()
+            require("dial.map").manipulate("increment", "visual")
+        end },
+        { "v", "<C-x>", function()
+            require("dial.map").manipulate("decrement", "visual")
+        end },
+        { "v", "g<C-a>", function()
+            require("dial.map").manipulate("increment", "gvisual")
+        end },
+        { "v", "g<C-x>", function()
+            require("dial.map").manipulate("decrement", "gvisual")
+        end }
+    }
 }
