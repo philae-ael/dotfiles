@@ -30,5 +30,8 @@ xss-lock slock&
 xset s 0 0 
 xset dpms 0 0 0 
 
+eval $(ssh-agent)
+ssh-add ~/.ssh/id_ed25519
+
 dbus-update-activation-environment --all &
 gnome-keyring-daemon --start --components=secrets &
