@@ -37,13 +37,6 @@ require('lazy').setup({
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
-  {
-    'braxtons12/blame_line.nvim',
-    opts = {
-      show_in_insert = true
-    }
-  },
-
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -56,7 +49,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -92,7 +85,12 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',   opts = {} },
+  {
+    'folke/which-key.nvim',
+    opts = {
+      delay = 500,
+    },
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -157,15 +155,24 @@ require('lazy').setup({
 
         -- Text object
         map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
+        gs.setup {
+          current_line_blame_opts = {
+            virt_text = true,
+            virt_text_pos = 'right_align', -- 'eol' | 'overlay' | 'right_align'
+            delay = 0,
+            ignore_whitespace = false,
+            virt_text_priority = 100,
+          },
+        }
       end,
     },
   },
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    'catppuccin/nvim',
+    name = 'catppuccin',
     priority = 1000,
     opts = {
-      flavour = "mocha",
+      flavour = 'mocha',
     },
   },
   {
@@ -192,7 +199,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',  opts = {} },
+  { 'numToStr/Comment.nvim', opts = {} },
   { 'stevearc/dressing.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -213,7 +220,7 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
-      'nvim-telescope/telescope-ui-select.nvim'
+      'nvim-telescope/telescope-ui-select.nvim',
     },
   },
 
@@ -229,11 +236,17 @@ require('lazy').setup({
     'echasnovski/mini.nvim',
     version = '*',
     setup = function()
-      require('mini.bufremove').setup({})
+      require('mini.bufremove').setup {}
     end,
     keys = {
-      { "<leader>bd", function() require("mini.bufremove").delete() end, desc = "[B]uffer delete" }
-    }
+      {
+        '<leader>bd',
+        function()
+          require('mini.bufremove').delete()
+        end,
+        desc = '[B]uffer delete',
+      },
+    },
   },
   'editorconfig/editorconfig-vim',
 
@@ -292,7 +305,7 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-vim.cmd.colorscheme "catppuccin"
+vim.cmd.colorscheme 'catppuccin'
 
 -- [[ Basic Keymaps ]]
 
@@ -325,9 +338,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
   extensions = {
-    ["ui-select"] = {
-      require("telescope.themes").get_dropdown {}
-    }
+    ['ui-select'] = {
+      require('telescope.themes').get_dropdown {},
+    },
   },
   defaults = {
     mappings = {
@@ -340,9 +353,8 @@ require('telescope').setup {
 }
 
 -- Enable telescope fzf native, if installed
-require('telescope').load_extension('fzf')
-require('telescope').load_extension('ui-select')
-
+require('telescope').load_extension 'fzf'
+require('telescope').load_extension 'ui-select'
 
 -- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
@@ -498,12 +510,24 @@ local on_attach = function(_, bufnr)
 
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
+  local imap = function(keys, func, desc)
+    if desc then
+      desc = 'LSP: ' .. desc
+    end
+
+    vim.keymap.set('i', keys, func, { buffer = bufnr, desc = desc })
+  end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', function() vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } } end,
-    '[C]ode [A]ction')
-  nmap('<leader>cf', function() vim.lsp.buf.format() end, '[C]ode [F]ormat')
-  nmap('<leader>cr', function() vim.lsp.buf.rename() end, '[C]ode [R]ename')
+  nmap('<leader>cf', function()
+    vim.lsp.buf.code_action { context = { only = { 'quickfix' } } }
+  end, '[C]ode [F]ixes')
+  nmap('<leader>ca', function()
+    vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } }
+  end, '[C]ode [A]ction')
+  nmap('<leader>cr', function()
+    vim.lsp.buf.rename()
+  end, '[C]ode [R]ename')
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -515,6 +539,7 @@ local on_attach = function(_, bufnr)
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  imap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -524,8 +549,9 @@ local on_attach = function(_, bufnr)
     vim.pretty_print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
 
-  nmap('<leader>ti', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end,
-    '[T]oggle [I]nlay Hints')
+  nmap('<leader>ti', function()
+    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+  end, '[T]oggle [I]nlay Hints')
   vim.lsp.inlay_hint.enable()
 
   -- Create a command `:Format` local to the LSP buffer
@@ -536,16 +562,16 @@ end
 
 -- document existing key chains
 require('which-key').add {
-  { "<leader>c", group = "[C]ode" },
-  { "<leader>d", group = "[D]ocument" },
-  { "<leader>g", group = "[G]it" },
-  { "<leader>h", group = "Git [H]unk" },
-  { "<leader>r", group = "[R]ename" },
-  { "<leader>s", group = "[S]earch" },
-  { "<leader>t", group = "[T]oggle" },
-  { "<leader>w", group = "[W]orkspace" },
-  { "<leader>",  group = "VISUAL <leader>", mode = "v" },
-  { "<leader>h", desc = "Git [H]unk",       mode = "v" },
+  { '<leader>c', group = '[C]ode' },
+  { '<leader>d', group = '[D]ocument' },
+  { '<leader>g', group = '[G]it' },
+  { '<leader>h', group = 'Git [H]unk' },
+  { '<leader>r', group = '[R]ename' },
+  { '<leader>s', group = '[S]earch' },
+  { '<leader>t', group = '[T]oggle' },
+  { '<leader>w', group = '[W]orkspace' },
+  { '<leader>', group = 'VISUAL <leader>', mode = 'v' },
+  { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
 }
 
 -- mason-lspconfig requires that these setup functions are called in this order
@@ -566,11 +592,11 @@ local servers = {
   gopls = {},
   pyright = {},
   rust_analyzer = {
-    ["rust-analyzer"] = {
+    ['rust-analyzer'] = {
       checkOnSave = {
-        command = "clippy"
-      }
-    }
+        command = 'clippy',
+      },
+    },
   },
   tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
@@ -584,9 +610,8 @@ local servers = {
   },
   typst_lsp = {
     settings = {
-      exportPdf = "onType"
-    }
-
+      exportPdf = 'onType',
+    },
   },
 }
 
@@ -667,12 +692,11 @@ cmp.setup {
   },
 }
 
-vim.filetype.add({ extension = { frag = "glsl", vert = "glsl", typst = "typst", asm = "nasm" } })
+vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm' } }
 
+vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
+vim.keymap.set('n', '<leader>Y', [["+Y]])
 
-vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
-vim.keymap.set("n", "<leader>Y", [["+Y]])
-
-vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
+vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
