@@ -1,6 +1,7 @@
 [alias]
 	tree = log --graph --pretty=oneline --abbrev-commit
 	s = status
+	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
 [core]
     pager = delta
 
@@ -13,6 +14,7 @@
 
 [diff]
     colorMoved = default
+	wordRegex = [^[:space:],]+|[,]+
 [credential "https://github.com"]
 	helper = 
 	helper = !/usr/bin/gh auth git-credential

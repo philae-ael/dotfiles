@@ -89,7 +89,7 @@ alias ltg="eza --tree --git-ignore"
 alias lta="eza --tree -A"
 alias ltga="eza --tree --git-ignore -A"
 alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
-alias nvimf="nvim \$(fzf)"
+alias nvimf="nvim '+:Telescope find_files'"
 alias tmp="cd $(mktemp -d)"
 
 autoload -U promptinit; promptinit
