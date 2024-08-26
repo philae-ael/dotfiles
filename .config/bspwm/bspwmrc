@@ -1,6 +1,6 @@
 #! /bin/sh
 
-pgrep -x sxhkd >/dev/null || SHELL=/bin/bash sxhkd &
+pgrep -x sxhkd >/dev/null || SXHKD_SHELL=/bin/bash sxhkd &
 
 bspc monitor -d I II III IV V VI VII VIII IX X
 

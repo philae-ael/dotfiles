@@ -49,7 +49,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -199,7 +199,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',  opts = {} },
   { 'stevearc/dressing.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -570,8 +570,8 @@ require('which-key').add {
   { '<leader>s', group = '[S]earch' },
   { '<leader>t', group = '[T]oggle' },
   { '<leader>w', group = '[W]orkspace' },
-  { '<leader>', group = 'VISUAL <leader>', mode = 'v' },
-  { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
+  { '<leader>',  group = 'VISUAL <leader>', mode = 'v' },
+  { '<leader>h', desc = 'Git [H]unk',       mode = 'v' },
 }
 
 -- mason-lspconfig requires that these setup functions are called in this order
@@ -654,11 +654,10 @@ cmp.setup {
     end,
   },
   completion = {
-    completeopt = 'menu,menuone,noinsert',
+    autocomplete = false,
+    completeopt = 'menu,menuone,noinsert,preview',
   },
   mapping = cmp.mapping.preset.insert {
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
@@ -689,8 +688,9 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
-  },
+  }
 }
+
 
 vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm' } }
 
