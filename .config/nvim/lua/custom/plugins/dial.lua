@@ -10,6 +10,7 @@ return {
         augend.constant.alias.bool,
         augend.constant.new { elements = { 'true', 'false' }, preserve_case = true },
         augend.constant.new { elements = { 'on', 'off' }, preserve_case = true },
+        augend.constant.new { elements = { 'yes', 'no' }, preserve_case = true },
         augend.constant.alias.alpha,
         augend.constant.alias.Alpha,
         augend.semver.alias.semver,
