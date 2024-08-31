@@ -90,7 +90,9 @@ alias lta="eza --tree -A"
 alias ltga="eza --tree --git-ignore -A"
 alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
 alias nvimf="nvim '+:Telescope find_files'"
-alias tmp="cd $(mktemp -d)"
+alias tmp="cd \$(mktemp -d)"
+
+alias make="\\make -j20"
 
 autoload -U promptinit; promptinit
 zstyle :prompt:pure:git:stash show yes
