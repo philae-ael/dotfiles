@@ -92,7 +92,7 @@ alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
 alias nvimf="nvim '+:Telescope find_files'"
 alias tmp="cd \$(mktemp -d)"
 
-alias make="\\make -j20"
+alias make="\\make -j$(( $(nproc) + 1 ))"
 
 autoload -U promptinit; promptinit
 zstyle :prompt:pure:git:stash show yes
@@ -124,3 +124,4 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 source /etc/profile.d/emscripten.sh
+source /opt/google-cloud-cli/completion.zsh.inc

@@ -15,8 +15,8 @@
 	defaultBranch = main
 [push]
 	autoSetupRemote = yes
-[blame]
-	ignoreRevsFile = .git-blame-ignore-revs
+; [blame]
+; 	ignoreRevsFile = .git-blame-ignore-revs
 
 [include]
     path = ~/.config/git/personal
@@ -35,3 +35,5 @@
 	rebase = true
 [rerere]
 	enabled = true
+[submodule]
+	recurse = true
