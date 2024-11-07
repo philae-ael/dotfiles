@@ -9,6 +9,9 @@ vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
 vim.opt.swapfile = false
 vim.opt.makeprg = 'make -j20'
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.opt.termguicolors = true
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -47,8 +50,13 @@ require('lazy').setup({
     },
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' },
   },
-  -- NOTE: This is where your plugins related to LSP can be installed.
-  --  The configuration is done below. Search for lspconfig to find it below.
+  {
+    'nvim-tree/nvim-tree.lua',
+    opts = {},
+    keys = {
+      { "<leader>tt", "<CMD>NvimTreeToggle<cr>", desc = "[T]oggle Nvim[Tree]" },
+    }
+  },
   {
     -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -59,7 +67,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -210,7 +218,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',  opts = {} },
   { 'stevearc/dressing.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -229,12 +237,7 @@ require('lazy').setup({
       -- requirements installed.
       {
         'nvim-telescope/telescope-fzf-native.nvim',
-        -- NOTE: If you are having trouble with this installation,
-        --       refer to the README for telescope-fzf-native for more instructions.
-        build = 'make',
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
+        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release'
       },
       'nvim-telescope/telescope-ui-select.nvim',
     },
@@ -586,8 +589,8 @@ require('which-key').add {
   { '<leader>s', group = '[S]earch' },
   { '<leader>t', group = '[T]oggle' },
   { '<leader>w', group = '[W]orkspace' },
-  { '<leader>', group = 'VISUAL <leader>', mode = 'v' },
-  { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
+  { '<leader>',  group = 'VISUAL <leader>', mode = 'v' },
+  { '<leader>h', desc = 'Git [H]unk',       mode = 'v' },
 }
 
 -- mason-lspconfig requires that these setup functions are called in this order
@@ -715,4 +718,6 @@ vim.keymap.set('n', '<leader>Y', [["+Y]])
 vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
 vim.keymap.set({ 'n', 'v' }, '<leader>cm', ':make<CR><CR>:botright cwindow<cr>')
 -- The line beneath this is called `modeline`. See `:help modeline`
+-- vim: ts=2 sts=2 sw=2 et
+-- vim: ts=2 sts=2 sw=2 et
 -- vim: ts=2 sts=2 sw=2 et
