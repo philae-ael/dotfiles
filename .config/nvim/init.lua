@@ -1,28 +1,19 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 vim.opt.tabstop = 2
 vim.opt.expandtab = true
 vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
+
 vim.opt.swapfile = false
 vim.opt.makeprg = 'make -j20'
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-vim.opt.termguicolors = true
-vim.o.hlsearch = false
-vim.wo.number = true
-vim.o.mouse = 'a'
-vim.o.breakindent = true
-vim.o.undofile = true
-vim.o.ignorecase = true
-vim.o.smartcase = true
+
 vim.wo.signcolumn = 'yes'
 vim.o.updatetime = 250
 vim.o.timeoutlen = 300
-vim.o.completeopt = 'menuone,noselect'
-vim.o.termguicolors = true
+
 vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm', slang = 'slang' } }
 
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
@@ -36,15 +27,6 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
-
-local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
-vim.api.nvim_create_autocmd('TextYankPost', {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = '*',
-})
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.uv.fs_stat(lazypath) then
@@ -221,7 +203,6 @@ require('lazy').setup({
     main = 'ibl',
     opts = {},
   },
-  { 'numToStr/Comment.nvim', opts = {} },
   { 'stevearc/dressing.nvim', opts = {} },
   {
     'nvim-telescope/telescope.nvim',
@@ -365,10 +346,21 @@ require('lazy').setup({
     'echasnovski/mini.nvim',
     version = false,
     config = function()
-      require('mini.bufremove').setup {}
-      require('mini.surround').setup {}
+      require('mini.ai').setup {}
       require('mini.align').setup {}
+      require('mini.basics').setup {
+        options = {
+          extra_ui = true,
+        },
+        mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
+      }
+      require('mini.bufremove').setup {}
+      require('mini.cursorword').setup {}
+      require('mini.operators').setup {}
+      require('mini.trailspace').setup {}
+      require('mini.surround').setup {}
     end,
+    lazy = false,
     -- stylua: ignore
     keys = {
       { '<leader>bd', function() require('mini.bufremove').delete() end, desc = '[B]uffer delete' },
@@ -443,30 +435,6 @@ require('lazy').setup({
           vim.api.nvim_buf_create_user_command(event.buf, 'Format', function(_)
             vim.lsp.buf.format()
           end, { desc = 'Format current buffer with LSP' })
-
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.document_highlight,
-            })
-
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.clear_references,
-            })
-
-            vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-              end,
-            })
-          end
         end,
       })
 
