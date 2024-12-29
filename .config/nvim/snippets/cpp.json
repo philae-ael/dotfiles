@@ -1,0 +1,11 @@
+{
+    "doxgroup": {
+        "prefix": "doxgroup",
+        "body": [
+            "/// \\addtogroup ${1:group}",
+            "/// @{",
+            "$0",
+            "/// @}"
+        ]
+    }
+}

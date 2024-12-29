@@ -1,7 +1,7 @@
 
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""
-CASE_SENSITIVE="true"
+CASE_SENSITIVE="false"
 HYPHEN_INSENSITIVE="true"
 zstyle ':omz:update' mode auto
 
@@ -24,7 +24,6 @@ alias ltg="eza --tree --git-ignore"
 alias lta="eza --tree -A"
 alias ltga="eza --tree --git-ignore -A"
 alias cdf="cd \$(fd  --type d  --strip-cwd-prefix | fzf)"
-alias nvimf="nvim '+:Telescope find_files'"
 alias tmp="cd \$(mktemp -d)"
 alias ze=zellij
 
