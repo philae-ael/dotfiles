@@ -14,6 +14,18 @@ vim.wo.signcolumn = 'yes'
 vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 
+vim.o.pumblend = 10 -- Make builtin completion menus slightly transparent
+vim.o.pumheight = 10 -- Make popup menu smaller
+vim.o.winblend = 10 -- Make floating windows slightly transparent
+
+vim.opt.listchars = {
+  tab = '▎ ',
+  extends = '…',
+  precedes = '…',
+  nbsp = '␣',
+}
+vim.o.list = true
+
 vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm', slang = 'slang' } }
 
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
@@ -48,7 +60,14 @@ require('lazy').setup({
   'norcalli/nvim-colorizer.lua',
   { 'kaarmu/typst.vim', ft = 'typst' },
   { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
-  { 'stevearc/oil.nvim', opts = {}, cmd = 'Oil', keys = { { '<leader>-', '<cmd>Oil<CR>', desc = 'Open parent directory' } } },
+  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {} },
+  { 'stevearc/dressing.nvim', opts = {} },
+  {
+    'stevearc/oil.nvim',
+    cmd = 'Oil',
+    keys = { { '<leader>-', '<cmd>Oil<CR>', desc = 'Open parent directory' } },
+    opts = {},
+  },
   {
     'MeanderingProgrammer/render-markdown.nvim',
     opts = { pipe_table = { style = 'normal' } },
@@ -125,7 +144,7 @@ require('lazy').setup({
         virt_text_priority = 100,
       },
       on_attach = function(bufnr)
-        local gs = package.loaded.gitsigns
+        local gs = require 'gitsigns'
 
         local function map(mode, l, r, opts)
           opts = opts or {}
@@ -133,27 +152,22 @@ require('lazy').setup({
           vim.keymap.set(mode, l, r, opts)
         end
 
-        map({ 'n', 'v' }, ']c', function()
-          if vim.wo.diff then
-            return ']c'
-          end
-          vim.schedule(function()
-            gs.next_hunk()
-          end)
-          return '<Ignore>'
-        end, { expr = true, desc = 'Jump to next hunk' })
-
-        map({ 'n', 'v' }, '[c', function()
-          if vim.wo.diff then
-            return '[c'
-          end
-          vim.schedule(function()
-            gs.prev_hunk()
-          end)
-          return '<Ignore>'
-        end, { expr = true, desc = 'Jump to previous hunk' })
+        local function mapnodiff(mode, l, r, opts)
+          map(mode, l, function()
+            if vim.wo.diff then
+              return l
+            end
+            vim.schedule(r)
+            return '<Ignore>'
+          end, opts)
+        end
 
         -- stylua: ignore start
+        mapnodiff({ 'n', 'v' }, '[c', function() gs.nav_hunk 'prev' end, { expr = true, desc = 'Jump to next hunk' })
+        mapnodiff({ 'n', 'v' }, ']c', function() gs.nav_hunk 'next' end, { expr = true, desc = 'Jump to next hunk' })
+        mapnodiff({ 'n', 'v' }, '[C', function() gs.nav_hunk 'first' end, { expr = true, desc = 'Jump to next hunk' })
+        mapnodiff({ 'n', 'v' }, ']C', function() gs.nav_hunk 'last' end, { expr = true, desc = 'Jump to next hunk' })
+
         map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'stage git hunk' })
         map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'reset git hunk' })
         map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
@@ -195,15 +209,6 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Add indentation guides even on blank lines
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help ibl`
-    main = 'ibl',
-    opts = {},
-  },
-  { 'stevearc/dressing.nvim', opts = {} },
   {
     'nvim-telescope/telescope.nvim',
     branch = '0.1.x',
@@ -350,7 +355,7 @@ require('lazy').setup({
       require('mini.align').setup {}
       require('mini.basics').setup {
         options = {
-          extra_ui = true,
+          extra_ui = false,
         },
         mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
       }
