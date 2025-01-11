@@ -7,9 +7,9 @@ zstyle ':omz:update' mode auto
 
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-plugins=(git sudo direnv dirhistory zsh-syntax-highlighting)
+plugins=(git sudo direnv dirhistory zsh-syntax-highlighting poetry poetry-env)
 
-zstyle ':omz:*' aliases no
+# zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh
 
 alias l="eza -lh"
@@ -40,3 +40,7 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 source /usr/share/nvm/init-nvm.sh
 
 eval "$(starship init zsh)"
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"

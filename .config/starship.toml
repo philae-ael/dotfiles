@@ -92,7 +92,7 @@ detect_folders = ["node_modules"]
 detect_extensions = []
 
 [python]
-format = "[ ${symbol}${version}]($style)"
+format = '[ ${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
 symbol = " "
 version_format = "${raw}"
 style = "bold bright-yellow"
