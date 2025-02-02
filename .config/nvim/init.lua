@@ -26,7 +26,7 @@ vim.opt.listchars = {
 }
 vim.o.list = true
 
-vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm', slang = 'slang' } }
+vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm', slang = 'shaderslang' } }
 
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
 vim.keymap.set('n', '<leader>Y', [["+Y]])
@@ -58,6 +58,18 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
   'tpope/vim-sleuth',
   'norcalli/nvim-colorizer.lua',
+  {
+    'ray-x/go.nvim',
+    opts = {},
+    ft = { 'go', 'gomod' },
+    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
+  },
+  {
+    'brenoprata10/nvim-highlight-colors',
+    opts = {
+      render = 'virtual',
+    },
+  },
   { 'kaarmu/typst.vim', ft = 'typst' },
   { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
   { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {} },
@@ -106,7 +118,7 @@ require('lazy').setup({
       signature = { enabled = true },
       completion = {
         documentation = {
-          auto_show = true,
+          auto_show = false,
           auto_show_delay_ms = 500,
         },
       },
@@ -227,7 +239,6 @@ require('lazy').setup({
           fzf = {},
         },
         defaults = {
-          file_ignore_patterns = { 'vendor', 'build', 'assets' },
           mappings = {
             i = {
               ['<C-u>'] = false,
@@ -274,7 +285,6 @@ require('lazy').setup({
           'go',
           'lua',
           'python',
-          'rust',
           'tsx',
           'javascript',
           'typescript',
@@ -288,9 +298,18 @@ require('lazy').setup({
 
         auto_install = true,
         sync_install = false,
-        ignore_install = {},
+        ignore_install = { 'rust' },
         modules = {},
-        highlight = { enable = true },
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = false,
+          use_languagetree = false,
+          disable = function(_, bufnr)
+            local buf_name = vim.api.nvim_buf_get_name(bufnr)
+            local file_size = vim.api.nvim_call_function('getfsize', { buf_name })
+            return file_size > 256 * 1024
+          end,
+        },
         indent = { enable = true },
         incremental_selection = {
           enable = true,
@@ -360,7 +379,7 @@ require('lazy').setup({
         mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
       }
       require('mini.bufremove').setup {}
-      require('mini.cursorword').setup {}
+      -- require('mini.cursorword').setup {}
       require('mini.operators').setup {}
       require('mini.trailspace').setup {}
       require('mini.surround').setup {}
@@ -369,6 +388,19 @@ require('lazy').setup({
     -- stylua: ignore
     keys = {
       { '<leader>bd', function() require('mini.bufremove').delete() end, desc = '[B]uffer delete' },
+    },
+  },
+  {
+    'folke/trouble.nvim',
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = 'Trouble',
+    keys = {
+      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', desc = 'Diagnostics' },
+      { '<leader>xX', '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', desc = 'Buffer Diagnostics' },
+      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = '[L]ocation List' },
+      { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', desc = '[Q]uickfix List' },
+      { '<leader>cs', '<cmd>Trouble symbols toggle focus=false<cr>', desc = '[S]ymbols' },
+      { '<leader>cl', '<cmd>Trouble lsp toggle focus=false win.position=right<cr>', desc = '[L]SP Definitions / references / ...' },
     },
   },
   'editorconfig/editorconfig-vim',
@@ -385,6 +417,11 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
+          -- local client = vim.lsp.get_client_by_id(event.data.client_id)
+          -- if client then
+          --   client.server_capabilities.semanticTokensProvider = nil
+          -- end
+
           local nmap = function(keys, func, desc)
             if desc then
               desc = 'LSP: ' .. desc
@@ -449,16 +486,6 @@ require('lazy').setup({
         clangd = {},
         gopls = {},
         pyright = {},
-        rust_analyzer = {
-          ['rust-analyzer'] = {
-            checkOnSave = {
-              command = 'clippy',
-            },
-            diagnostic = {
-              refreshSupport = false,
-            },
-          },
-        },
         html = { filetypes = { 'html', 'twig', 'hbs' } },
         lua_ls = {
           Lua = {
@@ -466,9 +493,6 @@ require('lazy').setup({
             telemetry = { enable = false },
             diagnostics = { disable = { 'missing-fields' } },
           },
-        },
-        slang = {
-          filetypes = { 'hlsl', 'shaderslang', 'slang' },
         },
       }
       require('mason').setup()
@@ -490,8 +514,13 @@ require('lazy').setup({
           end,
         },
       }
+
+      require('lspconfig').slangd.setup {
+        capabilities = capabilities,
+      }
     end,
   },
+  { 'mrcjkb/rustaceanvim', version = '^5', lazy = false },
   { import = 'custom.plugins' },
 }, {})
 
