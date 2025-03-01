@@ -7,7 +7,7 @@ zstyle ':omz:update' mode auto
 
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting poetry poetry-env)
+plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting zsh-uv-env)
 
 # zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh

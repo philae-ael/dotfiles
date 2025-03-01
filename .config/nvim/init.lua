@@ -32,6 +32,8 @@ vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
 vim.keymap.set('n', '<leader>Y', [["+Y]])
 vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
 vim.keymap.set({ 'n', 'v' }, '<leader>cm', ':make<CR><CR>:botright cwindow<cr>')
+vim.keymap.set({ 'v' }, '<leader>zm', ":'<'>%!zm<cr>")
+vim.keymap.set({ 'n' }, '<leader>zm', ':%!zm<cr>')
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
@@ -72,13 +74,16 @@ require('lazy').setup({
   },
   { 'kaarmu/typst.vim', ft = 'typst' },
   { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
-  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {} },
+  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {}, cond = not vim.g.vscode },
   { 'stevearc/dressing.nvim', opts = {} },
   {
     'stevearc/oil.nvim',
     cmd = 'Oil',
     keys = { { '<leader>-', '<cmd>Oil<CR>', desc = 'Open parent directory' } },
-    opts = {},
+    lazy = false,
+    opts = {
+      default_file_explorer = true,
+    },
   },
   {
     'MeanderingProgrammer/render-markdown.nvim',
@@ -123,6 +128,7 @@ require('lazy').setup({
         },
       },
     },
+    cond = not vim.g.vscode,
   },
   {
     'folke/which-key.nvim',
@@ -144,6 +150,7 @@ require('lazy').setup({
         { '<leader>h', desc = 'Git [H]unk', mode = 'v' },
       },
     },
+    cond = not vim.g.vscode,
   },
   {
     'lewis6991/gitsigns.nvim',
@@ -480,7 +487,10 @@ require('lazy').setup({
         end,
       })
 
-      local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities())
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      if not vim.g.vscode then
+        capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
+      end
 
       local servers = {
         clangd = {},
