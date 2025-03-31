@@ -17,6 +17,7 @@ vim.o.timeoutlen = 300
 vim.o.pumblend = 10 -- Make builtin completion menus slightly transparent
 vim.o.pumheight = 10 -- Make popup menu smaller
 vim.o.winblend = 10 -- Make floating windows slightly transparent
+vim.o.winborder = 'rounded'
 
 vim.opt.listchars = {
   tab = '▎ ',
@@ -37,10 +38,10 @@ vim.keymap.set({ 'n' }, '<leader>zm', ':%!zm<cr>')
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+vim.diagnostic.config { jump = { float = true }, virtual_lines = true }
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.uv.fs_stat(lazypath) then
@@ -56,26 +57,43 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
+  'editorconfig/editorconfig-vim',
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
   'tpope/vim-sleuth',
-  'norcalli/nvim-colorizer.lua',
+  'OXY2DEV/markview.nvim',
+  { 'brenoprata10/nvim-highlight-colors', opts = {} },
+  { 'kaarmu/typst.vim', ft = 'typst' },
+  { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' }, opts = {
+    keywords = { FIX = { alias = { 'ERROR' } } },
+  } },
+  { 'folke/snacks.nvim', opts = {
+    input = { enabled = true },
+  } },
+  { 'kylechui/nvim-surround', opts = {} },
   {
-    'ray-x/go.nvim',
-    opts = {},
-    ft = { 'go', 'gomod' },
-    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
-  },
-  {
-    'brenoprata10/nvim-highlight-colors',
-    opts = {
-      render = 'virtual',
+    'echasnovski/mini.nvim',
+    version = false,
+    config = function()
+      require('mini.ai').setup {}
+      require('mini.align').setup {}
+      require('mini.basics').setup {
+        options = {
+          extra_ui = false,
+        },
+        mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
+      }
+      require('mini.bufremove').setup {}
+      require('mini.cursorword').setup {}
+      -- require('mini.operators').setup {}
+      require('mini.trailspace').setup {}
+    end,
+    lazy = false,
+    -- stylua: ignore
+    keys = {
+      { '<leader>bd', function() require('mini.bufremove').delete() end, desc = '[B]uffer delete' },
     },
   },
-  { 'kaarmu/typst.vim', ft = 'typst' },
-  { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' } },
-  { 'lukas-reineke/indent-blankline.nvim', main = 'ibl', opts = {}, cond = not vim.g.vscode },
-  { 'stevearc/dressing.nvim', opts = {} },
   {
     'stevearc/oil.nvim',
     cmd = 'Oil',
@@ -84,19 +102,6 @@ require('lazy').setup({
     opts = {
       default_file_explorer = true,
     },
-  },
-  {
-    'MeanderingProgrammer/render-markdown.nvim',
-    opts = { pipe_table = { style = 'normal' } },
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' },
-  },
-  {
-    'iamcco/markdown-preview.nvim',
-    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
-    ft = { 'markdown' },
-    build = function()
-      vim.fn['mkdp#util#install']()
-    end,
   },
   {
     'folke/lazydev.nvim',
@@ -155,6 +160,7 @@ require('lazy').setup({
   {
     'lewis6991/gitsigns.nvim',
     opts = {
+      current_line_blame = true,
       current_line_blame_opts = {
         virt_text = true,
         virt_text_pos = 'right_align', -- 'eol' | 'overlay' | 'right_align'
@@ -192,17 +198,31 @@ require('lazy').setup({
         map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
         map('n', '<leader>hr', gs.reset_hunk, { desc = 'git reset hunk' })
         map('n', '<leader>hS', gs.stage_buffer, { desc = 'git Stage buffer' })
-        map('n', '<leader>hu', gs.undo_stage_hunk, { desc = 'undo stage hunk' })
         map('n', '<leader>hR', gs.reset_buffer, { desc = 'git Reset buffer' })
         map('n', '<leader>hp', gs.preview_hunk, { desc = 'preview git hunk' })
-        map('n', '<leader>hb', function() gs.blame_line { full = false } end, { desc = 'git blame line' })
+        map('n', '<leader>hb', function() gs.blame_line { full = true } end, { desc = 'git blame line' })
+        map('n', '<leader>hB', gs.blame, { desc = 'git blame file' })
         map('n', '<leader>hd', gs.diffthis, { desc = 'git diff against index' })
         map('n', '<leader>hD', function() gs.diffthis '~' end, { desc = 'git diff against last commit' })
         map('n', '<leader>tb', gs.toggle_current_line_blame, { desc = 'toggle git blame line' })
-        map('n', '<leader>td', gs.toggle_deleted, { desc = 'toggle git show deleted' })
+        map('n', '<leader>cb', gs.blame, { desc = 'git blame' })
+        map('n', '<leader>td', gs.preview_hunk_inline, { desc = 'toggle git show deleted' })
         map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
         -- stylua: ignore end
       end,
+    },
+  },
+  {
+    'folke/trouble.nvim',
+    opts = {}, -- for default options, refer to the configuration section for custom setup.
+    cmd = 'Trouble',
+    keys = {
+      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', desc = 'Diagnostics' },
+      { '<leader>xX', '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', desc = 'Buffer Diagnostics' },
+      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = '[L]ocation List' },
+      { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', desc = '[Q]uickfix List' },
+      { '<leader>cs', '<cmd>Trouble symbols toggle focus=false<cr>', desc = '[S]ymbols' },
+      { '<leader>cl', '<cmd>Trouble lsp toggle focus=false win.position=right<cr>', desc = '[L]SP Definitions / references / ...' },
     },
   },
   {
@@ -227,7 +247,6 @@ require('lazy').setup({
       },
     },
   },
-
   {
     'nvim-telescope/telescope.nvim',
     branch = '0.1.x',
@@ -277,7 +296,6 @@ require('lazy').setup({
       }
 ,
   },
-
   {
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
@@ -374,44 +392,6 @@ require('lazy').setup({
     end,
   },
   {
-    'echasnovski/mini.nvim',
-    version = false,
-    config = function()
-      require('mini.ai').setup {}
-      require('mini.align').setup {}
-      require('mini.basics').setup {
-        options = {
-          extra_ui = false,
-        },
-        mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
-      }
-      require('mini.bufremove').setup {}
-      -- require('mini.cursorword').setup {}
-      require('mini.operators').setup {}
-      require('mini.trailspace').setup {}
-      require('mini.surround').setup {}
-    end,
-    lazy = false,
-    -- stylua: ignore
-    keys = {
-      { '<leader>bd', function() require('mini.bufremove').delete() end, desc = '[B]uffer delete' },
-    },
-  },
-  {
-    'folke/trouble.nvim',
-    opts = {}, -- for default options, refer to the configuration section for custom setup.
-    cmd = 'Trouble',
-    keys = {
-      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', desc = 'Diagnostics' },
-      { '<leader>xX', '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', desc = 'Buffer Diagnostics' },
-      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = '[L]ocation List' },
-      { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', desc = '[Q]uickfix List' },
-      { '<leader>cs', '<cmd>Trouble symbols toggle focus=false<cr>', desc = '[S]ymbols' },
-      { '<leader>cl', '<cmd>Trouble lsp toggle focus=false win.position=right<cr>', desc = '[L]SP Definitions / references / ...' },
-    },
-  },
-  'editorconfig/editorconfig-vim',
-  {
     'neovim/nvim-lspconfig',
     dependencies = {
       { 'williamboman/mason.nvim' },
@@ -424,11 +404,6 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
-          -- local client = vim.lsp.get_client_by_id(event.data.client_id)
-          -- if client then
-          --   client.server_capabilities.semanticTokensProvider = nil
-          -- end
-
           local nmap = function(keys, func, desc)
             if desc then
               desc = 'LSP: ' .. desc
@@ -436,36 +411,15 @@ require('lazy').setup({
 
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = desc })
           end
-          local imap = function(keys, func, desc)
-            if desc then
-              desc = 'LSP: ' .. desc
-            end
-
-            vim.keymap.set('i', keys, func, { buffer = event.buf, desc = desc })
-          end
-
-          nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
           nmap('<leader>cf', function()
             vim.lsp.buf.code_action { context = { only = { 'quickfix' } } }
           end, '[C]ode [F]ixes')
           nmap('<leader>ca', function()
             vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } }
           end, '[C]ode [A]ction')
-          nmap('<leader>cr', function()
-            vim.lsp.buf.rename()
-          end, '[C]ode [R]ename')
 
-          nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-          nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-          nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
           nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-          nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
           nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-
-          -- See `:help K` for why this keymap
-          nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-          nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-          imap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
           -- Lesser used LSP functionality
           nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -479,11 +433,6 @@ require('lazy').setup({
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
           end, '[T]oggle [I]nlay Hints')
           vim.lsp.inlay_hint.enable(false)
-
-          -- Create a command `:Format` local to the LSP buffer
-          vim.api.nvim_buf_create_user_command(event.buf, 'Format', function(_)
-            vim.lsp.buf.format()
-          end, { desc = 'Format current buffer with LSP' })
         end,
       })
 
@@ -530,8 +479,159 @@ require('lazy').setup({
       }
     end,
   },
+  {
+    'stevearc/conform.nvim',
+    event = { 'BufWritePre' },
+    cmd = { 'ConformInfo' },
+    keys = {
+      {
+        -- Customize or remove this keymap to your liking
+        '<leader>f',
+        function()
+          require('conform').format { async = true }
+        end,
+        mode = '',
+        desc = '[F]ormat buffer',
+      },
+    },
+    opts = {
+      -- Define your formatters
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        python = { 'black', 'isort' },
+        javascript = { 'prettier' },
+        css = { 'prettier' },
+        sql = { 'sqlfmt' },
+        typescript = { 'prettier' },
+        typescriptreact = { 'prettier' },
+      },
+      -- Set default options
+      default_format_opts = {
+        lsp_format = 'fallback',
+      },
+      -- Set up format-on-save
+      format_on_save = { timeout_ms = 500 },
+      -- Customize formatters
+      formatters = {
+        shfmt = {
+          prepend_args = { '-i', '2' },
+        },
+        sqlfmt = {
+          prepend_args = { '-l', '120' },
+        },
+      },
+    },
+    init = function()
+      vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+    end,
+  },
+  { 'ray-x/go.nvim', opts = {}, ft = { 'go', 'gomod' }, build = ':lua require("go.install").update_all_sync()' },
   { 'mrcjkb/rustaceanvim', version = '^5', lazy = false },
-  { import = 'custom.plugins' },
+  {
+    'monaqa/dial.nvim',
+    config = function()
+      local augend = require 'dial.augend'
+      require('dial.config').augends:register_group {
+        default = {
+          augend.integer.alias.decimal_int,
+          augend.integer.alias.hex,
+          augend.date.alias['%Y/%m/%d'],
+          augend.constant.alias.bool,
+          augend.constant.new { elements = { 'true', 'false' }, preserve_case = true },
+          augend.constant.new { elements = { 'on', 'off' }, preserve_case = true },
+          augend.constant.new { elements = { 'yes', 'no' }, preserve_case = true },
+          augend.constant.alias.alpha,
+          augend.constant.alias.Alpha,
+          augend.semver.alias.semver,
+        },
+        typescript = {
+          augend.constant.new { elements = { 'let', 'const' } },
+        },
+        visual = {},
+      }
+    end,
+    keys = {
+      {
+        mode = 'n',
+        '<C-a>',
+        function()
+          require('dial.map').manipulate('increment', 'normal')
+        end,
+      },
+      {
+        mode = 'n',
+        '<C-x>',
+        function()
+          require('dial.map').manipulate('decrement', 'normal')
+        end,
+      },
+      {
+        mode = 'n',
+        'g<C-a>',
+        function()
+          require('dial.map').manipulate('increment', 'gnormal')
+        end,
+      },
+      {
+        mode = 'n',
+        'g<C-x>',
+        function()
+          require('dial.map').manipulate('decrement', 'gnormal')
+        end,
+      },
+      {
+        mode = 'v',
+        '<C-a>',
+        function()
+          require('dial.map').manipulate('increment', 'visual')
+        end,
+      },
+      {
+        mode = 'v',
+        '<C-x>',
+        function()
+          require('dial.map').manipulate('decrement', 'visual')
+        end,
+      },
+      {
+        mode = 'v',
+        'g<C-a>',
+        function()
+          require('dial.map').manipulate('increment', 'gvisual')
+        end,
+      },
+      {
+        mode = 'v',
+        'g<C-x>',
+        function()
+          require('dial.map').manipulate('decrement', 'gvisual')
+        end,
+      },
+    },
+  },
+  {
+    'folke/flash.nvim',
+    event = 'VeryLazy',
+    ---@module "flash"
+    ---@type Flash.Config
+    opts = {
+      label = {
+        rainbow = { enabled = false },
+      },
+      modes = {
+        search = { enabled = false },
+        char = { enabled = false },
+      },
+    },
+    -- stylua: ignore
+  keys = {
+    { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+    { "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+    { "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+    { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+    { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" }
+  },
+  },
 }, {})
 
 -- vim: ts=2 sts=2 sw=2 et

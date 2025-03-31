@@ -12,6 +12,7 @@ plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting zsh-uv-en
 # zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh
 
+alias ssh="TERM=xterm \\ssh"
 alias l="eza -lh"
 alias ls=eza
 alias ll="eza -lh"
@@ -44,3 +45,9 @@ eval "$(starship init zsh)"
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init - zsh)"
+
+function idot() {
+  dot -Gmargin=0.7 "-Gbgcolor=#ffffff00" -Gcolor=white -Gfontcolor=white -Ncolor=white -Nfontcolor=white -Ecolor=white -Gdpi=200 -Tpng \
+    | magick - -resize $(kitty +kitten icat --print-window-size | awk -Fx '{print $1 "x" ($2 - 100)}')\> png:- \
+    | kitty +kitten icat
+}
