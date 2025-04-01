@@ -19,29 +19,68 @@ vim.o.pumheight = 10 -- Make popup menu smaller
 vim.o.winblend = 10 -- Make floating windows slightly transparent
 vim.o.winborder = 'rounded'
 
-vim.opt.listchars = {
+vim.opt.listchars:append {
   tab = '▎ ',
   extends = '…',
   precedes = '…',
   nbsp = '␣',
+  conceal = '.',
 }
 vim.o.list = true
+vim.opt.fillchars:append { vert = '┃', horiz = '━', horizdown = '┳', horizup = '┻', verthoriz = '╋', vertleft = '┫', vertright = '┣' }
 
 vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', asm = 'nasm', slang = 'shaderslang' } }
 
-vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
-vim.keymap.set('n', '<leader>Y', [["+Y]])
-vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]])
+vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]], { desc = '[Y]ank into system clipboard' })
+vim.keymap.set('n', '<leader>Y', [["+Y]], { desc = '[Y]ank until the end of line into system clipboard' })
+vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+p]], { desc = '[P]aste from system clipboard' })
+vim.keymap.set('n', '<leader>Y', [["+P]], { desc = '[P]aste from system clipboard' })
+vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]], { desc = '[D]elete with modifying registers' })
 vim.keymap.set({ 'n', 'v' }, '<leader>cm', ':make<CR><CR>:botright cwindow<cr>')
 vim.keymap.set({ 'v' }, '<leader>zm', ":'<'>%!zm<cr>")
 vim.keymap.set({ 'n' }, '<leader>zm', ':%!zm<cr>')
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+vim.keymap.set('n', 'gV', '"`[" . strpart(getregtype(), 0, 1) . "`]"', { expr = true, replace_keycodes = false, desc = 'Visually select changed text' })
+vim.keymap.set('n', ']e', function()
+  vim.diagnostic.jump { count = vim.v.count1, severity = { min = 'ERROR' } }
+end, { desc = 'Jump to the next diagnostic in the current buffer' })
+vim.keymap.set('n', '[e', function()
+  vim.diagnostic.jump { count = -vim.v.count1, severity = { min = 'ERROR' } }
+end, { desc = 'Jump to the previous diagnostic in the current buffer' })
 
-vim.diagnostic.config { jump = { float = true }, virtual_lines = true }
+local virtual_line_config = { current_line = true }
+
+vim.diagnostic.config {
+  underline = true,
+  virtual_text = { virt_text_pos = 'eol_right_align' },
+  virtual_lines = virtual_line_config,
+  severity_sort = true,
+  float = {
+    focusable = false,
+    style = 'minimal',
+    border = 'rounded',
+    source = 'if_many',
+    header = '',
+  },
+}
+
+local diag_config_basic = false
+vim.keymap.set('n', '<leader>td', function()
+  diag_config_basic = not diag_config_basic
+  ---@param new vim.diagnostic.Opts
+  local function set_config(new)
+    local old = vim.diagnostic.config(nil)
+    vim.diagnostic.config(vim.tbl_deep_extend('force', old or {}, new))
+  end
+
+  if diag_config_basic then
+    set_config { virtual_lines = false }
+  else
+    set_config { virtual_lines = virtual_line_config }
+  end
+end, { desc = 'Toggle [d]iagnostic virtual_lines' })
 
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.uv.fs_stat(lazypath) then
@@ -81,11 +120,10 @@ require('lazy').setup({
         options = {
           extra_ui = false,
         },
-        mappings = { basic = false, option_toggle_prefix = '<leader>\\' },
+        mappings = { basic = false },
       }
       require('mini.bufremove').setup {}
       require('mini.cursorword').setup {}
-      -- require('mini.operators').setup {}
       require('mini.trailspace').setup {}
     end,
     lazy = false,
@@ -195,19 +233,20 @@ require('lazy').setup({
 
         map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'stage git hunk' })
         map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end, { desc = 'reset git hunk' })
-        map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
-        map('n', '<leader>hr', gs.reset_hunk, { desc = 'git reset hunk' })
-        map('n', '<leader>hS', gs.stage_buffer, { desc = 'git Stage buffer' })
-        map('n', '<leader>hR', gs.reset_buffer, { desc = 'git Reset buffer' })
-        map('n', '<leader>hp', gs.preview_hunk, { desc = 'preview git hunk' })
-        map('n', '<leader>hb', function() gs.blame_line { full = true } end, { desc = 'git blame line' })
-        map('n', '<leader>hB', gs.blame, { desc = 'git blame file' })
-        map('n', '<leader>hd', gs.diffthis, { desc = 'git diff against index' })
-        map('n', '<leader>hD', function() gs.diffthis '~' end, { desc = 'git diff against last commit' })
-        map('n', '<leader>tb', gs.toggle_current_line_blame, { desc = 'toggle git blame line' })
-        map('n', '<leader>cb', gs.blame, { desc = 'git blame' })
-        map('n', '<leader>td', gs.preview_hunk_inline, { desc = 'toggle git show deleted' })
-        map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
+        map('n', '<leader>hs', gs.stage_hunk, { desc = 'git [S]tage hunk' })
+        map('n', '<leader>hr', gs.reset_hunk, { desc = 'git [R]eset hunk' })
+        map('n', '<leader>hS', gs.stage_buffer, { desc = 'git [S]tage buffer' })
+        map('n', '<leader>hR', gs.reset_buffer, { desc = 'git [R]eset buffer' })
+        map('n', '<leader>hp', gs.preview_hunk, { desc = 'git [P]review hunk' })
+        map('n', '<leader>hi', gs.preview_hunk_inline, { desc = 'git preview hunk [i]nline' })
+
+        -- map('n', '<leader>gb', function() gs.blame_line { full = true } end, { desc = 'git blame line' })
+        map('n', '<leader>gb', gs.blame, { desc = 'git [B]lame file' })
+        map('n', '<leader>gd', gs.diffthis, { desc = 'git [D]iff against index' })
+        map('n', '<leader>gD', function() gs.diffthis '~' end, { desc = 'git [D]iff against last commit ~' })
+
+        map('n', '<leader>tb', gs.toggle_current_line_blame, { desc = 'toggle git [B]lame line' })
+        map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git [H]unk' })
         -- stylua: ignore end
       end,
     },
@@ -418,10 +457,10 @@ require('lazy').setup({
             vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } }
           end, '[C]ode [A]ction')
 
-          nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
           nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
           -- Lesser used LSP functionality
+          nmap('gd', vim.lsp.buf.definition, '[G]oto [d]efinition')
           nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
           nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
           nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
