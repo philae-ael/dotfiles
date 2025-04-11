@@ -33,8 +33,8 @@ vim.filetype.add { extension = { frag = 'glsl', vert = 'glsl', typst = 'typst', 
 
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]], { desc = '[Y]ank into system clipboard' })
 vim.keymap.set('n', '<leader>Y', [["+Y]], { desc = '[Y]ank until the end of line into system clipboard' })
-vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+p]], { desc = '[P]aste from system clipboard' })
-vim.keymap.set('n', '<leader>Y', [["+P]], { desc = '[P]aste from system clipboard' })
+vim.keymap.set({ 'n', 'v' }, '<leader>p', [["+p]], { desc = '[P]aste from system clipboard' })
+vim.keymap.set('n', '<leader>P', [["+P]], { desc = '[P]aste from system clipboard' })
 vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]], { desc = '[D]elete with modifying registers' })
 vim.keymap.set({ 'n', 'v' }, '<leader>cm', ':make<CR><CR>:botright cwindow<cr>')
 vim.keymap.set({ 'v' }, '<leader>zm', ":'<'>%!zm<cr>")
@@ -50,12 +50,15 @@ vim.keymap.set('n', '[e', function()
   vim.diagnostic.jump { count = -vim.v.count1, severity = { min = 'ERROR' } }
 end, { desc = 'Jump to the previous diagnostic in the current buffer' })
 
-local virtual_line_config = { current_line = true }
+vim.keymap.set({ 'n', 'v', 'i' }, '<Left>', '<nop>')
+vim.keymap.set({ 'n', 'v', 'i' }, '<Right>', '<nop>')
+vim.keymap.set({ 'n', 'v', 'i' }, '<Up>', '<nop>')
+vim.keymap.set({ 'n', 'v', 'i' }, '<Down>', '<nop>')
 
 vim.diagnostic.config {
   underline = true,
   virtual_text = { virt_text_pos = 'eol_right_align' },
-  virtual_lines = virtual_line_config,
+  virtual_lines = { current_line = true },
   severity_sort = true,
   float = {
     focusable = false,
@@ -67,6 +70,7 @@ vim.diagnostic.config {
 }
 
 local diag_config_basic = false
+local virtual_line_config = nil
 vim.keymap.set('n', '<leader>td', function()
   diag_config_basic = not diag_config_basic
   ---@param new vim.diagnostic.Opts
@@ -76,6 +80,7 @@ vim.keymap.set('n', '<leader>td', function()
   end
 
   if diag_config_basic then
+    virtual_line_config = vim.diagnostic.config(nil).virtual_lines
     set_config { virtual_lines = false }
   else
     set_config { virtual_lines = virtual_line_config }
@@ -401,20 +406,16 @@ require('lazy').setup({
             enable = true,
             set_jumps = true,
             goto_next_start = {
-              [']m'] = '@function.outer',
-              [']]'] = '@class.outer',
+              [']]'] = '@block.outer',
             },
             goto_next_end = {
-              [']M'] = '@function.outer',
-              [']['] = '@class.outer',
+              [']['] = '@block.outer',
             },
             goto_previous_start = {
-              ['[m'] = '@function.outer',
-              ['[['] = '@class.outer',
+              ['[['] = '@block.outer',
             },
             goto_previous_end = {
-              ['[M'] = '@function.outer',
-              ['[]'] = '@class.outer',
+              ['[]'] = '@block.outer',
             },
           },
           swap = {
@@ -537,7 +538,7 @@ require('lazy').setup({
       -- Define your formatters
       formatters_by_ft = {
         lua = { 'stylua' },
-        python = { 'black', 'isort' },
+        python = { 'black', 'isort', 'flake8' },
         javascript = { 'prettier' },
         css = { 'prettier' },
         sql = { 'sqlfmt' },
