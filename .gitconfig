@@ -1,21 +1,35 @@
 [alias]
-	tree = log --graph --pretty=oneline --abbrev-commit
-	tree-long = log --graph --abbrev-commit --decorate --format=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
-	s = status
-	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
+    tree = log --graph --pretty=oneline --abbrev-commit
+    tree-long = log --graph --abbrev-commit --decorate --format=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
+    s = status
+    change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
 [diff]
     colorMoved = default
-	wordRegex = [^[:space:],]+|[,]+
+    wordRegex = [^[:space:],]+|[,]+
 [credential "https://github.com"]
-	helper = "!gh auth git-credential"
+    helper = "!gh auth git-credential"
 [credential "https://gist.github.com"]
-	helper = "!gh auth git-credential"
+    helper = "!gh auth git-credential"
 [init]
-	defaultBranch = main
+    defaultBranch = main
 [push]
-	autoSetupRemote = yes
-; [blame]
-; 	ignoreRevsFile = .git-blame-ignore-revs
+    autoSetupRemote = yes
+    followTags = yes
+
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+[rebase]
+    autoStash = true
+[pull]
+    rebase = true
+[rerere]
+    enabled = true
+[submodule]
+    recurse = true
+
 
 [include]
     path = ~/.config/git/personal
@@ -23,16 +37,4 @@
     path = ~/.config/git/eli
 [includeIf "gitdir:~/qomon/"]
     path = ~/.config/git/work
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-[rebase]
-	autoStash = true
-[pull]
-	rebase = true
-[rerere]
-	enabled = true
-[submodule]
-	recurse = true
+

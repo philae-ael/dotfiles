@@ -367,7 +367,6 @@ require('lazy').setup({
 
         auto_install = true,
         sync_install = false,
-        ignore_install = { 'rust' },
         modules = {},
         highlight = {
           enable = true,
@@ -483,6 +482,7 @@ require('lazy').setup({
 
       local servers = {
         clangd = {},
+        julials = {},
         gopls = {},
         pyright = {},
         html = { filetypes = { 'html', 'twig', 'hbs' } },
@@ -491,6 +491,13 @@ require('lazy').setup({
             workspace = { checkThirdParty = false },
             telemetry = { enable = false },
             diagnostics = { disable = { 'missing-fields' } },
+          },
+        },
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              checkOnSave = { command = 'clippy' },
+            },
           },
         },
       }
@@ -566,7 +573,6 @@ require('lazy').setup({
     end,
   },
   { 'ray-x/go.nvim', opts = {}, ft = { 'go', 'gomod' }, build = ':lua require("go.install").update_all_sync()' },
-  { 'mrcjkb/rustaceanvim', version = '^5', lazy = false },
   {
     'monaqa/dial.nvim',
     config = function()
