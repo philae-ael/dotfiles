@@ -58,7 +58,7 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<Down>', '<nop>')
 vim.diagnostic.config {
   underline = true,
   virtual_text = { virt_text_pos = 'eol_right_align' },
-  virtual_lines = { current_line = true },
+  virtual_lines = false,
   severity_sort = true,
   float = {
     focusable = false,
@@ -69,8 +69,8 @@ vim.diagnostic.config {
   },
 }
 
-local diag_config_basic = false
-local virtual_line_config = nil
+local diag_config_basic = true
+local virtual_line_config = { current_line = true }
 vim.keymap.set('n', '<leader>td', function()
   diag_config_basic = not diag_config_basic
   ---@param new vim.diagnostic.Opts
@@ -80,6 +80,7 @@ vim.keymap.set('n', '<leader>td', function()
   end
 
   if diag_config_basic then
+    ---@diagnostic disable-next-line: cast-local-type
     virtual_line_config = vim.diagnostic.config(nil).virtual_lines
     set_config { virtual_lines = false }
   else
@@ -119,7 +120,7 @@ require('lazy').setup({
     'echasnovski/mini.nvim',
     version = false,
     config = function()
-      require('mini.ai').setup {}
+      -- require('mini.ai').setup {}
       require('mini.align').setup {}
       require('mini.basics').setup {
         options = {
@@ -496,7 +497,7 @@ require('lazy').setup({
         rust_analyzer = {
           settings = {
             ['rust-analyzer'] = {
-              checkOnSave = { command = 'clippy' },
+              check = { command = 'clippy' },
             },
           },
         },
@@ -551,6 +552,8 @@ require('lazy').setup({
         sql = { 'sqlfmt' },
         typescript = { 'prettier' },
         typescriptreact = { 'prettier' },
+        json = { 'jq' },
+        toml = { 'taplo' },
       },
       -- Set default options
       default_format_opts = {

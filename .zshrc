@@ -13,6 +13,8 @@ plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting zsh-uv-en
 
 # zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh
+unalias md
+unalias rd
 
 alias ssh="TERM=xterm \\ssh"
 alias l="eza -lh"
@@ -49,7 +51,12 @@ export PYENV_ROOT="$HOME/.pyenv"
 eval "$(pyenv init - zsh)"
 
 function idot() {
-  dot -Gmargin=0.7 "-Gbgcolor=#ffffff00" -Gcolor=white -Gfontcolor=white -Ncolor=white -Nfontcolor=white -Ecolor=white -Gdpi=200 -Tpng \
+    dot -Gmargin=0.7 "-Gbgcolor=#ffffff00" -Gcolor=white -Gfontcolor=white -Ncolor=white -Nfontcolor=white -Ecolor=white -Efontcolor=white -Gdpi=200 -Tpng \
     | magick - -resize $(kitty +kitten icat --print-window-size | awk -Fx '{print $1 "x" ($2 - 100)}')\> png:- \
     | kitty +kitten icat
+}
+
+function md() {
+  pandoc --standalone --from gfm --css ~/.pandoc/github-markdown.css $1 > /tmp/$1.html
+  xdg-open /tmp/$1.html
 }
