@@ -3,6 +3,7 @@
     tree-long = log --graph --abbrev-commit --decorate --format=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
     s = status
     change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
+	jdiff = difftool -t jsondiff -y
 [diff]
     colorMoved = default
     wordRegex = [^[:space:],]+|[,]+
@@ -38,3 +39,8 @@
 [includeIf "gitdir:~/qomon/"]
     path = ~/.config/git/work
 
+[core]
+	attributesfile = /home/eli/.gitattributes
+
+[difftool "jsondiff"]
+	cmd = json-diff $LOCAL $REMOTE

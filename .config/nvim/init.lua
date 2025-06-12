@@ -19,6 +19,7 @@ vim.o.pumheight = 10 -- Make popup menu smaller
 vim.o.winblend = 10 -- Make floating windows slightly transparent
 vim.o.winborder = 'rounded'
 
+vim.opt.concealcursor = ''
 vim.opt.listchars:append {
   tab = '▎ ',
   extends = '…',
@@ -106,7 +107,23 @@ require('lazy').setup({
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
   'tpope/vim-sleuth',
-  'OXY2DEV/markview.nvim',
+  {
+    'github/copilot.vim',
+    config = function()
+      vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
+        expr = true,
+        replace_keycodes = false,
+      })
+      vim.g.copilot_no_tab_map = true
+    end,
+  },
+  {
+    'OXY2DEV/markview.nvim',
+    lazy = false,
+    opts = {
+      preview = { icon_provider = 'devicons' },
+    },
+  },
   { 'brenoprata10/nvim-highlight-colors', opts = {} },
   { 'kaarmu/typst.vim', ft = 'typst' },
   { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' }, opts = {
@@ -482,7 +499,6 @@ require('lazy').setup({
       end
 
       local servers = {
-        clangd = {},
         julials = {},
         gopls = {},
         pyright = {},
@@ -501,6 +517,9 @@ require('lazy').setup({
               cargo = { features = 'all' },
             },
           },
+        },
+        clangd = {
+          filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
         },
       }
       require('mason').setup()
