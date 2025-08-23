@@ -7,9 +7,7 @@ zstyle ':omz:update' mode auto
 
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-zstyle :omz:plugins:ssh-agent quiet yes
-
-plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting zsh-uv-env ssh-agent)
+plugins=(git-auto-fetch sudo direnv dirhistory zsh-syntax-highlighting zsh-uv-env)
 
 # zstyle ':omz:*' aliases no
 source $ZSH/oh-my-zsh.sh

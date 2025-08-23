@@ -37,7 +37,6 @@ vim.keymap.set('n', '<leader>Y', [["+Y]], { desc = '[Y]ank until the end of line
 vim.keymap.set({ 'n', 'v' }, '<leader>p', [["+p]], { desc = '[P]aste from system clipboard' })
 vim.keymap.set('n', '<leader>P', [["+P]], { desc = '[P]aste from system clipboard' })
 vim.keymap.set({ 'n', 'v' }, '<leader>d', [["_d]], { desc = '[D]elete with modifying registers' })
-vim.keymap.set({ 'n', 'v' }, '<leader>cm', ':make<CR><CR>:botright cwindow<cr>')
 vim.keymap.set({ 'v' }, '<leader>zm', ":'<'>%!zm<cr>")
 vim.keymap.set({ 'n' }, '<leader>zm', ':%!zm<cr>')
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
@@ -45,10 +44,10 @@ vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = tr
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 vim.keymap.set('n', 'gV', '"`[" . strpart(getregtype(), 0, 1) . "`]"', { expr = true, replace_keycodes = false, desc = 'Visually select changed text' })
 vim.keymap.set('n', ']e', function()
-  vim.diagnostic.jump { count = vim.v.count1, severity = { min = 'ERROR' } }
+  vim.diagnostic.jump { count = vim.v.count1, severity = { min = vim.diagnostic.severity.ERROR } }
 end, { desc = 'Jump to the next diagnostic in the current buffer' })
 vim.keymap.set('n', '[e', function()
-  vim.diagnostic.jump { count = -vim.v.count1, severity = { min = 'ERROR' } }
+  vim.diagnostic.jump { count = -vim.v.count1, severity = { min = vim.diagnostic.severity.ERROR } }
 end, { desc = 'Jump to the previous diagnostic in the current buffer' })
 
 vim.keymap.set({ 'n', 'v', 'i' }, '<Left>', '<nop>')
@@ -69,6 +68,15 @@ vim.diagnostic.config {
     header = '',
   },
 }
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+  group = vim.api.nvim_create_augroup('makeprg-c', { clear = true }),
+  pattern = { '*.c', '*.h', '*.cpp', '*.hpp', '*.cxx', '*.hxx' },
+  callback = function()
+    vim.o.errorformat = vim.o.errorformat .. ',Test failed (%f:%l): %m'
+    vim.o.makeprg = 'cmake --build build --config Debug --parallel'
+  end,
+})
 
 local diag_config_basic = true
 local virtual_line_config = { current_line = true }
@@ -120,8 +128,12 @@ require('lazy').setup({
   {
     'OXY2DEV/markview.nvim',
     lazy = false,
+    priority = 49,
     opts = {
       preview = { icon_provider = 'devicons' },
+      typst = { enable = false },
+      yaml = { enable = false },
+      latex = { enable = false },
     },
   },
   { 'brenoprata10/nvim-highlight-colors', opts = {} },
@@ -272,19 +284,6 @@ require('lazy').setup({
         map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git [H]unk' })
         -- stylua: ignore end
       end,
-    },
-  },
-  {
-    'folke/trouble.nvim',
-    opts = {}, -- for default options, refer to the configuration section for custom setup.
-    cmd = 'Trouble',
-    keys = {
-      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', desc = 'Diagnostics' },
-      { '<leader>xX', '<cmd>Trouble diagnostics toggle filter.buf=0<cr>', desc = 'Buffer Diagnostics' },
-      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = '[L]ocation List' },
-      { '<leader>xQ', '<cmd>Trouble qflist toggle<cr>', desc = '[Q]uickfix List' },
-      { '<leader>cs', '<cmd>Trouble symbols toggle focus=false<cr>', desc = '[S]ymbols' },
-      { '<leader>cl', '<cmd>Trouble lsp toggle focus=false win.position=right<cr>', desc = '[L]SP Definitions / references / ...' },
     },
   },
   {
@@ -521,6 +520,7 @@ require('lazy').setup({
         clangd = {
           filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
         },
+        tinymist = {},
       }
       require('mason').setup()
 
@@ -545,6 +545,9 @@ require('lazy').setup({
       require('lspconfig').slangd.setup {
         capabilities = capabilities,
       }
+      require('lspconfig').zls.setup {
+        capabilities = capabilities,
+      }
     end,
   },
   {
@@ -566,7 +569,7 @@ require('lazy').setup({
       -- Define your formatters
       formatters_by_ft = {
         lua = { 'stylua' },
-        python = { 'black', 'isort', 'flake8' },
+        python = { 'black' },
         javascript = { 'prettier' },
         css = { 'prettier' },
         sql = { 'sqlfmt' },
@@ -701,6 +704,7 @@ require('lazy').setup({
     { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" }
   },
   },
+  'tpope/vim-dispatch',
 }, {})
 
 -- vim: ts=2 sts=2 sw=2 et

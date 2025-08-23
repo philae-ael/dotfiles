@@ -1,9 +1,24 @@
 #!/bin/sh
 
-set -e
+choice=$1
+if [ -z "$choice" ]; then
+    choice=$(echo "\
+1. To Clipboard
+2. To References
+3. To Screenshots
+" | wofi -d | awk -F. '{print $1;}'
+  )
+fi
 
-mkdir ~/screenshots/ 2> /dev/null || true
+if [ "$choice" = "1" ]; then
+    hyprshot -m region --clipboard-only
+elif [ "$choice" = "2" ]; then
+    hyprshot -m region -o ~/Reference/
+elif [ "$choice" = "3" ]; then
+    mkdir -p ~/Pictures/Screenshots/
+    hyprshot -m region -o ~/Pictures/Screenshots/
+else
+    exit 0
+fi
 
-zone=$(slop)
 
-maim --hidecursor -g "$zone" 2> /dev/null | tee ~/screenshots/$(date +%Y-%b-%d--%H-%M-%S_maim | tr A-Z a-z).png | xclip -selection clipboard -target image/png
