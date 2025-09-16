@@ -14,6 +14,12 @@ source $ZSH/oh-my-zsh.sh
 unalias md
 unalias rd
 
+function enote() {
+  pushd ~/notes
+  nvim "$(date '+%Y-%m-%d').md"
+  popd
+}
+
 alias ssh="TERM=xterm \\ssh"
 alias l="eza -lh"
 alias ls=eza
