@@ -153,6 +153,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup {
+  'nvim-tree/nvim-web-devicons',
   'editorconfig/editorconfig-vim',
   'tpope/vim-dispatch',
   'tpope/vim-fugitive',
@@ -168,7 +169,6 @@ require('lazy').setup {
       { mode = 'i', '<C-J>', 'copilot#Accept("\\<CR>")', expr = true, replace_keycodes = false },
     },
   },
-  { 'brenoprata10/nvim-highlight-colors', opts = {} },
   { 'kaarmu/typst.vim', ft = 'typst' },
   { 'folke/todo-comments.nvim', dependencies = { 'nvim-lua/plenary.nvim' }, opts = {} },
   { 'kylechui/nvim-surround', opts = {} },
@@ -254,7 +254,8 @@ require('lazy').setup {
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
-      -- keymap = { preset = 'mono' },
+      keymap = { preset = 'default' },
+      appearance = { nerd_font_variant = 'mono' },
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
@@ -265,6 +266,7 @@ require('lazy').setup {
           auto_show_delay_ms = 500,
         },
       },
+      fuzzy = { implementation = 'prefer_rust_with_warning' },
     },
   },
   {
@@ -402,14 +404,14 @@ require('lazy').setup {
       { '<leader>A', function() require('nvim-treesitter-textobjects.swap').swap_previous('@parameter.inner') end, desc = 'Swap [A]rgument with previous' },
     },
   },
+  { 'j-hui/fidget.nvim', opts = {} },
   {
     'mason-org/mason.nvim',
     dependencies = {
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       'mason-org/mason-lspconfig.nvim',
       'neovim/nvim-lspconfig',
-      { 'j-hui/fidget.nvim', opts = {} },
-      'saghen/blink.cmp',
+      'j-hui/fidget.nvim',
     },
     opts = {},
     init = function()
@@ -432,10 +434,6 @@ require('lazy').setup {
             }
           }
         end,
-      })
-
-      vim.lsp.config('*', {
-        capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities()),
       })
 
       local lsp_servers = {
