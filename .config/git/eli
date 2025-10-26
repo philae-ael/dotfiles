@@ -1,7 +1,10 @@
+[core]
+  sshCommand = ssh -o IdentitiesOnly=yes -i ~/.ssh/eli/id_ed25519
 [user]
 	email = elisabeth.leathe@proton.me
 	name = eli
-    signingkey = Elisabeth Leathe <elisabeth.leathe@proton.me>
+  signingkey = Elisabeth Leathe <elisabeth.leathe@proton.me>
 
 [commit]
     gpgsign = true
+

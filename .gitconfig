@@ -1,47 +1,58 @@
 [alias]
-    tree = log --graph --pretty=oneline --abbrev-commit
-    tree-long = log --graph --abbrev-commit --decorate --format=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''          %C(white)%s%C(reset)%n''          %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
-    s = status
-    change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f"
-	jdiff = difftool -t jsondiff -y
+  tree = log --graph --pretty=oneline --abbrev-commit
+  tree-long = log --graph --abbrev-commit --decorate --format=format:'%C(bold yellow)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold cyan)(committed: %cD)%C(reset) %C(auto)%d%C(reset)%n''      %C(white)%s%C(reset)%n''      %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)'
+  s = status
+  jdiff = difftool -t jsondiff -y
+
 [diff]
-    colorMoved = default
-    wordRegex = [^[:space:],]+|[,]+
-	tool = nvimdiff
+  colorMoved = default
+  wordRegex = [^[:space:],]+|[,]+
+  tool = nvimdiff
+
 [credential "https://github.com"]
-    helper = "!gh auth git-credential"
+  helper = 
+  helper = !/usr/bin/gh auth git-credential
+
 [credential "https://gist.github.com"]
-    helper = "!gh auth git-credential"
+  helper = 
+  helper = !/usr/bin/gh auth git-credential
+
 [init]
-    defaultBranch = main
+  defaultBranch = main
+
 [push]
-    autoSetupRemote = yes
-    followTags = yes
+  autoSetupRemote = yes
+  followTags = yes
 
 [filter "lfs"]
-    clean = git-lfs clean -- %f
-    smudge = git-lfs smudge -- %f
-    process = git-lfs filter-process
-    required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
 [rebase]
-    autoStash = true
+  autoStash = true
+
 [pull]
-    rebase = true
+  rebase = true
+
 [rerere]
-    enabled = true
+  enabled = true
+
 [submodule]
-    recurse = true
+  recurse = true
 
 
 [include]
-    path = ~/.config/git/personal
+  path = ~/.config/git/personal
 [includeIf "gitdir:~/projects-eli/"]
-    path = ~/.config/git/eli
+  path = ~/.config/git/eli
 [includeIf "gitdir:~/qomon/"]
-    path = ~/.config/git/work
+  path = ~/.config/git/work
 
 [core]
-	attributesfile = /home/eli/.gitattributes
+  attributesfile = /home/eli/.gitattributes
 
 [difftool "jsondiff"]
-	cmd = json-diff $LOCAL $REMOTE
+  cmd = json-diff $LOCAL $REMOTE
+
