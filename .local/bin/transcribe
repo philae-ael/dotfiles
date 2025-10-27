@@ -1,0 +1,157 @@
+#!/bin/bash
+
+set -e
+
+usage ()
+{
+  cat << EOF
+Usage: ./transcribe.sh a [OPTIONS...] [SOURCE]
+Transcribe a media using ffmpeg/yt-dlp and whisper.
+
+POSITIONAL ARGUMENTS:
+    [SOURCE]              can be a youtube link, a web source or local source
+
+OPTIONS:
+    -o,--output [OUTPUT]  the location where the full transcribe should be stored.
+                          If no output is not provided, a temporary directory will be used.
+    -p,--postprocess      postprocess output using ChatGPT requires the environment variable OPENAI_API_KEY to be set with
+
+OTHER OPTIONS:
+    -h,--help             display this help
+EOF
+  echo
+  requirements
+}
+
+requirements() {
+    cat << EOF
+REQUIREMENTS:
+    python3:
+      sudo apt install python3
+    ffmpeg:
+      sudo apt install ffmpeg
+    yt-dlp (optional, for youtube files):
+      sudo add-apt-repository ppa:tomtomtom/yt-dlp
+      sudo apt update
+      sudo apt install yt-dlp
+    curl and jq (for postprocessing with chatgpt):
+      sudo apt install curl jq
+EOF
+}
+
+required_args() {
+    if [ "$#" -lt $1 ]; then
+        usage
+        exit 1
+    fi
+}
+
+require_command() {
+  if ! command -v $1 &> /dev/null
+  then
+      echo "required command $1 could not be found"
+      requirements
+      exit 1
+  fi
+}
+
+require_command ffmpeg
+require_command python3
+
+POSITIONAL_ARGS=()
+POSTPROCESS=false
+OUTPUT=""
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -o|--output)
+      shift
+      required_args 1
+      OUTPUT=$1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -p|--postprocess)
+      shift
+      if [ "$OPENAI_API_KEY" = "" ]; then
+        echo "Postprocess has been requested but OPENAI_API_KEY is not set"
+        exit 1
+      fi
+      ;;
+      -*|--*)
+      echo "Unknown option $1"
+      echo
+      usage
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL_ARGS[@]}"
+
+SOURCE=${1:-}
+if [ "$SOURCE" = "" ]; then
+  echo "Please enter media location:"
+  IFS= read -p ">>> " SOURCE
+fi
+
+if [ ! -f ~/.whisper/bin/activate ] ; then
+  echo "venv not detected, installing"
+  python3 -m venv ~/.whisper
+  source ~/.whisper/bin/activate
+  pip install -U openai-whisper
+else
+  source ~/.whisper/bin/activate
+fi
+
+outdir=$(mktemp -d)
+out=$outdir/out.mp3
+
+echo "Downloading file..."
+if [[ "$SOURCE" = *'youtube.com'* ]]; then
+  require_command yt-dlp
+  yt-dlp "$SOURCE" -x --output "$out" --audio-format mp3
+else
+  ffmpeg -hide_banner -loglevel info -i "$SOURCE" -vn "$out"
+fi
+echo "Downloading done!"
+
+echo "Starting transcription!"
+whisper "$out" --model small --output_format txt --output_dir "$outdir"
+echo "Transcription done!"
+
+tmpoutput="$outdir/out.txt"
+
+PROMPT=$(
+cat <<EOF
+J'ai transcris une vidéo mais il y a quelques erreurs qui doivent être corrigées avant que le résultat soit utilisable. Peux-tu m'aider à nettoyer la transcription ?
+EOF
+)
+
+if $POSTPROCESS; then 
+  curl https://api.openai.com/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAI_API_KEY" \
+    -d "{
+       \"model\": \"gpt-4o-mini\",
+       \"messages\": [{\"role\": \"user\", \"content\": \"$PROMPT\n$(cat $tmpoutput)\"}],
+       \"temperature\": 0.7
+     }" | jq '.choices[0].message.content' -r > "$outdir/out-postprocessed.txt"
+  tmpoutput="$outdir/out-postprocessed.txt"
+fi
+
+
+if [ "$OUTPUT" != "" ]; then
+  cp "$tmpoutput" "$OUTPUT"
+else
+  OUTPUT=$tmpoutput
+fi
+echo "Full transcription has been saved in $OUTPUT"
+echo
+
+cat "$OUTPUT"

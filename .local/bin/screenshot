@@ -1,0 +1,24 @@
+#!/bin/sh
+
+choice=$1
+if [ -z "$choice" ]; then
+    choice=$(echo "\
+1. To Clipboard
+2. To References
+3. To Screenshots
+" |  fuzzel --dmenu | awk -F. '{print $1;}'
+  )
+fi
+
+if [ "$choice" = "1" ]; then
+    hyprshot -m region --clipboard-only
+elif [ "$choice" = "2" ]; then
+    hyprshot -m region -o ~/Reference/
+elif [ "$choice" = "3" ]; then
+    mkdir -p ~/Pictures/Screenshots/
+    hyprshot -m region -o ~/Pictures/Screenshots/
+else
+    exit 0
+fi
+
+
