@@ -1,7 +1,7 @@
 {
   "plugins": {
     "blink.cmp": {
-      "rev": "8743384",
+      "rev": "afc4f4d",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
@@ -20,8 +20,12 @@
       "rev": "041d923",
       "src": "https://github.com/Mofiqul/dracula.nvim"
     },
+    "fidget.nvim": {
+      "rev": "e32b672",
+      "src": "https://github.com/j-hui/fidget.nvim"
+    },
     "flash.nvim": {
-      "rev": "3be9bf7",
+      "rev": "fcea7ff",
       "src": "https://github.com/folke/flash.nvim"
     },
     "gitsigns.nvim": {
@@ -29,11 +33,11 @@
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "lazydev.nvim": {
-      "rev": "01bc2aa",
+      "rev": "371cd74",
       "src": "https://github.com/folke/lazydev.nvim"
     },
     "mason-lspconfig.nvim": {
-      "rev": "1d77bd8",
+      "rev": "d7b5feb",
       "src": "https://github.com/mason-org/mason-lspconfig.nvim"
     },
     "mason.nvim": {
@@ -41,7 +45,7 @@
       "src": "https://github.com/mason-org/mason.nvim"
     },
     "nvim-lspconfig": {
-      "rev": "a9b2fb5",
+      "rev": "e25994a",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-surround": {
@@ -49,7 +53,7 @@
       "src": "https://github.com/kylechui/nvim-surround"
     },
     "nvim-treesitter": {
-      "rev": "738d9ced",
+      "rev": "64f4755b",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
@@ -58,7 +62,7 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-context"
     },
     "nvim-treesitter-textobjects": {
-      "rev": "1b2d85d",
+      "rev": "5d63945",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
       "version": "'main'"
     },
@@ -75,11 +79,11 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "snacks.nvim": {
-      "rev": "ecde81f",
+      "rev": "76160be",
       "src": "https://github.com/folke/snacks.nvim"
     },
     "todo-comments.nvim": {
-      "rev": "19d461d",
+      "rev": "411503d",
       "src": "https://github.com/folke/todo-comments.nvim"
     },
     "undotree": {
@@ -95,7 +99,7 @@
       "src": "https://github.com/tpope/vim-sleuth"
     },
     "which-key.nvim": {
-      "rev": "b4177e3",
+      "rev": "3aab214",
       "src": "https://github.com/folke/which-key.nvim"
     }
   }

@@ -44,6 +44,7 @@ vim.o.virtualedit   = 'block'
 vim.o.formatoptions = 'qjl1'
 vim.opt.shortmess:append('WcC')
 vim.o.splitkeep = 'screen'
+vim.o.sessionoptions = 'buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,globals'
 
 
 vim.opt.listchars:append {
@@ -78,6 +79,8 @@ vim.keymap.set({ 'n', 'v', 'i' }, '<Left>', '<nop>')
 vim.keymap.set({ 'n', 'v', 'i' }, '<Right>', '<nop>')
 vim.keymap.set({ 'n', 'v', 'i' }, '<Up>', '<nop>')
 vim.keymap.set({ 'n', 'v', 'i' }, '<Down>', '<nop>')
+
+vim.keymap.set('n', '<leader>\\h', ':nohlsearch<CR>', { desc = 'Clear [H]ighlighted search' })
 
 vim.diagnostic.config {
   underline = true,
@@ -205,7 +208,14 @@ local function setup_treesitter()
 
   local nts = require("nvim-treesitter")
   nts.install(ts_parsers)
-  vim.api.nvim_create_autocmd('PackChanged', { callback = function() nts.update() end })
+  vim.api.nvim_create_autocmd('PackChanged', {
+    callback = function(ev)
+      local name, kind = ev.data.spec.name, ev.data.spec.kind
+      if name == 'nvim-treesitter' and (kind == 'install' or kind == 'update') then
+        nts.update()
+      end
+    end
+  })
 
   require("treesitter-context").setup({
     max_lines = 3,
@@ -284,6 +294,7 @@ vim.pack.add({
 
   'https://github.com/stevearc/conform.nvim',
   'https://github.com/monaqa/dial.nvim',
+  'https://github.com/j-hui/fidget.nvim',
 
 })
 
@@ -310,12 +321,16 @@ vim.keymap.set({ 'o', 'x' }, 'R', function() require("flash").treesitter_search(
 vim.keymap.set('c', '<c-s>', function() require("flash").toggle() end, { desc = "Toggle Flash Search" })
 
 require("snacks").setup({
+  input = {},
   picker = { ui_select = true },
 })
 local snacks = require("snacks")
-vim.keymap.set('n', '<leader>sf', snacks.picker.files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>sf', function() snacks.picker.git_files({ untracked = true, submodules = true }) end,
+  { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sb', snacks.picker.buffers, { desc = '[S]earch [B]uffers' })
-vim.keymap.set('n', '<leader>sg', snacks.picker.git_grep, { desc = '[S]earch [G]rep' })
+vim.keymap.set('n', '<leader>sg',
+  function() snacks.picker.git_grep() end,
+  { desc = '[S]earch [G]rep' })
 vim.keymap.set('n', '<leader>sd', snacks.picker.diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.api.nvim_create_autocmd('User', {
   pattern = 'OilActionsPost',
@@ -394,7 +409,6 @@ require('conform').setup({
     lua = { 'stylua' },
     python = { 'black' },
     go = { 'gofmt' },
-    rust = { 'rustfmt' },
     javascript = { 'prettierd' },
     typescript = { 'prettierd' },
     typescriptreact = { 'prettierd' },
@@ -439,3 +453,218 @@ vim.keymap.set('v', '<C-a>', function() require('dial.map').manipulate('incremen
 vim.keymap.set('v', '<C-x>', function() require('dial.map').manipulate('decrement', 'visual') end)
 vim.keymap.set('v', 'g<C-a>', function() require('dial.map').manipulate('increment', 'gvisual') end)
 vim.keymap.set('v', 'g<C-x>', function() require('dial.map').manipulate('decrement', 'gvisual') end)
+
+require('fidget').setup({})
+
+
+local function build_blink(params)
+  vim.notify('Building blink.cmp', vim.log.levels.INFO)
+  local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+  if obj.code == 0 then
+    vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+  else
+    vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+  end
+end
+
+vim.api.nvim_create_autocmd('PackChanged', {
+  callback = function(ev)
+    local name, kind = ev.data.spec.name, ev.data.spec.kind
+    if name == 'blink.cmp' and (kind == 'install' or kind == 'update') then
+      build_blink({ path = ev.data.path })
+    end
+  end,
+})
+require('blink.cmp').setup({
+  keymap = { preset = 'default' },
+  appearance = { nerd_font_variant = 'mono' },
+  sources = {
+    default = { 'lsp', 'path', 'snippets', 'buffer' },
+  },
+  signature = { enabled = true },
+  completion = {
+    documentation = {
+      auto_show = true,
+      auto_show_delay_ms = 500,
+    },
+  },
+  fuzzy = { implementation = 'prefer_rust_with_warning' },
+})
+
+local session_dir = vim.fn.expand('~/.cache/nvim/sessions/')
+local function session_list()
+  local sessions = vim.fn.globpath(session_dir, '*.vim', false, true)
+  local session_names = {}
+  for _, path in ipairs(sessions) do
+    local name = vim.fn.fnamemodify(path, ':t:r')
+    table.insert(session_names, name)
+  end
+  return session_names
+end
+
+-- @type SessionLoadConfig table
+-- @field pseudo boolean|nil if true, load session in a pseudo manner (without setting vim.g.Sessionmgr_this_session)
+--
+-- @param name string
+-- @param config SessionLoadConfig|nil
+local function session_save(name, config)
+  assert(type(name) == 'string' and #name > 0, 'Session name must be a non-empty string')
+
+  if config == nil then
+    config = {}
+  end
+  if not config.pseudo then
+    vim.g.Sessionmgr_this_session = name
+  end
+  vim.fn.mkdir(session_dir, 'p')
+  vim.cmd('mksession! ~/.cache/nvim/sessions/' .. name .. '.vim')
+end
+
+local function session_restart()
+  session_save('last_session', { pseudo = true })
+  vim.cmd('silent! restart Session load last_session')
+end
+
+
+
+-- @param name string
+local function session_load(name)
+  assert(type(name) == 'string' and #name > 0, 'Session name must be a non-empty string')
+
+  local session_file = session_dir .. name .. '.vim'
+  if vim.fn.filereadable(session_file) == 1 then
+    vim.cmd('source ' .. session_file)
+  else
+    vim.notify('Session "' .. name .. '" does not exist.', vim.log.levels.ERROR)
+  end
+end
+
+local function session_pick()
+  local sessions = session_list()
+  if #sessions == 0 then
+    vim.notify('No sessions found', vim.log.levels.WARN)
+    return
+  end
+
+  -- Build picker items with metadata
+  local items = {}
+  for _, name in ipairs(sessions) do
+    local path = session_dir .. name .. '.vim'
+    local mtime = vim.fn.getftime(path)
+    local date = os.date('%Y-%m-%d %H:%M', mtime)
+
+    table.insert(items, {
+      text = name,
+      file = path,
+      mtime = mtime,
+      date = date,
+    })
+  end
+
+  -- Sort by modification time (newest first)
+  table.sort(items, function(a, b)
+    return a.mtime > b.mtime
+  end)
+
+  vim.ui.select(items, {
+    prompt = 'Select a session to load:',
+    format_item = function(item)
+      return string.format('%-20s  [%s]', item.text, item.date)
+    end,
+  }, function(choice)
+    if choice then
+      session_load(choice.text)
+    else
+      vim.notify('Session loading cancelled', vim.log.levels.INFO)
+    end
+  end)
+end
+
+-- @param name string
+local function session_delete(name)
+  assert(type(name) == 'string' and #name > 0, 'Session name must be a non-empty string')
+  local session_file = session_dir .. name .. '.vim'
+  local ok, err = os.remove(session_file)
+  if ok then
+    vim.notify('Session "' .. name .. '" deleted.', vim.log.levels.INFO)
+  else
+    vim.notify('Error deleting session "' .. name .. '": ' .. err, vim.log.levels.ERROR)
+  end
+end
+
+local function session_auto_save()
+  local session_name = 'last_session'
+  local config = { pseudo = true }
+
+  if vim.g.Sessionmgr_this_session then
+    session_name = vim.g.Sessionmgr_this_session
+    config = { pseudo = false }
+  end
+
+  session_save(session_name, config)
+end
+
+vim.api.nvim_create_user_command('Session', function(opts)
+  local args = opts.fargs
+  if #args == 0 then
+    if vim.g.Sessionmgr_this_session then
+      vim.notify('Current session: ' .. vim.g.Sessionmgr_this_session, vim.log.levels.INFO)
+    else
+      vim.notify('No session currently loaded.', vim.log.levels.INFO)
+    end
+    return
+  end
+
+  local action = args[1]
+  if action == 'save' then
+    if #args < 2 then
+      vim.notify('Session save requires a session name.', vim.log.levels.ERROR)
+      return
+    end
+    session_save(args[2])
+  elseif action == 'load' then
+    if #args < 2 then
+      vim.notify('Session load requires a session name.', vim.log.levels.ERROR)
+      return
+    end
+    session_load(args[2])
+  elseif action == 'restart' then
+    session_restart()
+  elseif action == 'delete' then
+    if #args < 2 then
+      vim.notify('Session delete requires a session name.', vim.log.levels.ERROR)
+      return
+    end
+    session_delete(args[2])
+  elseif action == 'pick' then
+    session_pick()
+  elseif action == 'exit' then
+    vim.g.Sessionmgr_this_session = nil
+  else
+    vim.notify('Unknown Session action: ' .. action, vim.log.levels.ERROR)
+  end
+end, {
+  desc = 'Manage sessions',
+  nargs = '*',
+  complete = function(ArgLead, CmdLine)
+    local parts = vim.split(CmdLine, '%s+')
+    if #parts == 2 then
+      local commands = { 'save', 'load', 'restart', 'pick', 'delete', 'exit' }
+      return vim.tbl_filter(function(cmd)
+        return vim.startswith(cmd, ArgLead)
+      end, commands)
+    elseif #parts == 3 and (parts[2] == 'load' or parts[2] == 'save' or parts[2] == 'delete') then
+      return vim.tbl_filter(function(name)
+        return vim.startswith(name, ArgLead)
+      end, session_list())
+    else
+      return {}
+    end
+  end
+})
+
+
+
+vim.api.nvim_create_autocmd('VimLeave', { callback = session_auto_save })
+
+vim.keymap.set('n', '<leader>sl', session_pick, { desc = '[S]ession [L]oad' })
