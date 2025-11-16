@@ -1,11 +1,11 @@
 {
   "plugins": {
     "blink.cmp": {
-      "rev": "afc4f4d",
+      "rev": "2408f14",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
-      "rev": "9fd3d5e",
+      "rev": "26c02e1",
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "copilot.vim": {
@@ -45,7 +45,7 @@
       "src": "https://github.com/mason-org/mason.nvim"
     },
     "nvim-lspconfig": {
-      "rev": "e25994a",
+      "rev": "a89bfcf",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-surround": {
@@ -53,7 +53,7 @@
       "src": "https://github.com/kylechui/nvim-surround"
     },
     "nvim-treesitter": {
-      "rev": "64f4755b",
+      "rev": "65a266bf",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
@@ -62,7 +62,7 @@
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-context"
     },
     "nvim-treesitter-textobjects": {
-      "rev": "5d63945",
+      "rev": "2e5b873",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
       "version": "'main'"
     },
@@ -79,7 +79,7 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "snacks.nvim": {
-      "rev": "76160be",
+      "rev": "8bb3ad6",
       "src": "https://github.com/folke/snacks.nvim"
     },
     "todo-comments.nvim": {
