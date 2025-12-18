@@ -1,6 +1,11 @@
+# vim: set ft=gitconfig :
+
 [user]
 	email = tristan@qomon.com
 	name = Tristan Gouge
 
 [url "ssh://git@gitlab.com/"]
 	insteadOf = https://gitlab.com/
+
+[git-pr]
+	linear-workspace = qomon

@@ -1,0 +1,468 @@
+#!/bin/bash
+
+set -e
+
+BRANCH_PREFIX="feat/"
+DATE_FORMAT="%Y%m%d"
+
+# This allows passing additional git arguments if needed, e.g., GIT_ARGS="--git-dir=/path/to/repo/.git"
+# Not yet implemented in this script, but placeholder for future use.
+DEFAULT_GIT_ARGS="--git-dir=$(git rev-parse --git-dir)" # Don't worry about this strange looking thing, i had a bug where inside subshells, git commands failed to find the .git dir?!
+GIT_ARGS="${GIT_ARGS:-$DEFAULT_GIT_ARGS}"
+
+LINEAR_WORKSPACE=$(git config --get git-pr.linear-workspace)
+
+usage() {
+  cat <<EOF
+Usage: $0 <command> [<args>]
+
+Commands:
+  new      Create a new pull request. This will create a new branch, push it, and open a PR.
+  list     List open pull requests.
+  info     Show repository information. Mainly meant for debugging.
+  clean    Clean up merged branches. Use --dry-run to see what would be deleted.
+  help     Show this help message
+
+For gitlab support, ensure you have the GitLab CLI (glab) installed and authenticated.
+For github support, ensure you have the GitHub CLI (gh) installed and authenticated.
+
+For support for linear integration, set the git config 'git-pr.linear-workspace' to your Linear workspace ID.
+(e.g., git config --global git-pr.linear-workspace your-workspace-id for a global config)
+
+Note that if the script is in path as pr you can call it directly as 'git pr'.
+EOF
+}
+
+GIT_PR_LOG_LEVEL=${GIT_PR_LOG_LEVEL:-info}
+
+LOG_LEVEL_TO_NUM() {
+  case $1 in
+  debug) echo 0 ;;
+  info) echo 1 ;;
+  warn) echo 2 ;;
+  error) echo 3 ;;
+  *) echo 1 ;; # default to info
+  esac
+}
+
+WHITE='0'
+RED='31'
+YELLOW='33'
+CYAN='36'
+color() {
+  local COLOR_CODE="$1"
+  shift
+  echo -en "\033[${COLOR_CODE}m$*\033[0m"
+}
+log() {
+  local LEVEL="$1"
+  shift
+  if [ "$(LOG_LEVEL_TO_NUM "$GIT_PR_LOG_LEVEL")" -le "$(LOG_LEVEL_TO_NUM "$LEVEL")" ]; then
+    case $LEVEL in
+    debug)
+      color $WHITE "Debug:   "
+      ;;
+    info)
+      color $CYAN "Info:    "
+      ;;
+    warn)
+      color $YELLOW "Warning: "
+      ;;
+    error)
+      color $RED "Error:   "
+      ;;
+    esac
+    echo "$*"
+  fi
+}
+warn() {
+  log warn "$*"
+}
+debug() {
+  log debug "$*"
+}
+error() {
+  log error "$*"
+}
+info() {
+  log info "$*"
+}
+
+call_git() {
+  git "$GIT_ARGS" "$@"
+}
+
+debug "Using GIT_ARGS: $GIT_ARGS"
+if [ -z "$LINEAR_WORKSPACE" ]; then
+  warn "Linear workspace not set. To enable Linear integration, set the git config 'git-pr.linear-workspace' to your Linear workspace ID."
+fi
+
+# === Gather repo info
+# check if inside a git repo
+IS_GIT_REPO=$(call_git rev-parse --is-inside-work-tree 2>/dev/null || echo "false")
+if [ "$IS_GIT_REPO" == "false" ]; then
+  error "This script must be run inside a git repository."
+
+  usage
+  exit 1
+fi
+
+# Get the remote URL
+REMOTE_URL=$(call_git config --get remote.origin.url)
+if [ -z "$REMOTE_URL" ]; then
+  error "Could not determine remote URL. Is 'origin' remote set?"
+  exit 1
+fi
+
+FLAVOR=""
+if echo "$REMOTE_URL" | grep -q "github.com"; then
+  FLAVOR="github"
+
+  if ! command -v gh >/dev/null 2>&1; then
+    error "GitHub CLI (gh) is not installed. Please install it to use GitHub features."
+    exit 1
+  fi
+elif echo "$REMOTE_URL" | grep -q "gitlab.com"; then
+  FLAVOR="gitlab"
+  if ! command -v glab >/dev/null 2>&1; then
+    error "GitLab CLI (glab) is not installed. Please install it to use GitLab features."
+    exit 1
+  fi
+else
+  error "Unsupported remote URL: $REMOTE_URL"
+  exit 1
+fi
+
+BRANCH=$(call_git rev-parse --abbrev-ref HEAD)
+# Check if there is a main branch named 'main' or 'master'
+find_main_branch() {
+  local LAST_MAIN_COMMIT
+  local LAST_MASTER_COMMIT
+  if call_git show-ref --verify --quiet refs/heads/main; then
+    LAST_MAIN_COMMIT=$(call_git rev-parse main)
+  else
+    LAST_MAIN_COMMIT=""
+  fi
+  if call_git show-ref --verify --quiet refs/heads/master; then
+    LAST_MASTER_COMMIT=$(call_git rev-parse master)
+  else
+    LAST_MASTER_COMMIT=""
+  fi
+
+  # if one is included in the other, return the longer one
+  if [ -n "$LAST_MAIN_COMMIT" ] && [ -n "$LAST_MASTER_COMMIT" ]; then
+    if call_git merge-base --is-ancestor "$LAST_MAIN_COMMIT" "$LAST_MASTER_COMMIT"; then
+      echo "master"
+    else
+      echo "main"
+    fi
+  elif [ -n "$LAST_MAIN_COMMIT" ]; then
+    echo "main"
+  elif [ -n "$LAST_MASTER_COMMIT" ]; then
+    echo "master"
+  else
+    echo ""
+  fi
+}
+MAIN_BRANCH=$(find_main_branch)
+DEV_BRANCH=""
+if call_git show-ref --verify --quiet refs/heads/develop; then
+  DEV_BRANCH="develop"
+else
+  DEV_BRANCH="$MAIN_BRANCH"
+fi
+
+if [ -z "$MAIN_BRANCH" ]; then
+  error "Could not determine main branch (neither 'main' nor 'master' exists)."
+  exit 1
+fi
+
+repo_info() {
+  echo "Repository Information:"
+  echo "Remote URL: $REMOTE_URL"
+  echo "Git Flavor: $FLAVOR"
+  echo "Current Branch: $(call_git rev-parse --abbrev-ref HEAD)"
+  echo "Main Branch: $MAIN_BRANCH"
+  echo "Development Branch: $DEV_BRANCH"
+  echo "Linear Workspace: $LINEAR_WORKSPACE"
+}
+
+check_auth() {
+  if [ "$FLAVOR" = "github" ]; then
+    if ! gh auth status >/dev/null 2>&1; then
+      error "You are not authenticated with GitHub CLI. Please run 'gh auth login'."
+      exit 1
+    fi
+  elif [ "$FLAVOR" = "gitlab" ]; then
+    if ! glab auth status >/dev/null 2>&1; then
+      error "You are not authenticated with GitLab CLI. Please run 'glab auth login'."
+      exit 1
+    fi
+  fi
+}
+
+create_pr_usage() {
+  cat <<EOF
+Usage: $0 new [--source <source-branch>] [--issue <issue-number>] <target-description>
+Create a new pull request.
+Arguments:
+  <target-description>   A brief description of the target of the PR (used in branch name and title).
+Options:
+  --source, -s          The source branch to create the PR from (default: $DEV_BRANCH).
+  --issue, -i           The issue number related to this PR (optional).
+  --open, -o            Open the PR in the web browser after creation.
+EOF
+}
+
+join_by() {
+  local SEP="$1"
+  shift
+  local FIRST=true
+  for ARG in "$@"; do
+    if [ "$FIRST" = true ]; then
+      FIRST=false
+    else
+      printf "%s" "$SEP"
+    fi
+    printf "%s" "$ARG"
+  done
+
+}
+
+create_pr() {
+  check_auth
+  SOURCE=$DEV_BRANCH
+
+  POSITIONAL_ARGS=()
+
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    --source | -s)
+      SOURCE="$2"
+      if [ -z "$SOURCE" ]; then
+        error "--source requires a branch name."
+        create_pr_usage
+        exit 1
+      fi
+      shift
+      shift
+      ;;
+    --issue | -i)
+      ISSUE="$2"
+      if [ -z "$ISSUE" ]; then
+        error "--issue requires an issue number."
+        create_pr_usage
+        exit 1
+      fi
+      shift
+      shift
+      ;;
+    -o | --open)
+      OPEN=true
+      shift
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+    esac
+  done
+  set -- "${POSITIONAL_ARGS[@]}"
+  TARGET=$1
+  if [ -z "$TARGET" ]; then
+    error "<target-description> is required."
+    create_pr_usage
+    exit 1
+  fi
+
+  TARGET_EXT=()
+  if [ -n "$ISSUE" ]; then
+    TARGET_EXT+=("$ISSUE")
+  fi
+  TARGET_EXT+=("$(echo "$TARGET" | tr ' ' '- ' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-')")
+  TARGET_EXT+=("$(date +${DATE_FORMAT})")
+  TARGET_BRANCH="$BRANCH_PREFIX$(join_by "-" "${TARGET_EXT[@]}")"
+
+  MR_TITLE_EXT=()
+  if [ -n "$ISSUE" ]; then
+    MR_TITLE_EXT+=("Issue #$ISSUE")
+  fi
+  MR_TITLE_EXT+=("$TARGET")
+  MR_TITLE="$(join_by " " "${MR_TITLE_EXT[*]}")"
+
+  MR_DESC_EXT=()
+  MR_DESC_EXT+=("This PR merges changes from branch '$BRANCH' into '$DEV_BRANCH'.")
+  if [ -n "$ISSUE" ]; then
+    URL="https://linear.app/$LINEAR_WORKSPACE/issue/$ISSUE"
+    MR_DESC_EXT+=("Related to Issue [$ISSUE]($URL).")
+  fi
+  MR_DESC="$(join_by $'\n\n' "${MR_DESC_EXT[@]}")"
+
+  # if repo is dirty, stash changes, create branch, then pop stash
+  if [ -n "$(call_git status --porcelain)" ]; then
+    info "Stashing uncommitted changes"
+    call_git stash push -u -m "git-pr auto-stash"
+    STASHED=true
+  else
+    STASHED=false
+  fi
+  # Create the new branch from source
+  info "Creating new branch '$TARGET_BRANCH' from '$SOURCE'"
+  call_git branch "$TARGET_BRANCH" "$SOURCE"
+  call_git switch "$TARGET_BRANCH"
+
+  # Pop the stash if needed
+  if [ "$STASHED" = true ]; then
+    echo "Popping stashed changes"
+    call_git stash pop
+  fi
+
+  # Create the branch on remote
+  echo "Pushing branch '$TARGET_BRANCH' to remote"
+  call_git push -u origin "$TARGET_BRANCH"
+
+  echo "Creating a new pull request"
+  if [ "$FLAVOR" = "github" ]; then
+    gh pr create --draft --head "$TARGET_BRANCH" --base "$DEV_BRANCH" --title "$MR_TITLE" --body "$MR_DESC"
+  elif [ "$FLAVOR" = "gitlab" ]; then
+    glab mr create --draft --source-branch "$TARGET_BRANCH" --target-branch "$DEV_BRANCH" --title "$MR_TITLE" --description "$MR_DESC" --remove-source-branch
+    PR_LINK=$(glab mr list --source-branch="$TARGET_BRANCH" -F json | jq '.[0].web_url' -r)
+  fi
+
+  if [ "$OPEN" = true ]; then
+    if [ -z "$PR_LINK" ]; then
+      echo "Could not determine PR link to open."
+      exit 1
+    fi
+
+    xdg-open "$PR_LINK" || open "$PR_LINK"
+  fi
+}
+
+list_raw() {
+  POSSIBLE_MRS=$(call_git for-each-ref --format='%(refname:short)' refs/heads/ | grep "^$BRANCH_PREFIX" || true)
+  if [ -z "$POSSIBLE_MRS" ]; then
+    :
+  else
+    for BR in $POSSIBLE_MRS; do
+      if [ "$FLAVOR" = "github" ]; then
+        echo TODO
+        exit 1
+      elif [ "$FLAVOR" = "gitlab" ]; then
+        MR_INFO=$(glab mr list -A --source-branch "$BR" -F json | jq '.[0]' || true)
+        if [ -n "$MR_INFO" ] && [ "$MR_INFO" != "null" ]; then
+          NUMBER=$(echo "$MR_INFO" | jq '.iid')
+          TITLE=$(echo "$MR_INFO" | jq -r '.title')
+          URL=$(echo "$MR_INFO" | jq -r '.web_url')
+          STATE=$(echo "$MR_INFO" | jq -r '.state')
+
+          echo "{\"number\": $NUMBER, \"title\": \"$TITLE\", \"url\": \"$URL\", \"state\": \"$STATE\", \"branch\": \"$BR\"}"
+        else
+          echo "{\"branch\": \"$BR\", \"state\": \"unknown\"}"
+        fi
+      fi
+    done
+  fi
+}
+
+clean() {
+  DRY_RUN=false
+  FORCE=false
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    --dry-run | -n)
+      DRY_RUN=true
+      shift
+      ;;
+    --force | -f)
+      FORCE=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+    esac
+  done
+
+  if [ "$FORCE" = false ] && [ "$DRY_RUN" = false ]; then
+    warn "Cleaning branches will permanently delete merged branches both locally and remotely. Be sure to test with --dry-run first."
+    read -rp "Are you sure you want to proceed? (y/N): " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+      echo "Aborting cleanup."
+      exit 0
+    fi
+  fi
+
+  check_auth
+  git fetch
+
+  list_raw | while IFS= read -r PR_INFO; do
+    NUMBER=$(echo "$PR_INFO" | jq '.number // empty')
+    PR_BRANCH=$(echo "$PR_INFO" | jq -r '.branch // empty')
+    STATE=$(echo "$PR_INFO" | jq -r '.state')
+
+    if [ -n "$NUMBER" ]; then
+      if [ "$STATE" = "merged" ] || [ "$STATE" = "closed" ]; then
+
+        if [ "$DRY_RUN" = false ]; then
+          call_git branch -D "$PR_BRANCH"
+          call_git push origin --delete "$PR_BRANCH" || true
+        else
+          echo "(Dry run) Would delete branch '$PR_BRANCH' locally and remotely."
+        fi
+      fi
+    fi
+  done
+}
+
+COMMAND=$1
+if [ -z "$COMMAND" ]; then
+  COMMAND="help"
+fi
+shift || true
+case $COMMAND in
+new)
+  create_pr "$@"
+  ;;
+list)
+  check_auth
+  list_raw |
+    while IFS= read -r PR_INFO; do
+      NUMBER=$(echo "$PR_INFO" | jq '.number // empty')
+      TITLE=$(echo "$PR_INFO" | jq -r '.title // empty')
+      URL=$(echo "$PR_INFO" | jq -r '.url // empty')
+      PR_BRANCH=$(echo "$PR_INFO" | jq -r '.branch // empty')
+      STATE=$(echo "$PR_INFO" | jq -r '.state')
+
+      if [ -n "$NUMBER" ]; then
+        echo "$PR_BRANCH"
+        echo "  #$NUMBER: $TITLE [$STATE]"
+        echo "  $URL"
+      elif [ -n "$PR_BRANCH" ]; then
+        echo "$PR_BRANCH"
+        echo "  [State: $STATE]"
+      fi
+    done
+  ;;
+open)
+  if [ "$FLAVOR" = "github" ]; then
+    gh pr view --web
+  elif [ "$FLAVOR" = "gitlab" ]; then
+    glab mr view --web
+  fi
+  ;;
+info) repo_info ;;
+image-path)
+  echo "${BRANCH//\//-}"
+  ;;
+clean) clean "$@" ;;
+help | --help | -h | "")
+  usage
+  ;;
+*)
+  error "Unknown command: $COMMAND\n"
+  usage
+  exit 1
+  ;;
+esac

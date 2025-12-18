@@ -267,6 +267,7 @@ end
 
 
 vim.pack.add({
+  'https://github.com/tpope/vim-abolish',
   'https://github.com/nvim-tree/nvim-web-devicons',
   "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/Mofiqul/dracula.nvim",
@@ -296,7 +297,9 @@ vim.pack.add({
   'https://github.com/monaqa/dial.nvim',
   'https://github.com/j-hui/fidget.nvim',
 
+  'https://github.com/mfussenegger/nvim-lint'
 })
+
 
 require("vim._extui").enable({})
 
@@ -352,8 +355,15 @@ require("which-key").setup({
     { '<leader>s', group = '[S]earch' },
     { '<leader>t', group = '[T]oggle' },
     { '<leader>w', group = '[W]orkspace' },
-    { '<leader>',  group = 'VISUAL <leader>', mode = 'v' },
-    { '<leader>h', desc = 'Git [H]unk',       mode = 'v' },
+    { '<leader>',  group = 'VISUAL <leader>',              mode = 'v' },
+    { '<leader>h', group = 'Git [H]unk',                   mode = 'v' },
+    { 'cr',        group = '[C]ase [R]eplace',             mode = 'v' },
+    { 'crs',       desc = '[C]ase [R]eplace [s]nake_case', mode = { 'v', 'n' } },
+    { 'crc',       desc = '[C]ase [R]eplace [c]amelCase',  mode = { 'v', 'n' } },
+    { 'crm',       desc = '[C]ase [R]eplace [M]ixedCase',  mode = { 'v', 'n' } },
+    { 'cr-',       desc = '[C]ase [R]eplace [-]-case',     mode = { 'v', 'n' } },
+    { 'cr.',       desc = '[C]ase [R]eplace [.]-case',     mode = { 'v', 'n' } },
+    { 'cru',       desc = '[C]ase [R]eplace [U]PPER_CASE', mode = { 'v', 'n' } },
   },
 })
 
@@ -418,6 +428,7 @@ require('conform').setup({
     scss = { 'prettierd' },
     markdown = { 'prettierd' },
     typst = { 'typstfmt' },
+    sh = { 'shfmt' },
   },
   default_format_opts = { lsp_format = 'fallback' },
 
@@ -666,5 +677,10 @@ end, {
 
 
 vim.api.nvim_create_autocmd('VimLeave', { callback = session_auto_save })
-
 vim.keymap.set('n', '<leader>sl', session_pick, { desc = '[S]ession [L]oad' })
+
+require('lint').linters_by_ft = {
+  go = { 'golangcilint' },
+  sh = { 'shellcheck' },
+}
+vim.api.nvim_create_autocmd({ "BufWritePost" }, { callback = function() require("lint").try_lint() end })

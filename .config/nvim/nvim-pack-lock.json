@@ -1,15 +1,15 @@
 {
   "plugins": {
     "blink.cmp": {
-      "rev": "2408f14",
+      "rev": "73ea297",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
-      "rev": "26c02e1",
+      "rev": "1bf8b5b",
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "copilot.vim": {
-      "rev": "da369d9",
+      "rev": "f89e977",
       "src": "https://github.com/github/copilot.vim"
     },
     "dial.nvim": {
@@ -17,7 +17,7 @@
       "src": "https://github.com/monaqa/dial.nvim"
     },
     "dracula.nvim": {
-      "rev": "041d923",
+      "rev": "ae752c1",
       "src": "https://github.com/Mofiqul/dracula.nvim"
     },
     "fidget.nvim": {
@@ -29,23 +29,27 @@
       "src": "https://github.com/folke/flash.nvim"
     },
     "gitsigns.nvim": {
-      "rev": "20ad441",
+      "rev": "cdafc32",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
     "lazydev.nvim": {
-      "rev": "371cd74",
+      "rev": "5231c62",
       "src": "https://github.com/folke/lazydev.nvim"
     },
     "mason-lspconfig.nvim": {
-      "rev": "d7b5feb",
+      "rev": "7d527c7",
       "src": "https://github.com/mason-org/mason-lspconfig.nvim"
     },
     "mason.nvim": {
-      "rev": "ad7146a",
+      "rev": "57e5a8a",
       "src": "https://github.com/mason-org/mason.nvim"
     },
+    "nvim-lint": {
+      "rev": "897f7771c1ca4b11659dfe372d9376acd9fe3097",
+      "src": "https://github.com/mfussenegger/nvim-lint"
+    },
     "nvim-lspconfig": {
-      "rev": "a89bfcf",
+      "rev": "e0fae25",
       "src": "https://github.com/neovim/nvim-lspconfig"
     },
     "nvim-surround": {
@@ -53,16 +57,16 @@
       "src": "https://github.com/kylechui/nvim-surround"
     },
     "nvim-treesitter": {
-      "rev": "65a266bf",
+      "rev": "bb83a676",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
     "nvim-treesitter-context": {
-      "rev": "ec308c7",
+      "rev": "660861b",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-context"
     },
     "nvim-treesitter-textobjects": {
-      "rev": "2e5b873",
+      "rev": "227165a",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
       "version": "'main'"
     },
@@ -79,16 +83,20 @@
       "src": "https://github.com/nvim-lua/plenary.nvim"
     },
     "snacks.nvim": {
-      "rev": "8bb3ad6",
+      "rev": "fe7cfe9",
       "src": "https://github.com/folke/snacks.nvim"
     },
     "todo-comments.nvim": {
-      "rev": "411503d",
+      "rev": "31e3c38",
       "src": "https://github.com/folke/todo-comments.nvim"
     },
     "undotree": {
       "rev": "0f1c981",
       "src": "https://github.com/mbbill/undotree"
+    },
+    "vim-abolish": {
+      "rev": "dcbfe06",
+      "src": "https://github.com/tpope/vim-abolish"
     },
     "vim-rhubarb": {
       "rev": "5496d7c",

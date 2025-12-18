@@ -1,0 +1,16 @@
+#!/bin/bash
+
+EDITOR=${EDITOR:-nvim}
+NOTE_BASE_DIR=~/documents/notes
+
+mkdir -p $NOTE_BASE_DIR
+
+pushd $NOTE_BASE_DIR
+
+shift 
+for dir in "$@"; do
+    mkdir -p "$dir"
+    pushd "$dir"
+done
+
+exec $EDITOR ${1:-.}

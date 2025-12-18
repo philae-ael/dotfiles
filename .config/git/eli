@@ -8,3 +8,6 @@
 [commit]
     gpgsign = true
 
+[credential "https://git.leathe.dev/"]
+        helper = !tea login helper
+
