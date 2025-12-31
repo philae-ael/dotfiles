@@ -46,3 +46,6 @@ blue    = '#caa9fa'
 magenta = '#ff79c6'
 cyan    = '#8be9fd'
 white   = '#ffffff'
+
+[window]
+decorations = "None"

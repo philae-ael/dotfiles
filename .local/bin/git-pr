@@ -17,11 +17,12 @@ usage() {
 Usage: $0 <command> [<args>]
 
 Commands:
-  new      Create a new pull request. This will create a new branch, push it, and open a PR.
-  list     List open pull requests.
-  info     Show repository information. Mainly meant for debugging.
-  clean    Clean up merged branches. Use --dry-run to see what would be deleted.
-  help     Show this help message
+  new         Create a new pull request. This will create a new branch, push it, and open a PR.
+  list        List open pull requests.
+  info        Show repository information. Mainly meant for debugging.
+  clean       Clean up merged branches. Use --dry-run to see what would be deleted.
+  image-path  Output a sanitized branch name suitable for use in image tags or paths.
+  help        Show this help message
 
 For gitlab support, ensure you have the GitLab CLI (glab) installed and authenticated.
 For github support, ensure you have the GitHub CLI (gh) installed and authenticated.
@@ -211,6 +212,7 @@ Options:
   --source, -s          The source branch to create the PR from (default: $DEV_BRANCH).
   --issue, -i           The issue number related to this PR (optional).
   --open, -o            Open the PR in the web browser after creation.
+  --help, -h            Show this help message.
 EOF
 }
 
@@ -261,6 +263,10 @@ create_pr() {
       OPEN=true
       shift
       ;;
+    --help | -h)
+      create_pr_usage
+      exit 0
+      ;;
     *)
       POSITIONAL_ARGS+=("$1")
       shift
@@ -291,7 +297,7 @@ create_pr() {
   MR_TITLE="$(join_by " " "${MR_TITLE_EXT[*]}")"
 
   MR_DESC_EXT=()
-  MR_DESC_EXT+=("This PR merges changes from branch '$BRANCH' into '$DEV_BRANCH'.")
+  MR_DESC_EXT+=("This PR merges changes from branch '$TARGET_BRANCH' into '$DEV_BRANCH'.")
   if [ -n "$ISSUE" ]; then
     URL="https://linear.app/$LINEAR_WORKSPACE/issue/$ISSUE"
     MR_DESC_EXT+=("Related to Issue [$ISSUE]($URL).")
@@ -454,7 +460,31 @@ open)
   ;;
 info) repo_info ;;
 image-path)
-  echo "${BRANCH//\//-}"
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    --branch | -b)
+      BRANCH="$2"
+      shift
+      shift
+      ;;
+    --copy | -c)
+      COPY=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo
+      echo "Usage: $0 image-path [--branch <branch-name>] [--copy]"
+      exit 1
+      ;;
+    esac
+  done
+
+  IMAGE_PATH_BRANCH="${BRANCH//\//-}"
+  if [ "$COPY" = true ]; then
+    echo -n "$IMAGE_PATH_BRANCH" | wl-copy
+  fi
+  echo "$IMAGE_PATH_BRANCH"
   ;;
 clean) clean "$@" ;;
 help | --help | -h | "")

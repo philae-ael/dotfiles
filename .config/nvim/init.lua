@@ -70,10 +70,10 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set('n', 'gV', '"`[" . strpart(getregtype(), 0, 1) . "`]"',
   { expr = true, replace_keycodes = false, desc = 'Visually select changed text' })
 vim.keymap.set('n', ']e',
-  function() vim.diagnostic.jump { count = vim.v.count1, severity = { min = vim.diagnostic.severity.ERROR } } end,
+  function() vim.diagnostic.jump { count = vim.v.count1, severity = vim.diagnostic.severity.ERROR } end,
   { desc = 'Jump to the next diagnostic in the current buffer' })
 vim.keymap.set('n', '[e',
-  function() vim.diagnostic.jump { count = -vim.v.count1, severity = { min = vim.diagnostic.severity.ERROR } } end,
+  function() vim.diagnostic.jump { count = -vim.v.count1, severity = vim.diagnostic.severity.ERROR } end,
   { desc = 'Jump to the previous diagnostic in the current buffer' })
 vim.keymap.set({ 'n', 'v', 'i' }, '<Left>', '<nop>')
 vim.keymap.set({ 'n', 'v', 'i' }, '<Right>', '<nop>')
@@ -98,6 +98,8 @@ vim.diagnostic.config {
 
 local function setup_toggle_diagnostics()
   local diag_config_basic = true
+
+  --- @type any
   local virtual_line_config = { current_line = true }
   vim.keymap.set('n', '<leader>td', function()
     diag_config_basic = not diag_config_basic
@@ -108,8 +110,10 @@ local function setup_toggle_diagnostics()
     end
 
     if diag_config_basic then
-      ---@diagnostic disable-next-line: cast-local-type
-      virtual_line_config = vim.diagnostic.config(nil).virtual_lines
+      local old = vim.diagnostic.config(nil)
+      if old ~= nil then
+        virtual_line_config = old.virtual_lines
+      end
       set_config { virtual_lines = false }
     else
       set_config { virtual_lines = virtual_line_config }
@@ -119,42 +123,10 @@ end
 setup_toggle_diagnostics()
 
 local function setup_lsp()
-  require('mason').setup({})
-
-  local lsp_servers = {
-    julials = {},
-    gopls = {},
-    pyright = {},
-    lua_ls = {
-      Lua = {
-        workspace = { checkThirdParty = false },
-        telemetry = { enable = false },
-        diagnostics = { disable = { 'missing-fields' } },
-      },
-    },
-    rust_analyzer = {
-      settings = {
-        ['rust-analyzer'] = {
-          check = { command = 'clippy' },
-          cargo = { features = 'all' },
-        },
-      },
-    },
-    clangd = {
-      filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-    },
-    tinymist = {},
-    cmake = {},
-  }
-  for server, config in pairs(lsp_servers) do
-    vim.lsp.config(server, config)
-    vim.lsp.enable(server)
-  end
-
-  local ensure_installed = vim.tbl_keys(lsp_servers or {})
+  require('mason').setup()
   require("mason-lspconfig").setup {
+    ensure_installed = {},
     automatic_enable = true,
-    ensure_installed = ensure_installed,
   }
 
   vim.api.nvim_create_autocmd('LspAttach', {
@@ -165,9 +137,15 @@ local function setup_lsp()
       vim.keymap.set('n', '<leader>ti', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled()) end,
         { desc = '[T]oggle [I]nlay Hints', buffer = event.buf })
       vim.keymap.set('n', '<leader>ca',
-        function() vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } } end,
+        function()
+          vim.lsp.buf.code_action { context = {
+            only = { 'quickfix', 'refactor', 'source' },
+            diagnostics = {},
+          } }
+        end,
         { desc = '[C]ode [A]ction', buffer = event.buf })
-      vim.keymap.set('n', '<leader>cf', function() vim.lsp.buf.code_action { context = { only = { 'quickfix' } } } end,
+      vim.keymap.set('n', '<leader>cf',
+        function() vim.lsp.buf.code_action { context = { only = { 'quickfix' }, diagnostics = {} } } end,
         { desc = '[C]ode [F]ixes', buffer = event.buf })
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = '[G]oto [D]efinition', buffer = event.buf })
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, { desc = '[G]oto [D]eclaration', buffer = event.buf })
@@ -175,7 +153,8 @@ local function setup_lsp()
   })
 end
 local function setup_treesitter()
-  local ts_parsers = {
+  local nts = require("nvim-treesitter")
+  nts.install {
     "bash",
     "c",
     "dockerfile",
@@ -205,9 +184,6 @@ local function setup_treesitter()
     "yaml",
     "zig",
   }
-
-  local nts = require("nvim-treesitter")
-  nts.install(ts_parsers)
   vim.api.nvim_create_autocmd('PackChanged', {
     callback = function(ev)
       local name, kind = ev.data.spec.name, ev.data.spec.kind
@@ -229,7 +205,6 @@ local function setup_treesitter()
   require('nvim-treesitter-textobjects').setup({
     select = { lookahead = true },
     move = { set_jumps = true },
-
   })
   vim.keymap.set({ 'o', 'x' }, 'af',
     function() require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects') end,
@@ -257,7 +232,7 @@ local function setup_treesitter()
     callback = function(args)
       local filetype = args.match
       local lang = vim.treesitter.language.get_lang(filetype)
-      if vim.treesitter.language.add(lang) then
+      if lang and vim.treesitter.language.add(lang) then
         vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         vim.treesitter.start()
       end
@@ -297,7 +272,10 @@ vim.pack.add({
   'https://github.com/monaqa/dial.nvim',
   'https://github.com/j-hui/fidget.nvim',
 
-  'https://github.com/mfussenegger/nvim-lint'
+  'https://github.com/mfussenegger/nvim-lint',
+
+  'https://github.com/Julian/lean.nvim',
+  'https://codeberg.org/ziglang/zig.vim'
 })
 
 
@@ -346,6 +324,7 @@ vim.api.nvim_create_autocmd('User', {
 
 require('lazydev').setup({ library = { { path = '${3rd}/luv/library', words = { 'vim%.uv' } } } })
 
+--- @diagnostic disable: missing-fields
 require("which-key").setup({
   delay = 500,
   spec = {
@@ -366,49 +345,54 @@ require("which-key").setup({
     { 'cru',       desc = '[C]ase [R]eplace [U]PPER_CASE', mode = { 'v', 'n' } },
   },
 })
+--- @diagnostic enable: missing-fields
 
 vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle, { desc = 'Toggle [U]ndotree' })
 
 require("oil").setup({ default_file_explorer = true, })
 vim.keymap.set('n', '<leader>-', vim.cmd.Oil, { desc = 'Open Oil file explorer' })
 
-require("gitsigns").setup({
-  current_line_blame = true,
-  current_line_blame_opts = {
-    virt_text = true,
-    virt_text_pos = 'right_align',
-    delay = 0,
-    ignore_whitespace = false,
-    virt_text_priority = 100,
-  },
-})
-vim.keymap.set('v', '<leader>hs', function() require('gitsigns').stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
-  { desc = 'Git [H]unk [S]tage' })
-vim.keymap.set('v', '<leader>hr', function() require('gitsigns').reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
-  { desc = 'Git [H]unk [R]eset' })
+gs = require('gitsigns')
+if gs ~= nil then
+  --- @diagnostic disable: need-check-nil
+  gs.setup({
+    current_line_blame = true,
+    current_line_blame_opts = {
+      virt_text = true,
+      virt_text_pos = 'right_align',
+      delay = 0,
+      ignore_whitespace = false,
+      virt_text_priority = 100,
+    },
+  })
+  vim.keymap.set('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
+    { desc = 'Git [H]unk [S]tage' })
+  vim.keymap.set('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' } end,
+    { desc = 'Git [H]unk [R]eset' })
 
-vim.keymap.set('n', '<leader>hs', function() require('gitsigns').stage_hunk() end, { desc = 'Git [H]unk [S]tage' })
-vim.keymap.set('n', '<leader>hr', function() require('gitsigns').reset_hunk() end, { desc = 'Git [H]unk [R]eset' })
-vim.keymap.set('n', '<leader>hS', function() require('gitsigns').stage_buffer() end, { desc = 'git [S]tage buffer' })
-vim.keymap.set('n', '<leader>hR', function() require('gitsigns').reset_buffer() end, { desc = 'git [R]eset buffer' })
-vim.keymap.set('n', '<leader>hp', function() require('gitsigns').preview_hunk() end, { desc = 'git [P]review hunk' })
-vim.keymap.set('n', '<leader>gb', function() require('gitsigns').blame() end, { desc = 'git [B]lame file' })
-vim.keymap.set('n', '<leader>gd', function() require('gitsigns').diffthis() end, { desc = 'git [D]iff against index' })
-vim.keymap.set('n', '<leader>gD', function() require('gitsigns').diffthis('~') end,
-  { desc = 'git [D]iff against last commit ~' })
-vim.keymap.set('n', '<leader>tb', function() require('gitsigns').toggle_current_line_blame() end,
-  { desc = 'toggle git [B]lame line' })
+  vim.keymap.set('n', '<leader>hs', function() gs.stage_hunk() end, { desc = 'Git [H]unk [S]tage' })
+  vim.keymap.set('n', '<leader>hr', function() gs.reset_hunk() end, { desc = 'Git [H]unk [R]eset' })
+  vim.keymap.set('n', '<leader>hS', function() gs.stage_buffer() end, { desc = 'git [S]tage buffer' })
+  vim.keymap.set('n', '<leader>hR', function() gs.reset_buffer() end, { desc = 'git [R]eset buffer' })
+  vim.keymap.set('n', '<leader>hp', function() gs.preview_hunk() end, { desc = 'git [P]review hunk' })
+  vim.keymap.set('n', '<leader>gb', function() gs.blame() end, { desc = 'git [B]lame file' })
+  vim.keymap.set('n', '<leader>gd', function() gs.diffthis() end, { desc = 'git [D]iff against index' })
+  vim.keymap.set('n', '<leader>gD', function() gs.diffthis('~') end,
+    { desc = 'git [D]iff against last commit ~' })
+  vim.keymap.set('n', '<leader>tb', function() require('gitsigns').toggle_current_line_blame() end,
+    { desc = 'toggle git [B]lame line' })
 
-vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git [H]unk' })
+  vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git [H]unk' })
 
-vim.keymap.set({ 'n', 'v' }, '[c', function() require('gitsigns').nav_hunk('prev') end,
-  { expr = true, desc = 'Jump to previous hunk' })
-vim.keymap.set({ 'n', 'v' }, ']c', function() require('gitsigns').nav_hunk('next') end,
-  { expr = true, desc = 'Jump to next hunk' })
-vim.keymap.set({ 'n', 'v' }, '[C', function() require('gitsigns').nav_hunk('first') end,
-  { expr = true, desc = 'Jump to first hunk' })
-vim.keymap.set({ 'n', 'v' }, ']C', function() require('gitsigns').nav_hunk('last') end,
-  { expr = true, desc = 'Jump to last hunk' })
+  vim.keymap.set({ 'n', 'v' }, '[c', function() require('gitsigns').nav_hunk('prev') end,
+    { expr = true, desc = 'Jump to previous hunk' })
+  vim.keymap.set({ 'n', 'v' }, ']c', function() require('gitsigns').nav_hunk('next') end,
+    { expr = true, desc = 'Jump to next hunk' })
+  vim.keymap.set({ 'n', 'v' }, '[C', function() require('gitsigns').nav_hunk('first') end,
+    { expr = true, desc = 'Jump to first hunk' })
+  vim.keymap.set({ 'n', 'v' }, ']C', function() require('gitsigns').nav_hunk('last') end,
+    { expr = true, desc = 'Jump to last hunk' })
+end
 
 
 require("nvim-surround").setup({})
@@ -429,6 +413,7 @@ require('conform').setup({
     markdown = { 'prettierd' },
     typst = { 'typstfmt' },
     sh = { 'shfmt' },
+    oding = { 'odingfmt' },
   },
   default_format_opts = { lsp_format = 'fallback' },
 
@@ -684,3 +669,7 @@ require('lint').linters_by_ft = {
   sh = { 'shellcheck' },
 }
 vim.api.nvim_create_autocmd({ "BufWritePost" }, { callback = function() require("lint").try_lint() end })
+
+require('lean').setup({
+  mappings = true,
+})

@@ -36,6 +36,10 @@
       "rev": "5231c62",
       "src": "https://github.com/folke/lazydev.nvim"
     },
+    "lean.nvim": {
+      "rev": "f87777a13f4635422a699395a3f15fdbfd6b274f",
+      "src": "https://github.com/Julian/lean.nvim"
+    },
     "mason-lspconfig.nvim": {
       "rev": "7d527c7",
       "src": "https://github.com/mason-org/mason-lspconfig.nvim"
@@ -109,6 +113,10 @@
     "which-key.nvim": {
       "rev": "3aab214",
       "src": "https://github.com/folke/which-key.nvim"
+    },
+    "zig.vim": {
+      "rev": "74bdb43c9d5da8d6b715809b79f92ef8f711df8e",
+      "src": "https://codeberg.org/ziglang/zig.vim"
     }
   }
 }
