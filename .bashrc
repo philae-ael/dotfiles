@@ -10,7 +10,7 @@ set +a
 [[ $- != *i* ]] && return
 
 if [[ "$(tty)" == "/dev/tty1" ]]; then
-	exec Hyprland
+	exec start-hyprland
 fi
 
 alias ls='ls --color=auto'

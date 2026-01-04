@@ -275,7 +275,10 @@ vim.pack.add({
   'https://github.com/mfussenegger/nvim-lint',
 
   'https://github.com/Julian/lean.nvim',
-  'https://codeberg.org/ziglang/zig.vim'
+  'https://codeberg.org/ziglang/zig.vim',
+  'https://github.com/tarides/ocaml.nvim',
+
+  'https://github.com/b0o/SchemaStore.nvim'
 })
 
 

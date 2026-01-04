@@ -413,7 +413,9 @@ clean() {
 
         if [ "$DRY_RUN" = false ]; then
           call_git branch -D "$PR_BRANCH"
-          call_git push origin --delete "$PR_BRANCH" || true
+          # branch are often already deleted automatically on merge in GitLab
+          # So this is not needed in my workflow
+          # call_git push origin --delete "$PR_BRANCH" || true
         else
           echo "(Dry run) Would delete branch '$PR_BRANCH' locally and remotely."
         fi

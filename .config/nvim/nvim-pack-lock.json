@@ -1,5 +1,9 @@
 {
   "plugins": {
+    "SchemaStore.nvim": {
+      "rev": "fb5f164a28f8fd5a052da512436d4173e06cf71e",
+      "src": "https://github.com/b0o/SchemaStore.nvim"
+    },
     "blink.cmp": {
       "rev": "73ea297",
       "src": "https://github.com/saghen/blink.cmp"
@@ -77,6 +81,10 @@
     "nvim-web-devicons": {
       "rev": "8dcb311",
       "src": "https://github.com/nvim-tree/nvim-web-devicons"
+    },
+    "ocaml.nvim": {
+      "rev": "f13728bbedb02121ee54633465ac392bbf0a8e79",
+      "src": "https://github.com/tarides/ocaml.nvim"
     },
     "oil.nvim": {
       "rev": "7e1cd77",
